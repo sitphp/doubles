@@ -1,5 +1,7 @@
 # Doublit - Double and test any PHP class easily in PhpUnit
 
+[![Build Status](https://travis-ci.org/gealex/doublit.svg?branch=master)](https://travis-ci.org/gealex/doublit)
+
 Doublit can help you to test your PHP classes by generating doubles that look like the original classes but can be manipulated and tested (sort of a copy of a class). These doubles then can then be used instead of the original classes for your test. Doublit can create doubles of any kind of class, interface or trait. 
 
 See full documentation at [https://getdoublit.com](https://getdoublit.com)
@@ -51,6 +53,23 @@ To change the return value of a method, use the `stub` method. :
     $my_double::_method('myMethod')->stub('hello');
 
 For more details : [Read the doc on testing doubles](doc/testing_doubles.md)
+
+## Configuration
+
+You define the configuration for a specific double using the 4th argument of a Doublit instance method :</p>
+
+    {.language-php} // Get double instance with config
+    $my_double = Doublit::dummy_instance(MyClass::class, null, null, [
+        'config_param_1' => 'value_1',
+        'config_param_2' => 'value_1'
+    ]);
+
+Here is a list of all available config parameters :
+
+- `allow_final_doubles` : Set this parameter to `false` to stop Doublit from trying to make doubles of final classes/methods. Read more [here](#dealing_with_final_classes).
+- `allow_protected_methods` : Set this parameter to `false` to disallow testing protected methods. Read more [here](#dealing_with_protected_methods).
+- `allow_non_existent_classes` : Set this parameter to `false` to disallow alias doubles of non existent classes. Read more [here](#dealing_with_non_existent_methods).
+- `test_unexpected_methods` : Set this parameter to `true` to automatically receive an assertion error whenever an unexpected method is called. Read more [here](#testing_unexpected_methods_automatically).
 
 ## About
 

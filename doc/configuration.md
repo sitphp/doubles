@@ -12,7 +12,7 @@ The double configuration can be defined for all doubles using the `Doublit::conf
     ]);
    
 ### Double configuration
-You can also define configuration for a specific double using the 4th argument of an instance method or the 3rd argument of a double method</p>
+You can also define configuration for a specific double using the 4th argument of an instance method or the 3rd argument of a name method</p>
 
     {.language-php} // Get double instance with config
     $my_double = Doublit::dummy_instance(MyClass::class, null, null, [

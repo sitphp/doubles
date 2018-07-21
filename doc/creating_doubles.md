@@ -52,7 +52,7 @@ When you create a double, it will automatically implements the methods of the or
     $my_double = Doublit::dummy_instance(MyClass::class.'[myMethod, static:myOtherMethod]');
 
 ## Passing constructor arguments
-You can pass constructor arguments in the second argument of the Doublit double methods :
+You can pass constructor arguments in the second argument of the Doublit instance methods :
     
     {.language-php} // Get double instance and run original constructor with arguments "first_argument" and "second_argument"
     $my_dummy_double = Doublit::dummy_instance(MyClass::class, ['first_argument', 'second_argument']);
@@ -60,7 +60,7 @@ You can pass constructor arguments in the second argument of the Doublit double 
 > {.note.info} Note : When you pass constructor arguments, the original `__construct` method will be called with the given arguments regardless if your double is of type "dummy" or "mock". In the same way, if you don't pass constructor arguments, the original `__construct` method will not be called regardless if your double is of type "dummy" or "mock".
 
 ## Implementing interfaces and trait
-Use the third parameter of the Doublit double methods to declare the interfaces and/or traits that you might want to implement in your double class :
+Use the 3rd parameter of the Doublit instance methods to declare the interfaces and/or traits that you might want to implement in your double class :
     
     {.language-php} // Implement one interface
     $my_dummy_double = Doublit::mock_instance(MyClass::class, null, MyInterface::class);
@@ -94,15 +94,15 @@ Sometimes, you may need to instantiate the double yourself or you may not need a
 > {.note.info} Note : The `dummy_name` and `mock_name` and `alias_name` methods work the same as the `dummy_instance`, `mock_instance` and `alias_name` classes except, of course, that they cannot take constructor arguments.
 
 ## Extra
-The methods `dummy_instance`, `mock_instance`, `alias_instance` and the methods `dummy_name`, `mock_name`, `alias_name` are actually just shortcuts to respectively the `instance` method and the `double` method. You can use these directly if you prefer :
+The methods `dummy_instance`, `mock_instance`, `alias_instance` and the methods `dummy_name`, `mock_name`, `alias_name` are actually just shortcuts to respectively the `instance` method and the `name` method. You can use these directly if you prefer :
 
     {.language-php} // Instance methods
     $my_dummy_double_instance = Doublit::instance('dummy', MyClass::class, ...);
     $my_mock_double_instance = Doublit::instance('mock', MyClass::class, ...);
     $my_alias_double_instance = Doublit::instance('alias', MyClass::class, ...);
     
-    // Double methods
-    $my_dummy_double_class = Doublit::double('dummy', MyClass::class, ...);
-    $my_mock_double_class = Doublit::double('mock', MyClass::class, ...);
-    $my_alias_double_class = Doublit::double('alias', MyClass::class, ...);
+    // Name methods
+    $my_dummy_double_class = Doublit::name('dummy', MyClass::class, ...);
+    $my_mock_double_class = Doublit::name('mock', MyClass::class, ...);
+    $my_alias_double_class = Doublit::name('alias', MyClass::class, ...);
     
