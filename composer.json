@@ -1,0 +1,34 @@
+{
+    "name": "gealex/doublit",
+    "description": "Doublit : Double any PHP class easily for test in PhpUnit",
+    "keywords": ["test", "testing", "double", "mock", "dummy", "stub", "tdd"],
+    "homepage": "https://github.com/gealex/doublit",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alexandre GEISWILLER",
+            "email": "alexandre.geiswiller@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7",
+        "phpunit/phpunit": "6.*"
+    },
+    "require-dev": {
+    },
+    "autoload": {
+        "psr-4": {
+            "Doublit\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}

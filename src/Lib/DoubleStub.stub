@@ -1,0 +1,396 @@
+<?php
+/**
+ * *
+ *  *
+ *  * This file is part of the Doublit package.
+ *  *
+ *  * @license    MIT License
+ *  * @link       https://github.com/gealex/doublit
+ *  * @copyright  Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
+ *  *
+ *
+ */
+
+namespace Doublit\Lib;
+
+use \Doublit\Constraints;
+use \Doublit\Doublit;
+use \Doublit\Lib\Expectation;
+use \Doublit\Lib\ClassManager;
+use \PHPUnit\Framework\Assert;
+use \Doublit\Lib\ExpectationCollection;
+use \Doublit\Exceptions\RuntimeException;
+use \PHPUnit\Framework\Constraint\Constraint;
+use \Doublit\Exceptions\InvalidArgumentException;
+
+class DoubleStub
+{
+
+    protected static $_doublit_initialized = false;
+    protected static $_doublit_constructed = false;
+
+    protected static $_doublit_expectations = [];
+    protected static $_doublit_calls = [];
+    protected static $_doublit_config = [];
+    protected static $_doublit_reference;
+    protected static $_doublit_reference_instance;
+
+
+    /**
+     * Initialize with config
+     *
+     * @param array|null $_doublit_config
+     */
+    public static function _doublit_initialize(array $_doublit_config = null)
+    {
+        if (self::$_doublit_initialized) {
+            return;
+        }
+        if (isset($_doublit_config)) {
+            foreach ($_doublit_config as $key => $value) {
+                self::_doublit_setConfig($key, $value);
+            }
+        }
+
+        if (isset($_doublit_config['reference'])) {
+            self::$_doublit_reference = $_doublit_config['reference'];
+        }
+        self::$_doublit_initialized = true;
+    }
+
+    /**
+     * Set config value
+     *
+     * @param string $label
+     * @param $value
+     */
+    protected static function _doublit_setConfig($label, $value)
+    {
+        if (!is_string($label)) {
+            throw new InvalidArgumentException('Invalid "label" argument : should be string');
+        }
+        self::$_doublit_config[$label] = $value;
+    }
+
+    /**
+     * Get config value
+     *
+     * @param string $label
+     * @return array|mixed|null
+     */
+    protected static function _doublit_getConfig($label)
+    {
+        if (!is_string($label)) {
+            throw new InvalidArgumentException('Invalid "label" argument : should be string');
+        }
+        $_doublit_config_parts = explode('.', $label);
+        $_doublit_config = &self::$_doublit_config;
+        foreach ($_doublit_config_parts as $_doublit_config_part) {
+            if (!isset($_doublit_config[$_doublit_config_part])) {
+                return null;
+            }
+            $_doublit_config = &$_doublit_config[$_doublit_config_part];
+        }
+        return $_doublit_config;
+    }
+
+    /**
+     * Check if method can be asserted and return method expectation
+     *
+     * @param $method
+     * @return \Doublit\Lib\Expectation|\Doublit\Lib\ExpectationCollection
+     * @throws \ReflectionException
+     */
+    public static function _method($method)
+    {
+
+        if (is_array($method)) {
+            $expectation_collection = new ExpectationCollection();
+            foreach ($method as $value) {
+                $expectation = self::_method($value);
+                $expectation_collection->add($expectation);
+            }
+            return $expectation_collection;
+        }
+        $expectation = self::_doublit_getExpectation($method);
+        return $expectation;
+    }
+
+    /**
+     * Handle instance calls
+     *
+     * @param $method
+     * @param mixed ...$args
+     * @return mixed|null|object
+     * @throws \ReflectionException
+     */
+    protected function _doublit_handleInstanceCall($method, $args)
+    {
+        // Save call data
+        if (!isset(self::$_doublit_calls[$method])) {
+            self::$_doublit_calls[$method] = [];
+        }
+        self::$_doublit_calls[$method][] = ['args' => $args];
+
+        // Resolve return value
+        $call_count = count(self::$_doublit_calls[$method]);
+        $type = self::_doublit_getMethodType($method, $call_count);
+
+        switch ($type[0]) {
+            case 'dummy':
+                if ($method == '__construct') {
+                    $_doublit_reference = self::_doublit_getReference();
+                    if ($_doublit_reference !== null) {
+                        $_doublit_reference_reflexion = new \ReflectionClass($_doublit_reference);
+                        $return = $_doublit_reference_reflexion->newInstanceWithoutConstructor();
+                        self::$_doublit_reference_instance = $return;
+                    } else {
+                        $reflexion = new \ReflectionClass($this);
+                        $return = $reflexion->newInstanceWithoutConstructor();
+                    }
+                } else {
+                    $return = null;
+                }
+                break;
+            case 'stub':
+                $return = $type[1]->invoke([
+                    'args' => $args,
+                    'method' => $method,
+                    'class' => ClassManager::normalizeClass(__CLASS__),
+                    'instance' => Doublit::getInstance('\\' . __CLASS__)
+                ]);
+                break;
+            case 'mock':
+                $_doublit_reference = self::_doublit_getReference();
+                if ($method == '__construct' && $_doublit_reference !== null) {
+                    self::$_doublit_reference_instance = new $_doublit_reference(...$args);
+                }
+                if ($_doublit_reference !== null) {
+                    $return = self::$_doublit_reference_instance->$method($args);
+                } else if (!get_parent_class(__CLASS__)) {
+                    $return = null;
+                } else if (is_callable([parent::class, $method])) {
+                    $return = parent::$method(...$args);
+                } else {
+                    $return = null;
+                }
+                break;
+            default:
+                throw new RuntimeException('Internal error: method type unknown or undefined');
+        }
+        return $return;
+    }
+
+    /**
+     * Handle static calls
+     *
+     * @param $method
+     * @param mixed ...$args
+     * @return null
+     */
+    protected static function _doublit_handleStaticCall($method, $args)
+    {
+        // Save call data
+        if (!isset(self::$_doublit_calls[$method])) {
+            self::$_doublit_calls[$method] = [];
+        }
+        self::$_doublit_calls[$method][] = ['args' => $args];
+
+        // Resolve return value
+        $call_count = count(self::$_doublit_calls[$method]);
+        $type = self::_doublit_getMethodType($method, $call_count);
+        switch ($type[0]) {
+            case 'dummy':
+                $return = null;
+                break;
+            case 'stub':
+                $return = $type[1]->invoke([
+                    'args' => $args,
+                    'method' => $method,
+                    'class' => ClassManager::normalizeClass(__CLASS__),
+                    'instance' => Doublit::getInstance('\\' . __CLASS__)
+                ]);
+                break;
+            case 'mock':
+                $_doublit_reference = self::_doublit_getReference();
+                if ($_doublit_reference !== null) {
+                    $return = $_doublit_reference::$method($args);
+                } else if (!get_parent_class(__CLASS__)) {
+                    $return = null;
+                } else if (is_callable([parent::class, $method])) {
+                    $return = parent::$method(...$args);
+                } else {
+                    $return = null;
+                }
+                break;
+            default:
+                throw new RuntimeException('Type undefined or invalid for method ' . __CLASS__ . '::' . $method . '()');
+        }
+        return $return;
+    }
+
+    /**
+     * Return given method expectation
+     *
+     * @param $method
+     * @return Expectation
+     * @throws \ReflectionException
+     */
+    protected static function _doublit_getExpectation($method)
+    {
+        if (!isset(self::$_doublit_expectations[$method])) {
+            if (!method_exists(__CLASS__, $method)) {
+                throw new InvalidArgumentException('Method "' . $method . '" cannot be tested because it doesn\'t exist. You can add custom methods when creating your double using the notation "MyClass[customMethod, otherCustomMethod]"');
+            }
+            $reflection = new \ReflectionMethod(__CLASS__, $method);
+            if ($reflection->isPrivate()) {
+                throw new InvalidArgumentException('Method ' . __CLASS__ . '::' . $method . '() cannot be tested because it is private');
+            }
+            if (!self::_doublit_getConfig('allow_protected_methods')) {
+                if ($reflection->isProtected()) {
+                    throw new InvalidArgumentException('Method ' . __CLASS__ . '::' . $method . '() cannot be tested because it is protected. Set config parameter "allow_protected_methods" to "true" to allow testing protected methods');
+                }
+            }
+            self::$_doublit_expectations[$method] = new Expectation($method);
+        }
+        return self::$_doublit_expectations[$method];
+    }
+
+    /**
+     * Check if method has expectation
+     *
+     * @param $method
+     * @return bool
+     */
+    protected static function _doublit_hasExpectation($method)
+    {
+        return isset(self::$_doublit_expectations[$method]);
+    }
+
+    /**
+     * Return method type with parameters
+     *
+     * @param $method
+     * @param $call_count
+     * @return array
+     */
+    protected static function _doublit_getMethodType($method, $call_count)
+    {
+        if (self::_doublit_hasExpectation($method)) {
+            $expectation = self::_doublit_getExpectation($method);
+            $type = $expectation->getType($call_count) ?: [self::_doublit_getConfig('type')];
+        } else {
+            $type = [self::_doublit_getConfig('type')];
+        }
+        return $type;
+    }
+
+    /**
+     * Get class reference
+     *
+     * @return mixed
+     */
+    protected static function _doublit_getReference()
+    {
+        return self::$_doublit_reference;
+    }
+
+    /**
+     * Run count assertions
+     */
+    protected static function _doublit_assertMethodCount()
+    {
+
+        // Check asserted methods
+        foreach (self::$_doublit_expectations as $method => $expectation) {
+            $call_count = isset(self::$_doublit_calls[$method]) ? count(self::$_doublit_calls[$method]) : 0;
+            $assert_count = $expectation->getCount();
+            if ($assert_count === null) {
+                return;
+            }
+            if ($assert_count instanceof \Closure) {
+                $assert_count(self::$_doublit_calls[$method]);
+            } else if ($assert_count instanceof \PHPUnit_Framework_Constraint) {
+                Assert::assertThat($call_count, $assert_count, 'Method "' . $method . '" was called an unexpected ' . $call_count . ' times');
+            } else if ((filter_var($assert_count, FILTER_VALIDATE_INT) || filter_var($assert_count, FILTER_VALIDATE_INT) === 0)) {
+                Assert::assertEquals($assert_count, $call_count, 'Method "' . $method . '" was called ' . $call_count . ' times when excepted ' . $assert_count . ' times');
+            } else if (is_string($assert_count)) {
+                if ($assert_count[0] == '>' && $assert_count[1] == '=') {
+                    $limit = ltrim($assert_count, '>=');
+                    Assert::assertGreaterThanOrEqual($limit, $call_count, 'Method "' . $method . '" was called ' . $call_count . ' times when excepted ' . $limit . ' or more times');
+                } else if ($assert_count[0] == '>') {
+                    $limit = ltrim($assert_count, '>');
+                    Assert::assertGreaterThan($limit, $call_count, 'Method "' . $method . '" was called ' . $call_count . ' times when excepted more than ' . $limit . ' times');
+                } else if ($assert_count[0] == '<' && $assert_count[1] == '=') {
+                    $limit = ltrim($assert_count, '<=');
+                    Assert::assertLessThanOrEqual($limit, $call_count, 'Method "' . $method . '" was called ' . $call_count . ' times when excepted ' . $limit . ' or less times');
+                } else if ($assert_count[0] == '<') {
+                    $limit = ltrim($assert_count, '<');
+                    Assert::assertLessThanOrEqual($limit, $call_count, 'Method "' . $method . '" was called ' . $call_count . ' times when excepted less than ' . $limit . ' times');
+                } else {
+                    $limits = explode('-', $assert_count);
+                    Assert::assertGreaterThanOrEqual($limits[0], $call_count, 'Method "' . $method . '" was called ' . $call_count . ' times when excepted ' . $limits[0] . ' or more times');
+                    Assert::assertLessThanOrEqual($limits[1], $call_count, 'Method "' . $method . '" was called ' . $call_count . ' times when excepted ' . $limits[1] . ' or less times');
+                }
+            }
+        }
+        // Assert non-asserted methods
+        if (self::_doublit_getConfig('test_unexpected_methods')) {
+            foreach (self::$_doublit_calls as $method => $_doublit_calls) {
+                $call_count = count($_doublit_calls);
+                if (self::_doublit_hasExpectation($method)) {
+                    continue;
+                } else {
+                    Assert::assertEquals(0, count($_doublit_calls), 'Method "' . $method . '" was called ' . $call_count . ' times when excepted 0 times');
+                }
+            }
+        }
+    }
+
+    /**
+     * Run arguments assertions
+     */
+    protected static function _doublit_assertMethodArgs()
+    {
+        foreach (self::$_doublit_expectations as $method => $expectation) {
+            if (!isset(self::$_doublit_calls[$method])) {
+                continue;
+            }
+            foreach (self::$_doublit_calls[$method] as $i => $call) {
+                $call_count = $i + 1;
+                $call_args = $call['args'];
+                $assert_args = $expectation->getArgs($call_count);
+                if ($assert_args === null) {
+                    continue;
+                }
+                if (is_callable($assert_args)) {
+                    $assert_args(...$call['args']);
+                } else if (is_array($assert_args)) {
+                    $j = 0;
+                    $test_count = max(count($assert_args), count($call_args));
+                    while ($j < $test_count) {
+                        $constraint = isset($assert_args[$j]) ? $assert_args[$j] : Constraints::isNull();
+                        $value = isset($call_args[$j]) ? $call_args[$j] : null;
+                        if ($constraint instanceof Constraint) {
+                            Assert::assertThat($value, $constraint, 'Argument ' . ($j + 1) . ' of method "' . $method . '" didn\'t match expected value on call ' . $call_count);
+                        } else {
+                            Assert::assertEquals($constraint, $value, 'Argument ' . ($j + 1) . ' of method "' . $method . '" didn\'t match expected value on call ' . $call_count);
+                        }
+                        $j++;
+                    }
+                } else {
+                    throw new RuntimeException('Invalid assertion type');
+                }
+            }
+        }
+    }
+
+    /**
+     * Run class assertions
+     */
+    public static function _doublit_close()
+    {
+        self::_doublit_assertMethodCount();
+        self::_doublit_assertMethodArgs();
+    }
+}
