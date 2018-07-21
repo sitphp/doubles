@@ -6,6 +6,7 @@ Doublit can help you to test your PHP classes by generating doubles that look li
 
 See full documentation at [https://getdoublit.com](https://getdoublit.com)
 
+
 ## Installation
 
 Add the line `"gealex/doublit": "dev-master"` in the `"require-dev"` section of your composer.json file :
@@ -66,10 +67,12 @@ You define the configuration for a specific double using the 4th argument of a D
 
 Here is a list of all available config parameters :
 
-- `allow_final_doubles` : Set this parameter to `false` to stop Doublit from trying to make doubles of final classes/methods. Read more [here](#dealing_with_final_classes).
-- `allow_protected_methods` : Set this parameter to `false` to disallow testing protected methods. Read more [here](#dealing_with_protected_methods).
-- `allow_non_existent_classes` : Set this parameter to `false` to disallow alias doubles of non existent classes. Read more [here](#dealing_with_non_existent_methods).
-- `test_unexpected_methods` : Set this parameter to `true` to automatically receive an assertion error whenever an unexpected method is called. Read more [here](#testing_unexpected_methods_automatically).
+- `allow_final_doubles` : Set this parameter to `false` to stop Doublit from trying to make doubles of final classes/methods.
+- `allow_protected_methods` : Set this parameter to `false` to disallow testing protected methods.
+- `allow_non_existent_classes` : Set this parameter to `false` to disallow alias doubles of non existent classes.
+- `test_unexpected_methods` : Set this parameter to `true` to automatically receive an assertion error whenever an unexpected method is called.
+ 
+For more details : [Read the doc on configuration](doc/configuration.md)
 
 ## About
 
