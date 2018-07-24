@@ -117,6 +117,15 @@ class AssertionTest extends TestCase
         $double->foo();
     }
 
+    public function testPreviousAssertionShouldNotCancelCountAssertion()
+    {
+        $double = Doublit::mock_instance(AssertionStandardClass::class);
+        $double::_method('foo');
+        $double::_method('bar')->count(1);
+
+        $double->bar();
+    }
+
     public function testAssertCountUsingInvalidArgumentShouldFail()
     {
         $this->expectException(InvalidArgumentException::class);
@@ -125,12 +134,13 @@ class AssertionTest extends TestCase
         $double::_method('foo')->count(new \stdClass());
     }
 
-    public function testAssertCountShouldSucceedWhenMethodIsAsserted()
+    public function testAssertCountShouldRunAutomaticallyWhenConfigSaySo()
     {
         $double = Doublit::mock_instance(AssertionStandardClass::class, null, null, ['test_unexpected_methods' => true]);
         $double::_method('foo');
         $double->foo();
     }
+
 
     /* -----
     Test stub
@@ -268,6 +278,15 @@ class AssertionTest extends TestCase
         $double = Doublit::mock_instance(AssertionStandardClass::class);
         $double::_method('foo')->args(['arg_1', 'arg_2']);
         $double->foo('arg_1', 'arg_2');
+    }
+
+    public function testPreviousAssertionShouldNotCancelArgAssertion()
+    {
+        $double = Doublit::mock_instance(AssertionStandardClass::class);
+        $double::_method('foo');
+        $double::_method('bar')->args(['arg_1', 'arg_2']);
+
+        $double->bar('arg_1', 'arg_2');
     }
 
     public function testAssertArgsWithNullValue()

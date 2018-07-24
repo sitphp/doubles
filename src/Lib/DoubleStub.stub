@@ -306,7 +306,7 @@ class DoubleStub
             $call_count = isset(self::$_doublit_calls[$method]) ? count(self::$_doublit_calls[$method]) : 0;
             $assert_count = $expectation->getCount();
             if ($assert_count === null) {
-                return;
+                continue;
             }
             if ($assert_count instanceof \Closure) {
                 $assert_count(self::$_doublit_calls[$method]);

@@ -1,7 +1,7 @@
 {
     "name": "gealex/doublit",
     "description": "Doublit : Double any PHP class easily for test in PhpUnit",
-    "keywords": ["test", "testing", "double", "mock", "dummy", "stub", "tdd"],
+    "keywords": ["test", "testing", "double", "mock", "dummy", "stub", "tdd", "bdd"],
     "homepage": "https://github.com/gealex/doublit",
     "license": "MIT",
     "authors": [
