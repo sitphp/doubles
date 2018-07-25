@@ -9,11 +9,11 @@ See full documentation at [https://getdoublit.com](https://getdoublit.com)
 
 ## Installation
 
-Add the line `"gealex/doublit": "dev-master"` in the `"require-dev"` section of your composer.json file :
+Add the line `"gealex/doublit": "~1.0"` in the `"require-dev"` section of your composer.json file :
 
     {
         "require-dev": {
-            "gealex/doublit": "dev-master"
+            "gealex/doublit": "~1.0"
         }
     }
 
