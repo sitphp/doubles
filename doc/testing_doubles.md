@@ -1,7 +1,7 @@
 # Testing doubles
 > {.note.important} Important : For your tests to work, your PhpUnit test case classes must extend the `Doublit\TestCase` class.
 
-## Testing the count method calls
+## Testing the count of method calls
 Say you have created a double and you want to test the number of times that the method "myMethod" is being called on that double. There are 3 ways you could be doing this :
 
 ### Using comparators
@@ -27,42 +27,15 @@ This is the easiest way to test how many times a double method has been called u
     
     // Test that the method "myMethod" is called between 3 and 5 times
     $double::_method('myMethod')->count('3-5');
-
-### Using PhpUnit assertions
-You can also use PhpUnit assertions to test your methods call counts. All PhpUnit assertions are gathered in the `Doublit\Constraints` class. Here are some examples of count tests using constraints :
-
-    {.language-php}
-    use Doublit\Constraints;
-    ...
-    
-    // Test that the method "myMethod" is never called (0 times)
-    $double::_method('myMethod')->count(Constraints::equalTo(0));
-    
-    // Test that the method "myMethod" is called exactly 2 times
-    $double::_method('myMethod')->count(Constraints::equalTo(2));
-    
-    // Test that the method "myMethod" is called a least one time (more than 0 times)
-    $double::_method('myMethod')->count(Constraints::greaterThan(0));
-    
-    // Test that the method "myMethod" is called a least one time (1 or more times)
-    $double::_method('myMethod')->count(Constraints::greaterThanOrEqual(1));
-    
-    // Test that the method "myMethod" is called a less than 2 times
-    $double::_method('myMethod')->count(Constraints::lessThan(2));
-    
-    // Test that the method "myMethod" is called a less than 2 times (1 time or less)
-    $double::_method('myMethod')->count(Constraints::lessThanOrEqual(1));
-    
-    // Test that the method "myMethod" is called between 3 and 5 times (3 or more times and 5 or less times)
-    $double::_method('myMethod')->count('[Constraints::moreThanOrEqual(3), Constraints::lessThanOrEqual(5)]);
     
 ### Using your own function
-You can also use your own callback function to test the call count of a method. In the first parameter of your callback function, you will be given an array with all the method calls and their arguments. This could be useful, for example, to test the call count of a particular method on `__call` :
+You can also use your own callback function to test the call count of a method. In the first parameter of your callback function, you will be given a `$call` array containing all method calls with their arguments. This could be useful, for example, to test the call count of a particular method running through the `__call` magic method :
 
     {.language-php} // Test that the "__call" method has receive "myCallMethod" 2 times as a first argument
     $double::_method('__call')->count(function($calls){
         $my_call_method_count = 0;
         foreach($calls as $call){
+             // Retreive call arguments
             $call_arguments = $call['args'];
             
             // If the first argument of the call is "myCallMethod"
@@ -88,15 +61,64 @@ To test the arguments values of a method, just pass the values that the argument
 ### Against PhpUnit constraints
 You can also use the PhpUnit constraints, gathered in the `Doublit\Constraints` class. They give you more options to test your arguments :
 
-    {.language-php} // Test the first argument passed to method "myMethod" greater than "3" and that the second arguments is equal to "value2"
-    $double::_method('myMethod')->args([Constraints::greaterThan(3), Constraints::equalTo('value2')]);
+    {.language-php} use Doublit\Constraints;
+    ...
+    
+    // Test that the first argument passed to method "myMethod" an array and that the second arguments is an instance of class "MyClass"
+    $double::_method('myMethod')->args([Constraints::isType('array'), Constraints::isInstanceOf(MyClass::class)]);
+
+Here is a list of all available constraints to test against any argument `$argument` :
+
+- `Constraints::isTrue()` : Test that `$argument` is `true`.
+- `Constraints::isFalse()` : Test that `$argument` is `false`.
+- `Constraints::isNull()` : Test that `$argument` is `null`.
+- `Constraints::isNotNull()` : Test that `$argument` is not `null`.
+- `Constraints::isInfinite()` : Test that `$argument` is infinite.
+- `Constraints::isFinite()` : Test that `$argument` is not infinite.
+- `Constraints::isNan()` : Test that `$argument` is not a number.
+- `Constraints::isEmpty()` : Test that `$argument` is empty.
+- `Constraints::anything()` : Test that `$argument` is anything.
+- `Constraints::equalTo($value, $delta = 0.0, $maxDepth = 10, $canonicalize = false, $ignoreCase = false)` : Test that `$argument` is equal to `$value` (`$argument` == `$value`)
+- `Constraints::identicalTo($value)` : Test that `$argument` is identical to $value (`$argument` === `$value`)
+- `Constraints::isType($type)` : Test that `$argument` is of type `$type.
+- `Constraints::isInstanceOf($className)` : Test that `$argument` is instance of `$className.
+- `Constraints::stringStartsWith($prefix)` : Test that string `$argument` starts with `$prefix`
+- `Constraints::stringContains($string, $case = true)` : Test that string `$argument` contains `$string`
+- `Constraints::stringEndsWith($suffix)` : Test that string `$argument` ends with `$suffix`
+- `Constraints::matchesRegularExpression($pattern)` : Test that string `$argument` matches `$pattern` regular expression.
+- `Constraints::greaterThan($value)` : Test that numerical `$argument` is greater than `$value`.
+- `Constraints::greaterThanOrEqual($value)` : Test that numerical `$argument` is greater or equal to `$value`.
+- `Constraints::lessThan($value)` : Test that numerical `$argument` is less than `$value`.
+- `Constraints::lessThanOrEqual($value)` : Test that numerical `$argument` is less or equal to `$value`.
+- `Constraints::countOf($count)` : Test that countable `$argument` has expected `$count size`.
+- `Constraints::contains($value, $checkForObjectIdentity = true, $checkForNonObjectIdentity = false)` : Test if array `$argument` contains `$value`.
+- `Constraints::containsOnly($type)` : Test that array `$argument` contains only variables of type `$type`.
+- `Constraints::containsOnlyInstancesOf($classname)` : Test that array `$argument` contains only instances of class `$classname`.
+- `Constraints::arrayHasKey($key)` : Test that array `$argument` has the `$key`.
+- `Constraints::arraySubset($subset, $strict = false)` : Test that array `$argument` contains the `$subset`.
+- `Constraints::isWritable()` : Test that `$argument` is writable.
+- `Constraints::isReadable()` : Test that `$argument` is readable.
+- `Constraints::directoryExists()` : Test that `$argument` is an existent directory.
+- `Constraints::fileExists()` : Test that `$argument` is an existent file.
+- `Constraints::isJson()`: Test that `$argument` is a json.
+- `Constraints::jsonMatches($expectedJson)` : Test that json `$argument` is identical to `$expectedJson`
+- `Constraints::logicalAnd(...$args)` : Test that `$argument` matches all `$args` constraints
+- `Constraints::logicalOr(...$args)` : Test that `$argument` matches any of the `$args` constraints
+- `Constraints::logicalXor(...$args)` : Test that `$argument` matches only one of `$args` constraints
+- `Constraints::logicalNot(Constraint $constraint)` : Test that `$argument` doesn't match the constraint `$constraint`
+- `Constraints::callback($callback)` : Test that $callback with give argument `$argument` returns `true` (`$callback = function($argument){ return $argument == "test" };`)
+- `Constraints::attributeEqualTo($attributeName, $value, $delta = 0.0, $maxDepth = 10, $canonicalize = false, $ignoreCase = false)` : Test that class or object `$argument` has attribute `$attributeName` with value `$value`.
+- `Constraints::attribute(Constraint $constraint, $attributeName)` : Test classor object `$argument` has  attribute `$attributeName` that matches given `$constraint` constraint.
+- `Constraints::classHasAttribute($attributeName)` : Test that class `$argument` has attribute `$attributeName`.
+- `Constraints::classHasStaticAttribute($attributeName)` : Test that class `$argument` has static attribute `$attributeName`.
+- `Constraints::objectHasAttribute($attributeName)` : Test that object `$argument` has attribute `$attributeName`.
 
 ### Manualy
 If you need full control to test a method's arguments, you can run your own PhpUnit assertions using a callback function. You will be given all the arguments passed to your method in your callback :
 
     {.language-php} // Test the second argument passed to method "myMethod" is "value2" when the first argument's value is "value1"
     $double::_method('myMethod')->args(function($arg1, $arg2){
-        if($arg1 == 'value'){
+        if($arg1 == 'value1'){
             $this->assertEqual($arg2, 'value2');
         }
     });

@@ -48,10 +48,8 @@ use PHPUnit\Framework\Constraint\LogicalOr;
 use PHPUnit\Framework\Constraint\LogicalXor;
 use PHPUnit\Framework\Constraint\ObjectHasAttribute;
 use PHPUnit\Framework\Constraint\RegularExpression;
-use PHPUnit\Framework\Constraint\SameSize;
 use PHPUnit\Framework\Constraint\StringContains;
 use PHPUnit\Framework\Constraint\StringEndsWith;
-use PHPUnit\Framework\Constraint\StringMatchesFormatDescription;
 use PHPUnit\Framework\Constraint\StringStartsWith;
 use PHPUnit\Framework\Constraint\TraversableContains;
 use PHPUnit\Framework\Constraint\TraversableContainsOnly;
@@ -439,32 +437,12 @@ class Constraints
 
 
     /**
-     * @param $string
-     * @return StringMatchesFormatDescription
-     */
-    public static function matches($string)
-    {
-        return Assert::matches($string);
-    }
-
-
-    /**
      * @param $expectedJson
      * @return JsonMatches
      */
     public static function jsonMatches($expectedJson)
     {
         return new JsonMatches($expectedJson);
-    }
-
-
-    /**
-     * @param $expected
-     * @return SameSize
-     */
-    public static function sameSize($expected)
-    {
-        return new SameSize($expected);
     }
 
 

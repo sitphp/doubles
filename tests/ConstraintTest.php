@@ -48,10 +48,8 @@ use PHPUnit\Framework\Constraint\LogicalXor;
 use PHPUnit\Framework\Constraint\Not;
 use PHPUnit\Framework\Constraint\ObjectHasAttribute;
 use PHPUnit\Framework\Constraint\RegularExpression;
-use PHPUnit\Framework\Constraint\SameSize;
 use PHPUnit\Framework\Constraint\StringContains;
 use PHPUnit\Framework\Constraint\StringEndsWith;
-use PHPUnit\Framework\Constraint\StringMatchesFormatDescription;
 use PHPUnit\Framework\Constraint\StringStartsWith;
 use PHPUnit\Framework\Constraint\TraversableContains;
 use PHPUnit\Framework\Constraint\TraversableContainsOnly;
@@ -283,12 +281,6 @@ class ConstraintTest extends TestCase
         $this->assertInstanceOf(RegularExpression::class, $constraint);
     }
 
-    public function testMatches()
-    {
-        $constraint = Constraints::matches('string');
-        $this->assertInstanceOf(StringMatchesFormatDescription::class, $constraint);
-    }
-
     public function testStringStartsWith()
     {
         $constraint = Constraints::stringStartsWith('prefix');
@@ -311,12 +303,6 @@ class ConstraintTest extends TestCase
     {
         $constraint = Constraints::countOf('3');
         $this->assertInstanceOf(Count::class, $constraint);
-    }
-
-    public function testSameSize()
-    {
-        $constraint = Constraints::sameSize(new \ArrayIterator());
-        $this->assertInstanceOf(SameSize::class, $constraint);
     }
 
     public function testArraySubset()

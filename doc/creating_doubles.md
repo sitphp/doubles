@@ -1,7 +1,12 @@
 # Creating a double
 
-## Double types
-Doublit can easily make doubles of any kind of class, interface or trait. It doesn't matter if the class/interface or trait has final, abstract or static calls.
+## Creating a double instance
+Doublit can easily make doubles of any kind of class, interface or trait. It doesn't matter if the class/interface or trait has final, abstract or static calls. You should first import the `Doublit\Doublit` class which your are going to use to create your doubles :
+    
+    {.language-php}
+    // Import the doublit class
+    use \Doublit\Doublit;
+    ...
 
 ### Double instance of type "dummy"
 A doubles of type "dummy" will overwrite the original class methods to return `null` and the original class `__construct` method  will not be executed (unless you [pass constructor arguments](#passing-constructor-arguments)). If you don't understand what doubles of type "dummy" are, you can get more details on the [introduction page](/doc/intro). To get a "dummy" double instance of a given class, simply pass the name your original class to the `Doublit::dummy_instance` method :
@@ -76,7 +81,7 @@ For some reason, you may want to define yourself the name of your double class. 
     {.language-php} // Get a double instance named "MyDoubleClassName" for class "MyClass"
     $my_dummy_double_class = Doublit::dummy_instance('MyDoubleClassName:'.MyClass::class);
 
-## Non object class double
+## Non instiatiated class double
 Sometimes, you may need to instantiate the double yourself or you may not need a double instance at all (if you are working with a static class for example). For that you can use the double method to get only the class name of the generated double.
     
     {.language-php} // Get class name of double of type "dummy" for class "MyClass"
