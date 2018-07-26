@@ -82,4 +82,4 @@ Doublit is licensed under the [MIT license](https://opensource.org/licenses/MIT)
 ### Author
 Alexandre Geiswiller - [alexandre.geiswiller@gmail.com](mailto:alexandre.geiswiller@gmail.com).
 
-For more details : [Read the doc on testing doubles](doc/about.md)
+For more details : [Read the doc on about](doc/about.md)

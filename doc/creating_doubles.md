@@ -81,7 +81,7 @@ For some reason, you may want to define yourself the name of your double class. 
     {.language-php} // Get a double instance named "MyDoubleClassName" for class "MyClass"
     $my_dummy_double_class = Doublit::dummy_instance('MyDoubleClassName:'.MyClass::class);
 
-## Non instiatiated class double
+## Non instantiated class double
 Sometimes, you may need to instantiate the double yourself or you may not need a double instance at all (if you are working with a static class for example). For that you can use the double method to get only the class name of the generated double.
     
     {.language-php} // Get class name of double of type "dummy" for class "MyClass"
