@@ -28,6 +28,7 @@ class DoubleStub
 
     protected static $_doublit_initialized = false;
     protected static $_doublit_constructed = false;
+    protected static $_doublit_closed = false;
 
     protected static $_doublit_expectations = [];
     protected static $_doublit_calls = [];
@@ -310,7 +311,7 @@ class DoubleStub
             }
             if ($assert_count instanceof \Closure) {
                 $assert_count(self::$_doublit_calls[$method]);
-            } else if ($assert_count instanceof \PHPUnit_Framework_Constraint) {
+            } else if ($assert_count instanceof Constraint) {
                 Assert::assertThat($call_count, $assert_count, 'Method "' . $method . '" was called an unexpected ' . $call_count . ' times');
             } else if ((filter_var($assert_count, FILTER_VALIDATE_INT) || filter_var($assert_count, FILTER_VALIDATE_INT) === 0)) {
                 Assert::assertEquals($assert_count, $call_count, 'Method "' . $method . '" was called ' . $call_count . ' times when excepted ' . $assert_count . ' times');
@@ -332,6 +333,8 @@ class DoubleStub
                     Assert::assertGreaterThanOrEqual($limits[0], $call_count, 'Method "' . $method . '" was called ' . $call_count . ' times when excepted ' . $limits[0] . ' or more times');
                     Assert::assertLessThanOrEqual($limits[1], $call_count, 'Method "' . $method . '" was called ' . $call_count . ' times when excepted ' . $limits[1] . ' or less times');
                 }
+            } else {
+                throw new RuntimeException('Unexpected count value'.$assert_count);
             }
         }
         // Assert non-asserted methods
@@ -390,7 +393,12 @@ class DoubleStub
      */
     public static function _doublit_close()
     {
+        if(self::$_doublit_closed){
+            return false;
+        }
         self::_doublit_assertMethodCount();
         self::_doublit_assertMethodArgs();
+        self::$_doublit_closed = true;
+        return true;
     }
 }

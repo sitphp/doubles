@@ -42,22 +42,24 @@ class Expectation
      * or for all calls if $call_count is null
      *
      * @param null $call_number
+     * @return Expectation
      */
     function dummy($call_number = null)
     {
+        if (isset($call_number) && is_array($call_number)) {
+            foreach ($call_number as $value) {
+                $this->dummy($value);
+            }
+            return $this;
+        }
         $this->validateCallCount($call_number);
         if (isset($call_number)) {
-            if (is_array($call_number)) {
-                foreach ($call_number as $value) {
-                    $this->setTypeCall($value, ['dummy']);
-                }
-            } else {
-                $this->setTypeCall($call_number, ['dummy']);
-            }
+            $this->setTypeCall($call_number, ['dummy']);
         } else {
             $this->resetType();
             $this->setTypeDefault(['dummy']);
         }
+        return $this;
     }
 
     /**
@@ -65,6 +67,7 @@ class Expectation
      * or for all calls if $call_count is null
      *
      * @param null $call_number
+     * @return Expectation
      */
     function mock($call_number = null)
     {
@@ -72,7 +75,7 @@ class Expectation
             foreach ($call_number as $value) {
                 $this->mock($value);
             }
-            return;
+            return $this;
         }
         $this->validateCallCount($call_number);
         if (isset($call_number)) {
@@ -81,6 +84,7 @@ class Expectation
             $this->resetType();
             $this->setTypeDefault(['mock']);
         }
+        return $this;
     }
 
     /**
@@ -89,6 +93,7 @@ class Expectation
      *
      * @param $return
      * @param null $call_number
+     * @return Expectation
      */
     function stub($return, $call_number = null)
     {
@@ -114,6 +119,7 @@ class Expectation
             $this->resetType();
             $this->setTypeDefault(['stub', $stub]);
         }
+        return $this;
     }
 
     /**
@@ -125,12 +131,6 @@ class Expectation
      */
     function count($range)
     {
-        if (is_array($range)) {
-            foreach ($range as $value) {
-                $this->count($value);
-            }
-            return;
-        }
         if ($this->isInt($range)) {
             if ($range < 0) {
                 throw new InvalidArgumentException('Invalid "range" argument. Should be "i", ">i", "<i" ">=i", "<=i" (where i is a positive integer), callable or instance of ' . Constraint::class);
@@ -178,6 +178,7 @@ class Expectation
      *
      * @param $arguments_assertions
      * @param null $call_number
+     * @return Expectation
      */
     function args($arguments_assertions, $call_number = null)
     {
@@ -195,13 +196,13 @@ class Expectation
                 } else if ($argument_assertion === null) {
                     $arguments_assertions[$key] = Constraints::isNull();
                 } else if (!$argument_assertion instanceof Constraint) {
-                    throw new InvalidArgumentException('Invalid "arguments_assertions" argument with key"' . $key . '". Should be string, int, null or instance of ' . Constraint::class);
+                    throw new InvalidArgumentException('Invalid "arguments_assertions" argument "' . $key . '". Should be string, int, null or instance of ' . Constraint::class);
                 }
             }
         } else if ($arguments_assertions === null) {
             $arguments_assertions = [null];
         } else if (!$arguments_assertions instanceof \Closure) {
-            throw new InvalidArgumentException('Invalid "arguments_assertions" argument. Should be string, array, null or callback');
+            throw new InvalidArgumentException('Invalid "arguments_assertions" argument. Should be array, null or callback');
         }
 
         if (isset($call_number)) {
@@ -216,7 +217,7 @@ class Expectation
             $this->resetArgs();
             $this->setArgsDefault($arguments_assertions);
         }
-
+        return $this;
     }
 
     /**

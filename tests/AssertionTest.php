@@ -75,30 +75,70 @@ class AssertionTest extends TestCase
         $double::_method('foo')->count(0);
     }
 
-    public function testAssertCountUsingStringComparators()
+    public function testAssertCountUsingIntComparators()
     {
         $double = Doublit::mock_instance(AssertionStandardClass::class);
-        $double::_method('foo')->count('3');
-        $double::_method('foo')->count('>2');
-        $double::_method('foo')->count('>=3');
-        $double::_method('foo')->count('<4');
-        $double::_method('foo')->count('<=4');
-        $double::_method('foo')->count('2-4');
+        $double::_method('foo')->count(3);
 
         $double->foo();
         $double->foo();
         $double->foo();
     }
 
-    public function testAssertCountUsingPhpUnitAssertions()
+    public function testAssertCountUsingEqualComparators()
+    {
+        $double = Doublit::mock_instance(AssertionStandardClass::class);
+        $double::_method('foo')->count('3');
+
+        $double->foo();
+        $double->foo();
+        $double->foo();
+    }
+
+    public function testAssertCountUsingGreaterComparators()
+    {
+        $double = Doublit::mock_instance(AssertionStandardClass::class);
+        $double::_method('foo')->count('>2');
+
+        $double->foo();
+        $double->foo();
+        $double->foo();
+    }
+
+    public function testAssertCountUsingGreaterOrEqualComparators()
+    {
+        $double = Doublit::mock_instance(AssertionStandardClass::class);
+        $double::_method('foo')->count('>=3');
+
+        $double->foo();
+        $double->foo();
+        $double->foo();
+    }
+
+    public function testAssertCountUsingLessComparators()
+    {
+        $double = Doublit::mock_instance(AssertionStandardClass::class);
+        $double::_method('foo')->count('<4');
+
+        $double->foo();
+        $double->foo();
+        $double->foo();
+    }
+
+    public function testAssertCountUsingLessOrEqualComparators()
+    {
+        $double = Doublit::mock_instance(AssertionStandardClass::class);
+        $double::_method('foo')->count('<=3');
+
+        $double->foo();
+        $double->foo();
+        $double->foo();
+    }
+
+    public function testAssertCountUsingPhpUnitConstraints()
     {
         $double = Doublit::mock_instance(AssertionStandardClass::class);
         $double::_method('foo')->count(Constraints::equalTo(3));
-        $double::_method('foo')->count(Constraints::greaterThan(2));
-        $double::_method('foo')->count(Constraints::greaterThanOrEqual(3));
-        $double::_method('foo')->count(Constraints::lessThan(4));
-        $double::_method('foo')->count(Constraints::lessThanOrEqual(4));
-        $double::_method('foo')->count([Constraints::greaterThanOrEqual(2), Constraints::lessThanOrEqual(4)]);
 
         $double->foo();
         $double->foo();
@@ -134,11 +174,11 @@ class AssertionTest extends TestCase
         $double::_method('foo')->count(new \stdClass());
     }
 
-    public function testAssertCountShouldRunAutomaticallyWhenConfigSaySo()
+    public function testAssertCountShouldNotTestCountAutomaticallyEvenWhenConfigSaySo()
     {
         $double = Doublit::mock_instance(AssertionStandardClass::class, null, null, ['test_unexpected_methods' => true]);
         $double::_method('foo');
-        $double->foo();
+        $this->assertEquals($double->foo(),'foo');
     }
 
 
@@ -344,6 +384,20 @@ class AssertionTest extends TestCase
         $double::_method('foo')->args(['arg_1', 'arg_2'], 0);
         $double->foo();
         $double->foo('arg_1', 'arg_2');
+    }
+
+    public function testChain()
+    {
+        $double = Doublit::mock_instance(AssertionStandardClass::class);
+        $double::_method('foo')
+            ->count(2)
+            ->args(['arg_1', 'arg_2'], 1)
+            ->args(['arg_3', 'arg_4'], 2)
+            ->stub('return_1', 1)
+            ->stub('return_2', 2);
+
+        $this->assertEquals('return_1', $double->foo('arg_1', 'arg_2'));
+        $this->assertEquals('return_2', $double->foo('arg_3', 'arg_4'));
     }
 }
 
