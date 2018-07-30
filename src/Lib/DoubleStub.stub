@@ -28,6 +28,7 @@ class DoubleStub
 
     protected static $_doublit_initialized = false;
     protected static $_doublit_constructed = false;
+    protected static $_doublit_closed = false;
 
     protected static $_doublit_expectations = [];
     protected static $_doublit_calls = [];
@@ -363,23 +364,23 @@ class DoubleStub
                 if ($assert_args === null) {
                     continue;
                 }
-                if (is_callable($assert_args)) {
-                    $assert_args(...$call['args']);
-                } else if (is_array($assert_args)) {
-                    $j = 0;
-                    $test_count = max(count($assert_args), count($call_args));
-                    while ($j < $test_count) {
-                        $constraint = isset($assert_args[$j]) ? $assert_args[$j] : Constraints::isNull();
-                        $value = isset($call_args[$j]) ? $call_args[$j] : null;
-                        if ($constraint instanceof Constraint) {
-                            Assert::assertThat($value, $constraint, 'Argument ' . ($j + 1) . ' of method "' . $method . '" didn\'t match expected value on call ' . $call_count);
-                        } else {
-                            Assert::assertEquals($constraint, $value, 'Argument ' . ($j + 1) . ' of method "' . $method . '" didn\'t match expected value on call ' . $call_count);
-                        }
-                        $j++;
-                    }
-                } else {
+                if (!is_array($assert_args)) {
                     throw new RuntimeException('Invalid assertion type');
+                }
+                $j = 0;
+                $test_count = max(count($assert_args), count($call_args));
+                while ($j < $test_count) {
+                    $constraint = isset($assert_args[$j]) ? $assert_args[$j] : Constraints::isNull();
+                    $value = isset($call_args[$j]) ? $call_args[$j] : null;
+                    if ($constraint instanceof Constraint) {
+                        Assert::assertThat($value, $constraint, 'Argument ' . ($j + 1) . ' of method "' . $method . '" didn\'t match expected value on call ' . $call_count);
+                    } else if(is_callable($assert_args[$j])){
+                        echo('callable:');
+                        $assert_args[$j](...$call['args']);
+                    } else {
+                        Assert::assertEquals($constraint, $value, 'Argument ' . ($j + 1) . ' of method "' . $method . '" didn\'t match expected value on call ' . $call_count);
+                    }
+                    $j++;
                 }
             }
         }
@@ -390,7 +391,12 @@ class DoubleStub
      */
     public static function _doublit_close()
     {
+        if(self::$_doublit_closed){
+            return false;
+        }
+        self::$_doublit_closed = true;
         self::_doublit_assertMethodCount();
         self::_doublit_assertMethodArgs();
+        return true;
     }
 }

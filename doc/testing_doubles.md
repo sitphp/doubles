@@ -88,8 +88,57 @@ To test the arguments values of a method, just pass the values that the argument
 ### Against PhpUnit constraints
 You can also use the PhpUnit constraints, gathered in the `Doublit\Constraints` class. They give you more options to test your arguments :
 
-    {.language-php} // Test the first argument passed to method "myMethod" greater than "3" and that the second arguments is equal to "value2"
-    $double::_method('myMethod')->args([Constraints::greaterThan(3), Constraints::equalTo('value2')]);
+    {.language-php} use Doublit\Constraints;
+    ...
+    
+    // Test that the first argument passed to method "myMethod" an array and that the second arguments is an instance of class "MyClass"
+    $double::_method('myMethod')->args([Constraints::isType('array'), Constraints::isInstanceOf(MyClass::class)]);
+
+Here is a list of all available constraints to test against any argument `$argument` :
+
+- `Constraints::isTrue()` : Test that `$argument` is `true`.
+- `Constraints::isFalse()` : Test that `$argument` is `false`.
+- `Constraints::isNull()` : Test that `$argument` is `null`.
+- `Constraints::isNotNull()` : Test that `$argument` is not `null`.
+- `Constraints::isInfinite()` : Test that `$argument` is infinite.
+- `Constraints::isFinite()` : Test that `$argument` is not infinite.
+- `Constraints::isNan()` : Test that `$argument` is not a number.
+- `Constraints::isEmpty()` : Test that `$argument` is empty.
+- `Constraints::anything()` : Test that `$argument` is anything.
+- `Constraints::equalTo($value, $delta = 0.0, $maxDepth = 10, $canonicalize = false, $ignoreCase = false)` : Test that `$argument` is equal to `$value` (`$argument` == `$value`).
+- `Constraints::identicalTo($value)` : Test that `$argument` is identical to $value (`$argument` === `$value`).
+- `Constraints::isType($type)` : Test that `$argument` is of type `$type.
+- `Constraints::isInstanceOf($className)` : Test that `$argument` is instance of `$className.
+- `Constraints::stringStartsWith($prefix)` : Test that string `$argument` starts with `$prefix`.
+- `Constraints::stringContains($string, $case = true)` : Test that string `$argument` contains `$string`.
+- `Constraints::stringEndsWith($suffix)` : Test that string `$argument` ends with `$suffix`.
+- `Constraints::matchesRegularExpression($pattern)` : Test that string `$argument` matches `$pattern` regular expression.
+- `Constraints::greaterThan($value)` : Test that numerical `$argument` is greater than `$value`.
+- `Constraints::greaterThanOrEqual($value)` : Test that numerical `$argument` is greater or equal to `$value`.
+- `Constraints::lessThan($value)` : Test that numerical `$argument` is less than `$value`.
+- `Constraints::lessThanOrEqual($value)` : Test that numerical `$argument` is less or equal to `$value`.
+- `Constraints::countOf($count)` : Test that countable `$argument` has expected `$count size`.
+- `Constraints::contains($value, $checkForObjectIdentity = true, $checkForNonObjectIdentity = false)` : Test if array `$argument` contains `$value`.
+- `Constraints::containsOnly($type)` : Test that array `$argument` contains only variables of type `$type`.
+- `Constraints::containsOnlyInstancesOf($classname)` : Test that array `$argument` contains only instances of class `$classname`.
+- `Constraints::arrayHasKey($key)` : Test that array `$argument` has the `$key`.
+- `Constraints::arraySubset($subset, $strict = false)` : Test that array `$argument` contains the `$subset`.
+- `Constraints::isWritable()` : Test that `$argument` is writable.
+- `Constraints::isReadable()` : Test that `$argument` is readable.
+- `Constraints::directoryExists()` : Test that `$argument` is an existent directory.
+- `Constraints::fileExists()` : Test that `$argument` is an existent file.
+- `Constraints::isJson()`: Test that `$argument` is a json.
+- `Constraints::jsonMatches($expectedJson)` : Test that json `$argument` is identical to `$expectedJson`.
+- `Constraints::logicalAnd(...$args)` : Test that `$argument` matches all `$args` constraints.
+- `Constraints::logicalOr(...$args)` : Test that `$argument` matches any of the `$args` values or constraints.
+- `Constraints::logicalXor(...$args)` : Test that `$argument` matches only one of `$args` values or constraints.
+- `Constraints::logicalNot(Constraint $constraint)` : Test that `$argument` doesn't match the constraint `$constraint`.
+- `Constraints::callback($callback)` : Test that $callback with give argument `$argument` returns `true` (`$callback = function($argument){ return $argument == "test" };`).
+- `Constraints::attributeEqualTo($attributeName, $value, $delta = 0.0, $maxDepth = 10, $canonicalize = false, $ignoreCase = false)` : Test that class or object `$argument` has attribute `$attributeName` with value `$value`.
+- `Constraints::attribute(Constraint $constraint, $attributeName)` : Test classor object `$argument` has  attribute `$attributeName` that matches given `$constraint` constraint.
+- `Constraints::classHasAttribute($attributeName)` : Test that class `$argument` has attribute `$attributeName`.
+- `Constraints::classHasStaticAttribute($attributeName)` : Test that class `$argument` has static attribute `$attributeName`.
+- `Constraints::objectHasAttribute($attributeName)` : Test that object `$argument` has attribute `$attributeName`.
 
 ### Manualy
 If you need full control to test a method's arguments, you can run your own PhpUnit assertions using a callback function. You will be given all the arguments passed to your method in your callback :
@@ -188,12 +237,45 @@ You can chain your test assertions :
     {.language-php} 
     // Test "myMethod"
     $double::_method('myMethod')
-    ->count('1') // make sure it is called exactly 1 time,
-    ->stub('my_return') // replace the return value by "my_return",
-    ->args(['value1', 'value2'], 3);  // and test its arguments are "value1" and "value2" on the third call
+        ->count('1') // make sure it is called exactly 1 time,
+        ->stub('my_return') // replace the return value by "my_return",
+        ->args(['value1', 'value2'], 3);  // and test its arguments are "value1" and "value2" on the third call
 
 ## Overwriting public properties
 Only public class properties can be manipulated. To modify the value of a public property, just set its value like this :
 
     {.language-php} // Set my_param to true
     $my_double->my_property = true;
+    
+## Spies
+
+Somethings you may wish to run your double code first and test it afterwards. That's what we call spy tests. For that, you only need to write your method tests after your double code. 
+
+To make a spy test, you would write your test in that order :
+    
+    {.language-php} // Create class double
+    $double = Doublit::dummy_instance(MyClass::class);
+    
+    // Run method "myMethod"
+    $double->myMethod('arg1','arg2');
+    
+    // Test method
+    $double::_method('myMethod')
+        ->count(1)
+        ->args(['arg1', 'arg2']);
+        
+Instead of writing it in that order :
+    
+    {.language-php} // Create class double
+    $double = Doublit::dummy_instance(MyClass::class);
+    
+    // Test method
+    $double::_method('myMethod')
+        ->count(1)
+        ->args(['arg1', 'arg2']);
+    
+    // Run method "myMethod"
+    $double->myMethod('arg1','arg2');
+        
+
+> {.note.important} Important : It is no possible to change a method behaviour with spies.

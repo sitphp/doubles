@@ -129,7 +129,7 @@ class Expectation
             foreach ($range as $value) {
                 $this->count($value);
             }
-            return;
+            return $this;
         }
         if ($this->isInt($range)) {
             if ($range < 0) {
@@ -176,46 +176,47 @@ class Expectation
     /**
      * Set arguments constraint
      *
-     * @param $arguments_assertions
+     * @param $argument_assertion
      * @param null $call_number
+     * @return Expectation
      */
-    function args($arguments_assertions, $call_number = null)
+    function args($argument_assertion, $call_number = null)
     {
+
         $this->validateCallCount($call_number);
-        if (is_array($arguments_assertions)) {
-            foreach ($arguments_assertions as $key => $argument_assertion) {
-                if (is_string($argument_assertion) || is_int($argument_assertion)) {
-                    $arguments_assertions[$key] = Constraints::equalTo($argument_assertion);
-                } else if (is_bool($argument_assertion)) {
-                    if ($argument_assertion) {
-                        $arguments_assertions[$key] = Constraints::isTrue();
-                    } else {
-                        $arguments_assertions[$key] = Constraints::isFalse();
-                    }
-                } else if ($argument_assertion === null) {
-                    $arguments_assertions[$key] = Constraints::isNull();
-                } else if (!$argument_assertion instanceof Constraint) {
-                    throw new InvalidArgumentException('Invalid "arguments_assertions" argument with key"' . $key . '". Should be string, int, null or instance of ' . Constraint::class);
-                }
+        if (is_array($argument_assertion)) {
+            foreach ($argument_assertion as $key => $value) {
+                $this->args($value, $call_number);
             }
-        } else if ($arguments_assertions === null) {
-            $arguments_assertions = [null];
-        } else if (!$arguments_assertions instanceof \Closure) {
-            throw new InvalidArgumentException('Invalid "arguments_assertions" argument. Should be string, array, null or callback');
+            return $this;
+        }
+
+        if (is_string($argument_assertion) || is_int($argument_assertion)) {
+            $argument_assertion = Constraints::equalTo($argument_assertion);
+        } else if (is_bool($argument_assertion)) {
+            if ($argument_assertion) {
+                $argument_assertion = Constraints::isTrue();
+            } else {
+                $argument_assertion = Constraints::isFalse();
+            }
+        } else if ($argument_assertion === null) {
+            $argument_assertion = Constraints::isNull();
+        } else if (!$argument_assertion instanceof \Closure && !$argument_assertion instanceof Constraint) {
+            throw new InvalidArgumentException('Invalid "arguments_assertions" argument. Should be string, int, null or instance of ' . Constraint::class);
         }
 
         if (isset($call_number)) {
             if (is_array($call_number)) {
                 foreach ($call_number as $value) {
-                    $this->setArgsCall($value, $arguments_assertions);
+                    $this->setArgsCall($value, $argument_assertion);
                 }
             } else {
-                $this->setArgsCall($call_number, $arguments_assertions);
+                $this->setArgsCall($call_number, $argument_assertion);
             }
         } else {
-            $this->resetArgs();
-            $this->setArgsDefault($arguments_assertions);
+            $this->setArgsDefault($argument_assertion);
         }
+        return $this;
 
     }
 
@@ -328,9 +329,12 @@ class Expectation
      *
      * @param $constraint
      */
-    protected function setArgsDefault($constraints)
+    protected function setArgsDefault($constraint)
     {
-        $this->args['_default'] = $constraints;
+        if(!isset($this->args['_default'])){
+            $this->args['_default'] = [];
+        }
+        $this->args['_default'][] = $constraint;
     }
 
     /**
@@ -339,9 +343,12 @@ class Expectation
      * @param $call_number
      * @param callable $callback
      */
-    protected function setArgsCall($call_number, $constraints)
+    protected function setArgsCall($call_number, $constraint)
     {
-        $this->args[$call_number] = $constraints;
+        if(!isset($this->args[$call_number])){
+            $this->args[$call_number] = [];
+        }
+        $this->args[$call_number][] = $constraint;
     }
 
     /**

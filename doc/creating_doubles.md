@@ -86,7 +86,7 @@ Sometimes, you may need to instantiate the double yourself or you may not need a
     $my_mock_double_class_name = Doublit::mock_name(MyClass::class, MyInterfaceToImplement::class);
     
     // Get class name of double of type "alias" for class "MyClass"
-    $my_mock_double_class_name = Doublit::alias_name(MyClass::class, MyInterfaceToImplement::class);
+    $my_alias_double_class_name = Doublit::alias_name(MyClass::class, MyInterfaceToImplement::class);
 
     // Instantiate the "dummy" double
     $my_dummy_double_class_name = new $my_double_class_name();
