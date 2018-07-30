@@ -210,12 +210,45 @@ You can chain your test assertions :
     {.language-php} 
     // Test "myMethod"
     $double::_method('myMethod')
-    ->count('1') // make sure it is called exactly 1 time,
-    ->stub('my_return') // replace the return value by "my_return",
-    ->args(['value1', 'value2'], 3);  // and test its arguments are "value1" and "value2" on the third call
+        ->count('1') // make sure it is called exactly 1 time,
+        ->stub('my_return') // replace the return value by "my_return",
+        ->args(['value1', 'value2'], 3);  // and test its arguments are "value1" and "value2" on the third call
 
 ## Overwriting public properties
 Only public class properties can be manipulated. To modify the value of a public property, just set its value like this :
 
     {.language-php} // Set my_param to true
     $my_double->my_property = true;
+    
+## Spies
+
+Somethings you may wish to run your double code first and test it afterwards. That's what we call spy tests. For that, you only need to write your method tests after your double code. 
+
+To make a spy test, you would write your test in that order :
+    
+    {.language-php} // Create class double
+    $double = Doublit::dummy_instance(MyClass::class);
+    
+    // Run method "myMethod"
+    $double->myMethod('arg1','arg2');
+    
+    // Test method
+    $double::_method('myMethod')
+        ->count(1)
+        ->args(['arg1', 'arg2']);
+        
+Instead of writing it in that order :
+    
+    {.language-php} // Create class double
+    $double = Doublit::dummy_instance(MyClass::class);
+    
+    // Test method
+    $double::_method('myMethod')
+        ->count(1)
+        ->args(['arg1', 'arg2']);
+    
+    // Run method "myMethod"
+    $double->myMethod('arg1','arg2');
+        
+
+> {.note.important} Important : It is no possible to change a method behaviour with spies.
