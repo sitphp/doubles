@@ -1,4 +1,4 @@
-# Doublit - Double and test any PHP class easily in PhpUnit
+# Doublit - Double and test PHP classes easily in PhpUnit
 
 [![Build Status](https://travis-ci.org/gealex/doublit.svg?branch=master)](https://travis-ci.org/gealex/doublit)
 
@@ -10,7 +10,7 @@ See full documentation at [https://getdoublit.com](https://getdoublit.com)
 ## Installation
 
 Add the line `"gealex/doublit": "~1.0"` in the `"require-dev"` section of your composer.json file :
-
+    
     {
         "require-dev": {
             "gealex/doublit": "~1.0"

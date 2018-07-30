@@ -1,7 +1,16 @@
 # Introduction
 
-## How Doublit can help you with testing ?
-Doublit can help you to test your PHP classes by generating doubles that look like the original classes but can be manipulated and tested (sort of a copy of a class). These doubles can then be used instead of the original classes for your test. Doublit can create doubles of any kind of class, interface or trait. 
+## How doubles can help you with testing ?
+Imagine you have two classes `ClassToTest` and `Foo`. Class `ClassToTest` needs class `Foo` to work. We can say class `ClassToTest` is dependent on class `Foo`.
+When you start to test the methods of class `ClassToTest`, you don't want to be disturbed by class `Foo` which you can test separatly. So what you would do is create a `Double` class which would look like the `Foo` class but would behave has you desire for your for your test. You would then use this `Double` class instead of the `Foo` class inside your `ClassToTest` class. Then you could test class `ClassToTest` without worrying about if class `Foo` is doing what it is suppose to do or not. So with doublit, you would do something like this :
+        
+    {.language-php} /* Double of class "Foo" */
+    $double = Doublit::dummy_instance(Foo::class);
+    
+    /* Instantiate class "ClassToTest" with a double of class "Foo" */
+    $class_to_test = new ClassToTest($double);
+
+Doublit can generate doubles that look like the original classes but can be manipulated and tested (sort of a copy of a class). These doubles can then be used instead of the original classes for your test. Doublit can create doubles of any kind of class, interface or trait. 
 Here are the 3 things that doubles can do for testing :
 
 - The method calls of a double can be counted : you can test how many times a double method has been called.
@@ -58,20 +67,3 @@ Here is what a "mock" of our previously created "Name" class  would look like :
     }
     
 As you can see, the double will behave exactly the same as the original class. But unlike the original class, it can be tested and manipulated so can use it instead of our original class for our test.
-
-## How to integrate Doublit with PhpUnit ?
-In order to run your PhpUnit test cases with Doublit, you must simply extend the `Doublit\TestCase` class. This class extends the  `PHPUnit\Framework\TestCase` class so you can write your tests like normally in PhpUnit :
-
-    {.language-php} class MyTestClass extends \Doublit\TestCase {
-    
-        function testMyFirtsTest(){
-            // your test here ...
-        }
-        
-        function testMySecondTest(){
-            // your test here ..
-        }
-    
-    }
-    
-This will make sure the `Doublit\Doublit::close()` method is executed at the end of all your tests.

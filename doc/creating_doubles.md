@@ -1,26 +1,21 @@
 # Creating a double
 
 ## Creating a double instance
-Doublit can easily make doubles of any kind of class, interface or trait. It doesn't matter if the class/interface or trait has final, abstract or static calls. You should first import the `Doublit\Doublit` class which your are going to use to create your doubles :
-    
-    {.language-php}
-    // Import the doublit class
-    use \Doublit\Doublit;
-    ...
+Doublit can easily make doubles of any kind of class, interface or trait. It doesn't matter if the class/interface or trait has final, abstract or static calls.
 
 ### Double instance of type "dummy"
-A doubles of type "dummy" will overwrite the original class methods to return `null` and the original class `__construct` method  will not be executed (unless you [pass constructor arguments](#passing-constructor-arguments)). If you don't understand what doubles of type "dummy" are, you can get more details on the [introduction page](/doc/intro). To get a "dummy" double instance of a given class, simply pass the name your original class to the `Doublit::dummy_instance` method :
+A doubles of type "dummy" will overwrite the original class methods to return `null` and the original class `__construct` method  will not be executed (unless you [pass constructor arguments](#passing-constructor-arguments)). If you are not sure what doubles of type "dummy" are, you can get more details on the [introduction page](/doc/intro). To get a "dummy" double instance of a given class, simply pass the name your original class to the `Doublit::dummy_instance` method :
     
     {.language-php} // Get a double instance of type "dummy" for class "MyClass"
     $my_double = Doublit::dummy_instance(MyClass::class);
-    
+
     // This will return null
     $my_double->myMethod();
-
-> {.note.info} Note : In this example, we are creating a double instance of a class but it works the same way to create doubles of interfaces and traits.
+        
+> {.note.info} Note : In this example, we are creating a double instance of a class but it works the same way to create doubles of interfaces or traits.
         
 ### Double instance of type "mock"
-A doubles of type "mock" will overwrite the original class methods to behave exactly the same as in the original class. If you don't understand what doubles of type "mock" are, you can get more details on the [introduction page](/doc/intro). You can use "mock" doubles when want to test a class but leave its behaviour unchanged. To get a "mock" double instance of a given class, simply pass the name of your original class to the `Doublit::mock_instance` method :
+A doubles of type "mock" will overwrite the original class methods to behave exactly the same as in the original class. If you are not sure what doubles of type "mock" are, you can get more details on the [introduction page](/doc/intro). You can use "mock" doubles when want to test a class but leave its behaviour unchanged. To get a "mock" double instance of a given class, simply pass the name of your original class to the `Doublit::mock_instance` method :
             
     {.language-php} // Get a double instance of type "mock" for class "MyClass"
     $my_double = Doublit::mock_instance(MyClass::class);
@@ -91,7 +86,7 @@ Sometimes, you may need to instantiate the double yourself or you may not need a
     $my_mock_double_class_name = Doublit::mock_name(MyClass::class, MyInterfaceToImplement::class);
     
     // Get class name of double of type "alias" for class "MyClass"
-    $my_mock_double_class_name = Doublit::alias_name(MyClass::class, MyInterfaceToImplement::class);
+    $my_alias_double_class_name = Doublit::alias_name(MyClass::class, MyInterfaceToImplement::class);
 
     // Instantiate the "dummy" double
     $my_dummy_double_class_name = new $my_double_class_name();

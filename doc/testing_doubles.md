@@ -116,7 +116,7 @@ Here is a list of all available constraints to test against any argument `$argum
 ### Manualy
 If you need full control to test a method's arguments, you can run your own PhpUnit assertions using a callback function. You will be given all the arguments passed to your method in your callback :
 
-    {.language-php} // Test the second argument passed to method "myMethod" is "value2" when the first argument's value is "value1"
+    {.language-php} // Test that the second argument passed to method "myMethod" is "value2" when the first argument's value is "value1"
     $double::_method('myMethod')->args(function($arg1, $arg2){
         if($arg1 == 'value1'){
             $this->assertEqual($arg2, 'value2');
@@ -210,12 +210,45 @@ You can chain your test assertions :
     {.language-php} 
     // Test "myMethod"
     $double::_method('myMethod')
-    ->count('1') // make sure it is called exactly 1 time,
-    ->stub('my_return') // replace the return value by "my_return",
-    ->args(['value1', 'value2'], 3);  // and test its arguments are "value1" and "value2" on the third call
+        ->count('1') // make sure it is called exactly 1 time,
+        ->stub('my_return') // replace the return value by "my_return",
+        ->args(['value1', 'value2'], 3);  // and test its arguments are "value1" and "value2" on the third call
 
 ## Overwriting public properties
 Only public class properties can be manipulated. To modify the value of a public property, just set its value like this :
 
     {.language-php} // Set my_param to true
     $my_double->my_property = true;
+    
+## Spies
+
+Somethings you may wish to run your double code first and test it afterwards. That's what we call spy tests. For that, you only need to write your method's tests after your double code. 
+
+To make a spy test, you would write your test in that order :
+    
+    {.language-php} // Create class double
+    $double = Doublit::dummy_instance(MyClass::class);
+    
+    // Run method "myMethod"
+    $double->myMethod('arg1','arg2');
+    
+    // Test method
+    $double::_method('myMethod')
+        ->count(1)
+        ->args(['arg1', 'arg2']);
+        
+Instead of writing it in that order :
+    
+    {.language-php} // Create class double
+    $double = Doublit::dummy_instance(MyClass::class);
+    
+    // Test method
+    $double::_method('myMethod')
+        ->count(1)
+        ->args(['arg1', 'arg2']);
+    
+    // Run method "myMethod"
+    $double->myMethod('arg1','arg2');
+        
+
+> {.note.info} Info : It is no possible to change a method behaviour with spies.

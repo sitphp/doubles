@@ -65,7 +65,7 @@ class ConstraintTest extends TestCase
 
     public function testLogicalOr()
     {
-        $constraint = Constraints::logicalOr(Constraints::equalTo('3'), Constraints::greaterThan(4));
+        $constraint = Constraints::logicalOr(2,3);
         $this->assertInstanceOf(LogicalOr::class, $constraint);
     }
 
