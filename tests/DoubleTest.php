@@ -73,6 +73,11 @@ class DoubleTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         Doublit::instance('invalid_type', DoubleStandardClass::class);
     }
+    public function testClassDoubleOfFinalInternalClassShouldFail()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        Doublit::mock_instance(\Closure::class);
+    }
 
     /* -----
     Test named doubles

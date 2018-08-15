@@ -495,7 +495,7 @@ class Doublit
                 throw new InvalidArgumentException('Cannot make named doubles of type "alias"');
             }
             if (!$allow_non_existent_classes) {
-                throw new InvalidArgumentException('Class ' . $original . ' doesn\'t exist. Set the "allow_non_existent_classes" config parameter to allow creating non existent class doubles');
+                throw new InvalidArgumentException('Class ' . $original . ' doesn\'t exist. Set config parameter "allow_non_existent_classes" to "true" to allow creating non existent class doubles');
             }
 
             $class_parse = ClassManager::parseClass($original);
@@ -503,10 +503,15 @@ class Doublit
             $double_namespace = $class_parse['namespace'];
         } else if (class_exists($original)) {
             $reflection_class = ClassManager::getReflection($original);
-            if ($reflection_class->isFinal() && !$allow_final_doubles) {
-                throw new InvalidArgumentException('Class "' . $original . '" is marked final and cannot be doubled. Set config parameter "allow_asserting_final_methods" to "true" to allow doubles of final classes');
+            if ($reflection_class->isFinal()) {
+                if(!$allow_final_doubles){
+                    throw new InvalidArgumentException('Cannot make double of class "' . $original . '" because it is marked final. Set config parameter "allow_final_doubles" to "true" to allow doubles of final classes');
+                }
+                if($reflection_class->isInternal()){
+                    throw new InvalidArgumentException('Cannot make double of class "' . $original . '" because it is internal and marked final.');
+                }
             }
-            if ($allow_final_doubles && !$reflection_class->isInternal() && ClassManager::hasFinalCalls($original)) {
+            if (ClassManager::hasFinalCalls($original) && $allow_final_doubles && !$reflection_class->isInternal()) {
                 $new_class_name = self::generateDoublitClassName();
                 $new_class_code = ClassManager::getCode($original, ['clean_final' => true]);
                 $new_class_code = preg_replace('#namespace\s+' . str_replace('\\', '\\\\', $reflection_class->getNamespaceName()) . '\s*;#', '', $new_class_code);

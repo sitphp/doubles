@@ -29,10 +29,10 @@ You can also define configuration for a specific double using the 4th argument o
 ### Configuration list
 Here is a list of all available config parameters :
 
-- `allow_final_doubles` : Set this parameter to `false` to stop Doublit from trying to make doubles of final classes/methods. Read more [here](#dealing_with_final_classes).
-- `allow_protected_methods` : Set this parameter to `false` to disallow testing protected methods. Read more [here](#dealing_with_protected_methods).
-- `allow_non_existent_classes` : Set this parameter to `false` to disallow alias doubles of non existent classes. Read more [here](#dealing_with_non_existent_methods).
-- `test_unexpected_methods` : Set this parameter to `true` to automatically receive an assertion error whenever an unexpected method is called. Read more [here](#testing_unexpected_methods_automatically).
+- `allow_final_doubles` : Set this parameter to `false` to stop Doublit from trying to make doubles of final classes/methods. Read more [here](#dealing-with-final-classes).
+- `allow_protected_methods` : Set this parameter to `false` to disallow testing protected methods. Read more [here](#dealing-with-protected-methods).
+- `allow_non_existent_classes` : Set this parameter to `false` to disallow alias doubles of non existent classes. Read more [here](#dealing-with-non-existent-methods).
+- `test_unexpected_methods` : Set this parameter to `true` to automatically receive an assertion error whenever an unexpected method is called. Read more [here](#testing-unexpected-methods-automatically).
 
 ## Notes
 

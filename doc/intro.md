@@ -1,8 +1,8 @@
 # Introduction
 
 ## How doubles can help you with testing ?
-Imagine you have two classes `ClassToTest` and `Foo`. Class `ClassToTest` needs class `Foo` to work. We can say class `ClassToTest` is dependent on class `Foo`.
-When you start to test the methods of class `ClassToTest`, you don't want to be disturbed by class `Foo` which you can test separatly. So what you would do is create a `Double` class which would look like the `Foo` class but would behave has you desire for your for your test. You would then use this `Double` class instead of the `Foo` class inside your `ClassToTest` class. Then you could test class `ClassToTest` without worrying about if class `Foo` is doing what it is suppose to do or not. So with doublit, you would do something like this :
+Let's say you have two classes : `ClassToTest` and `Foo`. And say that you are using class `Foo` inside class `ClassToTest`. We could then say that class `ClassToTest` is dependent on class `Foo`.
+If you wanted to test the methods of class `ClassToTest`, you might not want to be disturbed by class `Foo` which you could test separatly. So what you would do is create a class `Double` which would have all the methods class `Foo` behaving the way you want for your test. You would then use this `Double` class instead of the `Foo` class inside your `ClassToTest` class. Then you could test class `ClassToTest` without worrying about if class `Foo` is doing what it is suppose to do or not. So with doublit, you would do something like this :
         
     {.language-php} /* Double of class "Foo" */
     $double = Doublit::dummy_instance(Foo::class);
