@@ -71,9 +71,9 @@ Use the 3rd parameter of the Doublit instance methods to declare the interfaces 
 > {.note.info} Note : Every double class will automatically implement the `Doublit\DoubleInterface` interface in case you need to identify a double instance.
 
 ## Naming the double class 
-For some reason, you may want to define yourself the name of your double class. For that, you have to prepend your original class name with the double class name you want to give followed by a ":" character :
+You can also define the double class name yourself. For that just type the given double class name and character ":" before your original class :
 
-    {.language-php} // Get a double instance named "MyDoubleClassName" for class "MyClass"
+    {.language-php} // Get a double instance of class "MyClass" with class name "MyDoubleClassName". 
     $my_dummy_double_class = Doublit::dummy_instance('MyDoubleClassName:'.MyClass::class);
 
 ## Non instantiated class double
