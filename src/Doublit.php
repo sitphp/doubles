@@ -373,14 +373,10 @@ class Doublit
                         }
                         if ($param->hasType()) {
                             $param_type = $param->getType();
-                            $method_code .= $param_type . ' ';
-                        } else {
-                            $param_class = $param->getClass();
-                            if($param_class !== null){
-                                $param_type = ClassManager::normalizeClass($param_class->getName());
-                                $method_code .= $param_type . ' ';
+                            if (!in_array($param_type, self::$type_hints)) {
+                                $param_type = ClassManager::normalizeClass($param->getClass()->getName());
                             }
-
+                            $method_code .= $param_type . ' ';
                         }
                         if ($param->isPassedByReference()) {
                             $reference_params[$key] = $param->getName();
@@ -392,7 +388,7 @@ class Doublit
                             $method_code .= '$' . $param->getName() . ' = ';
                             if ($param->isDefaultValueAvailable()) {
                                 $method_default_value = $param->getDefaultValue();
-                                $method_code .= $method_default_value === null ? 'null' : '"' . $method_default_value . '"';
+                                $method_code .= $method_default_value === null ? 'null' : '"' . str_replace('"', "'", $method_default_value) . '"';
                             } else {
                                 $method_code .= 'null';
                             }

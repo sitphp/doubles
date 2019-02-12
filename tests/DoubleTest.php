@@ -388,6 +388,14 @@ class DoubleStandardClass
     {
         return $a;
     }
+    public function optionalWithDoubleQuote($a = '"')
+    {
+        return $a;
+    }
+    public function optionalWithSingleQuote($a = "'")
+    {
+        return $a;
+    }
 
     public function returnType(): string
     {
