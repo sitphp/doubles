@@ -373,10 +373,14 @@ class Doublit
                         }
                         if ($param->hasType()) {
                             $param_type = $param->getType();
-                            if (!in_array($param_type, self::$type_hints)) {
-                                $param_type = ClassManager::normalizeClass($param->getClass()->getName());
-                            }
                             $method_code .= $param_type . ' ';
+                        } else {
+                            $param_class = $param->getClass();
+                            if($param_class !== null){
+                                $param_type = ClassManager::normalizeClass($param_class->getName());
+                                $method_code .= $param_type . ' ';
+                            }
+
                         }
                         if ($param->isPassedByReference()) {
                             $reference_params[$key] = $param->getName();
@@ -413,7 +417,7 @@ class Doublit
                         $is_static = false;
                     }
                 } else {
-                    throw new RuntimeException('Wrong method format');
+                    throw new RuntimeException('Invalid method format');
                 }
                 $method_code .= '{ $args = func_get_args(); ';
                 foreach ($reference_params as $key => $reference_param) {
