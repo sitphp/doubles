@@ -388,7 +388,7 @@ class Doublit
                             $method_code .= '$' . $param->getName() . ' = ';
                             if ($param->isDefaultValueAvailable()) {
                                 $method_default_value = $param->getDefaultValue();
-                                $method_code .= $method_default_value === null ? 'null' : '"' . str_replace('"', "'", $method_default_value) . '"';
+                                $method_code .= $method_default_value === null ? 'null' : '"' . addslashes( $method_default_value) . '"';
                             } else {
                                 $method_code .= 'null';
                             }

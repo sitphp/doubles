@@ -73,6 +73,7 @@ class DoubleTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         Doublit::instance('invalid_type', DoubleStandardClass::class);
     }
+
     public function testClassDoubleOfFinalInternalClassShouldFail()
     {
         $this->expectException(InvalidArgumentException::class);
@@ -136,10 +137,16 @@ class DoubleTest extends TestCase
         $this->assertEquals([1, 2, 3], $double->variadic(1, 2, 3));
     }
 
-    public function testClassDoubleMethodWithOptionaArgumentShouldImplementIt()
+    public function testClassDoubleMethodWithOptionalArgumentShouldImplementIt()
     {
         $double = Doublit::mock_instance(DoubleStandardClass::class);
         $this->assertEquals('optional', $double->optional());
+    }
+
+    public function testClassDoubleMethodWithOptionalSlashedArgumentsShouldBeCorrect()
+    {
+        $double = Doublit::mock_instance(DoubleStandardClass::class);
+        $this->assertEquals('\\', $double->optionalWithEscape());
     }
 
     public function testClassDoubleMethodWithTypeArgumentShouldImplementIt()
@@ -388,11 +395,18 @@ class DoubleStandardClass
     {
         return $a;
     }
+
     public function optionalWithDoubleQuote($a = '"')
     {
         return $a;
     }
+
     public function optionalWithSingleQuote($a = "'")
+    {
+        return $a;
+    }
+
+    public function optionalWithEscape($a = "\\")
     {
         return $a;
     }
