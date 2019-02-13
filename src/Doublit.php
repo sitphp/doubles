@@ -22,7 +22,7 @@ use \Doublit\Exceptions\RuntimeException;
 class Doublit
 {
 
-    protected static $type_hints = ['self', 'array', 'callable', 'boot', 'float', 'int', 'string', 'iterable'];
+    protected static $type_hints = ['self', 'array', 'callable', 'bool', 'float', 'int', 'string'];
     protected static $count = 0;
     protected static $config = [
         'allow_final_doubles' => true,
@@ -144,11 +144,9 @@ class Doublit
                 self::validate($key, $value);
             }
         }
-
         // Double definition
         $double_definition = self::resolveBaseDoubleDefinition($type, $class, $implements, $config);
         $double_definition = self::resolveMethodsToImplement($double_definition);
-
         // Load double
         $code = self::resolveDoubleCode($double_definition);
         EvalLoader::load($code);
@@ -306,6 +304,7 @@ class Doublit
      *
      * @param $double_definition
      * @return bool|mixed|string
+     * @throws \ReflectionException
      */
     protected static function resolveDoubleCode($double_definition)
     {
@@ -375,6 +374,8 @@ class Doublit
                             $param_type = $param->getType();
                             if (!in_array($param_type, self::$type_hints)) {
                                 $param_type = ClassManager::normalizeClass($param->getClass()->getName());
+                            } else if(isset($double_definition['extends']) && $param_type == 'self') {
+                                $param_type = $double_definition['extends'];
                             }
                             $method_code .= $param_type . ' ';
                         }
@@ -383,17 +384,27 @@ class Doublit
                             $method_code .= '&';
                         }
                         if ($param->isVariadic()) {
-                            $method_code .= '...$' . $param->getName();
-                        } else if ($param->isOptional()) {
-                            $method_code .= '$' . $param->getName() . ' = ';
-                            if ($param->isDefaultValueAvailable()) {
-                                $method_default_value = $param->getDefaultValue();
-                                $method_code .= $method_default_value === null ? 'null' : '"' . addslashes( $method_default_value) . '"';
-                            } else {
+                            $method_code .= '...';
+                        }
+                        $method_code .= '$'.$param->getName();
+                        if ($param->isDefaultValueAvailable()) {
+                            $method_code .=  ' = ';
+                            $method_default_value = $param->getDefaultValue();
+                            if($method_default_value === null){
                                 $method_code .= 'null';
+                            } else if(is_string($method_default_value)){
+                                $method_code .= '"' . addslashes( $method_default_value) . '"';
+                            } else if(is_bool($method_default_value)){
+                                $method_code .= $method_default_value ? 'true' : 'false';
+                            } else if(is_array($method_default_value)){
+                                $method_code .= self::arrayToString($method_default_value);
+                            } else if(is_numeric($method_default_value)) {
+                                $method_code .= $method_default_value;
+                            } else {
+                                $method_code .= var_export($method_default_value);
                             }
-                        } else {
-                            $method_code .= '$' . $param->getName();
+                        } else if($param->isOptional() && !$param->isVariadic()){
+                            $method_code .=  ' = null';
                         }
                     }
                     $method_code .= ')';
@@ -470,7 +481,6 @@ class Doublit
             $original = ClassManager::normalizeClass($class[0]);
         }
 
-
         if (is_string($implements)) {
             $implements = [$implements];
         }
@@ -514,36 +524,43 @@ class Doublit
             if (ClassManager::hasFinalCalls($original) && $allow_final_doubles && !$reflection_class->isInternal()) {
                 $new_class_name = self::generateDoublitClassName();
                 $new_class_code = ClassManager::getCode($original, ['clean_final' => true]);
-                $new_class_code = preg_replace('#namespace\s+' . str_replace('\\', '\\\\', $reflection_class->getNamespaceName()) . '\s*;#', '', $new_class_code);
+                /*$new_class_code = preg_replace('#namespace\s+' . str_replace('\\', '\\\\', $reflection_class->getNamespaceName()) . '\s*;#', '', $new_class_code);*/
                 $new_class_code = preg_replace('#class\s+' . $reflection_class->getShortName() . '\s*{#', 'class ' . $new_class_name . '{', $new_class_code);
                 EvalLoader::load($new_class_code);
-                $double_extends = $new_class_name;
+                $double_extends = '';
+                if($reflection_class->inNamespace()){
+                    $double_extends .= '\\'.$reflection_class->getNamespaceName().'\\';
+                }
+                $double_extends .= $new_class_name;
             } else {
                 $double_extends = $original;
             }
         } else if (trait_exists($original)) {
+            $double_extends = '';
             $reflection_class = ClassManager::getReflection($original);
+            $new_class_name = self::generateDoublitClassName($reflection_class->getName());
             if ($allow_final_doubles && !$reflection_class->isInternal() && ClassManager::hasFinalCalls($original)) {
-                $new_class_name = self::generateDoublitClassName($reflection_class->getName());
                 $new_class_code = ClassManager::getCode($original, ['clean_final' => true]);
-                $new_class_code = preg_replace('#namespace\s+' . str_replace('\\', '\\\\', $reflection_class->getNamespaceName()) . '\s*;#', '', $new_class_code);
+                /*$new_class_code = preg_replace('#namespace\s+' . str_replace('\\', '\\\\', $reflection_class->getNamespaceName()) . '\s*;#', '', $new_class_code);*/
                 $replacement = '';
                 if (ClassManager::hasAbstractCalls($original)) {
                     $replacement .= 'abstract ';
                 }
                 $replacement .= 'class '.$new_class_name . '{';
                 $new_class_code = preg_replace('#trait\s+' . $reflection_class->getShortName() . '\s*{#', $replacement, $new_class_code);
+                if($reflection_class->inNamespace()){
+                    $double_extends .= '\\'.$reflection_class->getNamespaceName().'\\';
+                }
+                $double_extends .= $new_class_name;
             } else {
-                $reflection_class = ClassManager::getReflection($original);
-                $new_class_name = self::generateDoublitClassName($reflection_class->getName());
                 $new_class_code = '<?php ';
                 if (ClassManager::hasAbstractCalls($original)) {
                     $new_class_code .= 'abstract ';
                 }
                 $new_class_code .= 'class ' . $new_class_name . ' { use ' . $original . '; }';
+                $double_extends .= $new_class_name;
             }
             EvalLoader::load($new_class_code);
-            $double_extends = $new_class_name;
         } else if (interface_exists($original)) {
             $double_interfaces[] = $original;
         } else {
@@ -662,6 +679,30 @@ class Doublit
     protected static function addInstance($label, $instance)
     {
         self::$instances[$label] = $instance;
+    }
+
+    protected static function arrayToString(array $array){
+        $first_run = true;
+        $string = '[';
+        foreach ($array as $key => $value){
+            if($first_run){
+                $first_run = false;
+            } else {
+                $string .= ', ';
+            }
+            if(is_int($key)){
+                $string .= $key;
+            } else {
+                $string .= '"'.addslashes($key).'"';
+            }
+            if(is_array($value)){
+                $string .= self::arrayToString($value);
+            } else {
+                $string .= ' => "'.addslashes($value).'"';
+            }
+        }
+        $string .= ']';
+        return $string;
     }
 
     /**

@@ -137,16 +137,16 @@ class DoubleTest extends TestCase
         $this->assertEquals([1, 2, 3], $double->variadic(1, 2, 3));
     }
 
-    public function testClassDoubleMethodWithOptionalArgumentShouldImplementIt()
+    public function testClassDoubleMethodWithDefaultArgumentShouldImplementIt()
     {
         $double = Doublit::mock_instance(DoubleStandardClass::class);
-        $this->assertEquals('optional', $double->optional());
+        $this->assertEquals(1, $double->defaultWithOptional());
     }
 
     public function testClassDoubleMethodWithOptionalSlashedArgumentsShouldBeCorrect()
     {
         $double = Doublit::mock_instance(DoubleStandardClass::class);
-        $this->assertEquals('\\', $double->optionalWithEscape());
+        $this->assertEquals('\\', $double->defaultWithEscape());
     }
 
     public function testClassDoubleMethodWithTypeArgumentShouldImplementIt()
@@ -381,7 +381,7 @@ class DoubleStandardClass
         return $a;
     }
 
-    public function reference(&$a)
+    public function reference(&$a = 1)
     {
         $a++;
     }
@@ -391,22 +391,44 @@ class DoubleStandardClass
         return $a;
     }
 
-    public function optional($a = 'optional')
+    public function defaultWithOptional($default = null, $a = 1, $optional = null)
     {
         return $a;
     }
 
-    public function optionalWithDoubleQuote($a = '"')
+    public function defaultWithStringType(string $a = 'optional'){
+        return $a;
+    }
+    public function defaultWithIntType(int $a = 0){
+        return $a;
+    }
+    public function defaultWithBoolType(bool $a = true){
+        return $a;
+    }
+    public function defaultWithArrayType(array $a = ['ar"ray1','array2']){
+        return $a;
+    }
+    public function defaultWithFloatType(float $a = 1.3){
+        return $a;
+    }
+    public function defaultWithSelfType(self $a){
+        return $a;
+    }
+    public function defaultWithCallableType(callable $a){
+        return $a;
+    }
+
+    public function defaultWithSingleQuote($a = "'")
     {
         return $a;
     }
 
-    public function optionalWithSingleQuote($a = "'")
+    public function defaultWithDoubleQuote($a = '"')
     {
         return $a;
     }
 
-    public function optionalWithEscape($a = "\\")
+    public function defaultWithEscape($a = "\\")
     {
         return $a;
     }

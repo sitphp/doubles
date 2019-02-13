@@ -13,8 +13,6 @@
 
 namespace Doublit\Lib;
 
-use Doublit\Exceptions\RuntimeException;
-
 class ClassManager
 {
     protected static $reflection_classes;
@@ -112,43 +110,31 @@ class ClassManager
      * @return bool|null|string|string[]
      * @throws \ReflectionException
      */
+
     public static function getCode($class, $options = null)
     {
         $reflection_class = self::getReflection($class);
         $class_path = $reflection_class->getFileName();
         $class_code = file_get_contents($class_path);
 
-        // Clean other classes
-        preg_match_all('#^(?:final\s+)?(?:abstract\s+)?(?:class|interface|trait)(?:(?!\s+' . $reflection_class->getShortName() . '))\s+[a-zA-Z\d_\s]*{$#sm', $class_code, $matches, PREG_OFFSET_CAPTURE);
-        if (!empty($matches)) {
-            $classes_to_remove = [];
-            foreach ($matches[0] as $match) {
-                $beginning = false;
-                $brace_count = 0;
+        preg_match_all('#^(?:final\s+)?(?:abstract\s+)?(?:class|interface|trait)\s+([a-zA-Z\d_]+)\s*.*?{$#sm', $class_code, $matches, PREG_OFFSET_CAPTURE);
+
+        $classes_to_remove = [];
+        foreach ($matches[0] as $i => $match) {
+            if($matches[1][$i][0] === $reflection_class->getShortName()){
+                continue;
+            }
+            if(isset($matches[0][$i+1])){
                 $offset_start = $match[1];
-                $offset_end = $offset_start;
-                $count_braces = true;
-                while ($beginning === false || $brace_count != 0) {
-                    $offset_end++;
-                    if ($beginning === false && $class_code[$offset_end] == '}') {
-                        throw new RuntimeException('Class "' . $class . '" code could not be extracted : wrong pattern');
-                    }
-                    if ($class_code[$offset_end] == '"' || $class_code[$offset_end] == "'") {
-                        $count_braces = $count_braces ? false : true;
-                    }
-                    if ($class_code[$offset_end] == '{' && $count_braces) {
-                        $beginning = true;
-                        $brace_count++;
-                    } else if ($class_code[$offset_end] == '}' && $count_braces) {
-                        $brace_count--;
-                    }
-                }
-                $offset_end++;
+                $offset_end = $matches[0][$i+1][1];
                 $classes_to_remove[] = substr($class_code, $offset_start, $offset_end - $offset_start);
+            } else {
+                $offset_start = $match[1];
+                $classes_to_remove[] = substr($class_code, $offset_start);
             }
-            foreach ($classes_to_remove as $class_to_remove) {
-                $class_code = str_replace($class_to_remove, '', $class_code);
-            }
+        }
+        foreach ($classes_to_remove as $class_to_remove) {
+            $class_code = str_replace($class_to_remove, '', $class_code);
         }
 
         // Clean final calls
@@ -159,7 +145,7 @@ class ClassManager
             foreach ($reflection_class->getMethods() as $reflection_method) {
                 if ($reflection_method->isFinal()) {
                     if ($reflection_method->isStatic()) {
-                        $class_code = preg_replace('#final\s+(public|protected|private)\s+static\s+function\s+' . $reflection_method->getName() . '#', '$1 static function ' . $reflection_method->getName(), $class_code);
+                        $class_code = preg_replace('#final\s+(?:(public|protected|private)\s+)?static\s+function\s+' . $reflection_method->getName() . '#', '$1 static function ' . $reflection_method->getName(), $class_code);
                     } else {
                         $class_code = preg_replace('#final\s+(?:(public|protected|private)\s+)?function\s+' . $reflection_method->getName() . '#', '$1 function ' . $reflection_method->getName(), $class_code);
                     }
