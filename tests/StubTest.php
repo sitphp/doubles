@@ -20,6 +20,7 @@ use \Doublit\TestCase;
 
 class StubTest extends TestCase
 {
+
     /* -----
     Test returnValue
     ---- */

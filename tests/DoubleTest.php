@@ -314,6 +314,17 @@ class DoubleTest extends TestCase
     /* -----
     Test class with constructor
     ---- */
+    public function testClassWithConstructorMockDoubleShouldExecuteOriginalConstructor()
+    {
+        $double = Doublit::mock_instance(ClassWithConstructor::class, ['bar']);
+        $this->assertEquals('bar', $double->foo);
+    }
+    public function testClassWithoutConstructorMockDoubleShouldNotExecuteOriginalConstructor()
+    {
+        $double = Doublit::mock_instance(ClassWithConstructor::class);
+        $this->assertEquals('foo', $double->foo);
+    }
+
     public function testClassWithConstructorDummyDoubleShouldNotExecuteOriginalConstructor()
     {
         $double = Doublit::dummy_instance(ClassWithConstructor::class);
@@ -333,9 +344,9 @@ class DoubleTest extends TestCase
         } else {
             $this->expectException(\ArgumentCountError::class);
         }
-        $double_class = Doublit::mock_name(ClassWithConstructor::class);
-        $double = new $double_class();
+        Doublit::mock_instance(ClassWithConstructor::class, []);
     }
+
 
     /* -----
     Test class with implements
@@ -356,6 +367,7 @@ class DoubleTest extends TestCase
 
 class DoubleStandardClass
 {
+
     public function foo()
     {
         return 'foo';
@@ -396,25 +408,38 @@ class DoubleStandardClass
         return $a;
     }
 
-    public function defaultWithStringType(string $a = 'optional'){
+    public function defaultWithStringType(string $a = 'optional')
+    {
         return $a;
     }
-    public function defaultWithIntType(int $a = 0){
+
+    public function defaultWithIntType(int $a = 0)
+    {
         return $a;
     }
-    public function defaultWithBoolType(bool $a = true){
+
+    public function defaultWithBoolType(bool $a = true)
+    {
         return $a;
     }
-    public function defaultWithArrayType(array $a = ['ar"ray1','array2']){
+
+    public function defaultWithArrayType(array $a = ['ar"ray1', 'array2'])
+    {
         return $a;
     }
-    public function defaultWithFloatType(float $a = 1.3){
+
+    public function defaultWithFloatType(float $a = 1.3)
+    {
         return $a;
     }
-    public function defaultWithSelfType(self $a){
+
+    public function defaultWithSelfType(self $a)
+    {
         return $a;
     }
-    public function defaultWithCallableType(callable $a){
+
+    public function defaultWithCallableType(callable $a)
+    {
         return $a;
     }
 

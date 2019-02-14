@@ -311,7 +311,7 @@ class Doublit
         /* @var $method \ReflectionMethod */
 
         if (class_exists($double_definition['class_name'], false)) {
-            throw new InvalidArgumentException('Cannot make double with name "' . $double_definition['short_name'] . '" : class name already taken');
+            throw new InvalidArgumentException('Cannot make double with name "' . $double_definition['class_name'] . '" : class name already taken');
         }
         $code = file_get_contents(__DIR__ . '/Lib/DoubleStub.stub');
         if (isset($double_definition['namespace'])) {
@@ -524,7 +524,6 @@ class Doublit
             if (ClassManager::hasFinalCalls($original) && $allow_final_doubles && !$reflection_class->isInternal()) {
                 $new_class_name = self::generateDoublitClassName();
                 $new_class_code = ClassManager::getCode($original, ['clean_final' => true]);
-                /*$new_class_code = preg_replace('#namespace\s+' . str_replace('\\', '\\\\', $reflection_class->getNamespaceName()) . '\s*;#', '', $new_class_code);*/
                 $new_class_code = preg_replace('#class\s+' . $reflection_class->getShortName() . '\s*{#', 'class ' . $new_class_name . '{', $new_class_code);
                 EvalLoader::load($new_class_code);
                 $double_extends = '';
@@ -541,7 +540,6 @@ class Doublit
             $new_class_name = self::generateDoublitClassName($reflection_class->getName());
             if ($allow_final_doubles && !$reflection_class->isInternal() && ClassManager::hasFinalCalls($original)) {
                 $new_class_code = ClassManager::getCode($original, ['clean_final' => true]);
-                /*$new_class_code = preg_replace('#namespace\s+' . str_replace('\\', '\\\\', $reflection_class->getNamespaceName()) . '\s*;#', '', $new_class_code);*/
                 $replacement = '';
                 if (ClassManager::hasAbstractCalls($original)) {
                     $replacement .= 'abstract ';
