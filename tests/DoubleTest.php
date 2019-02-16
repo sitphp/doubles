@@ -13,6 +13,7 @@
 
 namespace Tests;
 
+use Doublit\Lib\ClassManager;
 use \Doublit\TestCase;
 use \Doublit\Lib\DoubleInterface;
 use \Doublit\Doublit;
@@ -40,44 +41,42 @@ class DoubleTest extends TestCase
     ---- */
     public function testClassDoubleShouldImplementDoubleInterface()
     {
-        $double = Doublit::mock_instance(DoubleStandardClass::class);
+        $double = Doublit::build(DoubleStandardClass::class)->getDummyInstance();
         $this->assertInstanceOf(DoubleInterface::class, $double);
     }
 
     public function testNamedClassDoubleShouldBeInstanceOfNamedClass()
     {
-        $double = Doublit::mock_instance('MyClass:' . DoubleStandardClass::class);
+        $double = Doublit::build(DoubleStandardClass::class)
+            ->name('MyClass')
+            ->getDummyInstance();
         $this->assertInstanceOf('MyClass', $double);
     }
 
     public function testNamespaceNamedClassDoubleShouldBeInstanceOfNamedClass()
     {
-        $double = Doublit::mock_instance('MyNamespacePart1\MyNamespacePart2\MyClass:' . DoubleStandardClass::class);
+        $double = Doublit::build(DoubleStandardClass::class)
+            ->name('MyNamespacePart1\MyNamespacePart2\MyClass')
+            ->getDummyInstance();
         $this->assertInstanceOf('MyNamespacePart1\MyNamespacePart2\MyClass', $double);
     }
 
     public function testInternalClassDoubleShouldImplementItself()
     {
-        $double = Doublit::dummy_instance(\ReflectionClass::class);
-        $this->assertInstanceOf(\ReflectionClass::class, $double);
+        $double = Doublit::build(\DatePeriod::class)->getDummyInstance();
+        $this->assertInstanceOf(\DatePeriod::class, $double);
     }
 
     public function testNonExistentClassDoubleShouldFail()
     {
         $this->expectException(InvalidArgumentException::class);
-        Doublit::mock_instance('SomeNonExistentClass');
-    }
-
-    public function testClassDoubleWithInvalidTypeShouldFail()
-    {
-        $this->expectException(InvalidArgumentException::class);
-        Doublit::instance('invalid_type', DoubleStandardClass::class);
+        Doublit::build('SomeNonExistentClass')->getDummyInstance();
     }
 
     public function testClassDoubleOfFinalInternalClassShouldFail()
     {
         $this->expectException(InvalidArgumentException::class);
-        Doublit::mock_instance(\Closure::class);
+        Doublit::build(\Closure::class)->getDummyInstance();
     }
 
     /* -----
@@ -85,7 +84,7 @@ class DoubleTest extends TestCase
     ---- */
     public function testNamedClassWithShouldImplementOriginalMethods()
     {
-        $double = Doublit::mock_instance('MyNamedClass:' . DoubleStandardClass::class);
+        $double = Doublit::build(DoubleStandardClass::class)->name('MyNamedClass');
         $this->assertEquals('foo', $double->foo());
     }
 
@@ -314,7 +313,18 @@ class DoubleTest extends TestCase
     /* -----
     Test class with constructor
     ---- */
-    public function testClassWithConstructorDummyDoubleShouldNotExecuteOriginalConstructor()
+    public function testClassWithConstructorMockDoubleShouldExecuteOriginalConstructor()
+    {
+        $double = Doublit::mock_instance(ClassWithConstructor::class, ['bar']);
+        $this->assertEquals('bar', $double->foo);
+    }
+    public function testClassWithoutConstructorMockDoubleShouldNotExecuteOriginalConstructor()
+    {
+        $double = Doublit::mock_instance(ClassWithConstructor::class);
+        $this->assertEquals('foo', $double->foo);
+    }
+
+        public function testClassWithConstructorDummyDoubleShouldNotExecuteOriginalConstructor()
     {
         $double = Doublit::dummy_instance(ClassWithConstructor::class);
         $this->assertEquals('foo', $double->foo);
@@ -333,8 +343,7 @@ class DoubleTest extends TestCase
         } else {
             $this->expectException(\ArgumentCountError::class);
         }
-        $double_class = Doublit::mock_name(ClassWithConstructor::class);
-        $double = new $double_class();
+        Doublit::mock_instance(ClassWithConstructor::class, []);
     }
 
     /* -----

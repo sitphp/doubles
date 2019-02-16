@@ -24,6 +24,7 @@ class EvalLoader
      */
     public static function load($code)
     {
+        echo $code;
         eval('?>' . $code);
     }
 }

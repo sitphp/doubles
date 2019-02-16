@@ -25,7 +25,7 @@ class ReturnSelfStub implements StubInterface
         } else if (isset($call['class'])) {
             return $call['class'];
         } else {
-            throw new RuntimeException('Call instance and class not found');
+            throw new RuntimeException('Call instance/class not found');
         }
     }
 }

@@ -65,6 +65,12 @@ class AssertionTest extends TestCase
         $expectations = $double::_method(['foo', 'bar']);
         $this->assertInstanceOf(ExpectationCollection::class, $expectations);
     }
+    public function testAssertingInternalMethodsShouldNotBeAllowed()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $double = Doublit::dummy_instance(DoubleStandardClass::class);
+        $double::_method('_doublit_close');
+    }
 
     /* -----
     Test count

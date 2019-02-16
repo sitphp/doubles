@@ -20,6 +20,9 @@ use \Doublit\TestCase;
 
 class StubTest extends TestCase
 {
+
+
+
     /* -----
     Test returnValue
     ---- */
@@ -139,6 +142,11 @@ class StubTest extends TestCase
 
 class StubStandardClass
 {
+    function __construct()
+    {
+
+    }
+
     public function foo()
     {
         return 'foo';
