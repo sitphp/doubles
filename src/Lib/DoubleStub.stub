@@ -14,10 +14,8 @@
 namespace Doublit\Lib;
 
 use \Doublit\Constraints;
-use \Doublit\Doublit;
 use \Doublit\Lib\Expectation;
-use \Doublit\Lib\ClassManager;
-use Doublit\Stubs\StubInterface;
+use \Doublit\Stubs\StubInterface;
 use \PHPUnit\Framework\Assert;
 use \Doublit\Lib\ExpectationCollection;
 use \Doublit\Exceptions\RuntimeException;
@@ -27,14 +25,13 @@ use \Doublit\Exceptions\InvalidArgumentException;
 class DoubleStub
 {
 
-    protected static $_doublit_initialized = false;
-    protected static $_doublit_constructed = false;
-    protected static $_doublit_closed = false;
-
-    protected static $_doublit_expectations = [];
-    protected static $_doublit_calls = [];
-    protected static $_doublit_config = [];
-    protected static $_doublit_reference;
+    private static $_doublit_initialized = false;
+    private static $_doublit_closed = false;
+    private static $type;
+    private static $_doublit_expectations = [];
+    private static $_doublit_calls = [];
+    private static $_doublit_config = [];
+    private static $_doublit_reference;
     protected static $_doublit_blacklisted_methods = [
         '_doublit_initialize',
         '_doublit_setConfig',
@@ -54,19 +51,20 @@ class DoubleStub
     /**
      * Initialize with config
      *
+     * @param string $type
      * @param array|null $_doublit_config
      */
-    public static function _doublit_initialize(array $_doublit_config = null)
+    static function _doublit_initialize(string $type, array $_doublit_config = null)
     {
         if (self::$_doublit_initialized) {
             return;
         }
+        self::_doublit_setType($type);
         if (isset($_doublit_config)) {
             foreach ($_doublit_config as $key => $value) {
                 self::_doublit_setConfig($key, $value);
             }
         }
-
         if (isset($_doublit_config['reference'])) {
             self::$_doublit_reference = $_doublit_config['reference'];
         }
@@ -110,6 +108,30 @@ class DoubleStub
     }
 
     /**
+     * Set double type (mock, dummy or alias)
+     *
+     * @param string $type
+     * @return string
+     */
+    protected static function _doublit_setType(string $type)
+    {
+        if (!in_array($type, ['mock', 'dummy', 'alias'])) {
+            throw new InvalidArgumentException('Invalid doublit type : expected "mock", "dummy" or "alias"');
+        }
+        self::$type = $type;
+    }
+
+    /**
+     * Return double type
+     *
+     * @return string
+     */
+    protected static function _doublit_getType()
+    {
+        return self::$type;
+    }
+
+    /**
      * Check if method can be asserted and return method expectation
      *
      * @param $method
@@ -126,8 +148,10 @@ class DoubleStub
             }
             return $expectation_collection;
         }
-        if(in_array($method, self::$_doublit_blacklisted_methods)){
-            throw new InvalidArgumentException('Method "'.$method.'" belongs to the Doublit library and cannot be asserted');
+
+
+        if (in_array($method, self::$_doublit_blacklisted_methods)) {
+            throw new InvalidArgumentException('Method "' . $method . '" belongs to the Doublit library and cannot be asserted');
         }
         $expectation = self::_doublit_getExpectation($method);
         return $expectation;
@@ -155,9 +179,9 @@ class DoubleStub
         $type = $type_params[0];
         switch ($type) {
             case 'dummy':
-                if ($method == '__construct' && null !== $_doublit_reference = self::_doublit_getReference()) {
+                if($method == '__construct' && null !== $_doublit_reference = self::_doublit_getReference()){
                     $_doublit_reference_reflexion = new \ReflectionClass($_doublit_reference);
-                    self::$_doublit_getReference = $_doublit_reference_reflexion->newInstanceWithoutConstructor();
+                    self::$_doublit_reference_instance = $_doublit_reference_reflexion->newInstanceWithoutConstructor();
                 } else {
                     $return = null;
                 }
@@ -168,8 +192,8 @@ class DoubleStub
                 $return = $stub->invoke([
                     'args' => $args,
                     'method' => $method,
-                    'class' => ClassManager::normalizeClass(__CLASS__),
-                    'instance' => Doublit::getInstance('\\' . __CLASS__)
+                    'class' => __CLASS__,
+                    'instance' => $this
                 ]);
                 break;
             case 'mock':
@@ -199,6 +223,7 @@ class DoubleStub
      * @param $method
      * @param mixed ...$args
      * @return null
+     * @throws \ReflectionException
      */
     protected static function _doublit_handleStaticCall($method, $args)
     {
@@ -222,8 +247,7 @@ class DoubleStub
                 $return = $stub->invoke([
                     'args' => $args,
                     'method' => $method,
-                    'class' => ClassManager::normalizeClass(__CLASS__),
-                    'instance' => Doublit::getInstance('\\' . __CLASS__)
+                    'class' => __CLASS__
                 ]);
                 break;
             case 'mock':
@@ -248,16 +272,23 @@ class DoubleStub
      * Return given method expectation
      *
      * @param $method
-     * @return Expectation
-     * @throws \ReflectionException
+     * @return Expectation | array
      */
-    protected static function _doublit_getExpectation($method)
+    protected static function _doublit_getExpectation($method = null)
     {
-        if(isset(self::$_doublit_expectations[$method])){
+        if (!isset($method)) {
+            return self::$_doublit_expectations;
+        }
+        if (isset(self::$_doublit_expectations[$method])) {
             return self::$_doublit_expectations[$method];
         }
+        return self::$_doublit_expectations[$method] = self::_doublit_resolveExpectation($method);
+    }
+
+    protected static function _doublit_resolveExpectation($method)
+    {
         if (!method_exists(__CLASS__, $method)) {
-            throw new InvalidArgumentException('Method "' . $method . '" cannot be tested because it doesn\'t exist. You can add custom methods when creating your double using the notation "MyClass[customMethod, otherCustomMethod]"');
+            throw new InvalidArgumentException('Method "' . $method . '" cannot be tested because it doesn\'t exist. You can add custom methods with the "setMethod" method"');
         }
         $reflection = new \ReflectionMethod(__CLASS__, $method);
         if ($reflection->isPrivate()) {
@@ -265,7 +296,7 @@ class DoubleStub
         }
         if (!self::_doublit_getConfig('allow_protected_methods')) {
             if ($reflection->isProtected()) {
-                throw new InvalidArgumentException('Method ' . __CLASS__ . '::' . $method . '() cannot be tested because it is protected. Set config parameter "allow_protected_methods" to "true" to allow testing protected methods');
+                throw new InvalidArgumentException('Method ' . __CLASS__ . '::' . $method . '() cannot be tested because it is protected. Set config parameter "allow_protected_methods" to "true" or use the "allowProtectedMethods" method to allow testing protected methods');
             }
         }
         return self::$_doublit_expectations[$method] = new Expectation($method);
@@ -288,14 +319,15 @@ class DoubleStub
      * @param $method
      * @param $call_count
      * @return array
+     * @throws \ReflectionException
      */
-    protected static function _doublit_getMethodTypeParams($method, $call_count)
+    static function _doublit_getMethodTypeParams($method, $call_count)
     {
         if (self::_doublit_hasExpectation($method)) {
             $expectation = self::_doublit_getExpectation($method);
-            $type = $expectation->getType($call_count) ?: [self::_doublit_getConfig('type')];
+            $type = $expectation->getType($call_count) ?: [self::_doublit_getType()];
         } else {
-            $type = [self::_doublit_getConfig('type')];
+            $type = [self::_doublit_getType()];
         }
         return $type;
     }
@@ -317,7 +349,7 @@ class DoubleStub
     {
 
         // Check asserted methods
-        foreach (self::$_doublit_expectations as $method => $expectation) {
+        foreach (self::_doublit_getExpectation() as $method => $expectation) {
             $call_count = isset(self::$_doublit_calls[$method]) ? count(self::$_doublit_calls[$method]) : 0;
             $assert_count = $expectation->getCount();
             if ($assert_count === null) {
@@ -348,7 +380,7 @@ class DoubleStub
                     Assert::assertLessThanOrEqual($limits[1], $call_count, 'Method "' . $method . '" was called ' . $call_count . ' times when excepted ' . $limits[1] . ' or less times');
                 }
             } else {
-                throw new RuntimeException('Unexpected count value'.$assert_count);
+                throw new RuntimeException('Unexpected count value' . $assert_count);
             }
         }
         // Assert non-asserted methods
@@ -369,7 +401,7 @@ class DoubleStub
      */
     protected static function _doublit_assertMethodArgs()
     {
-        foreach (self::$_doublit_expectations as $method => $expectation) {
+        foreach (self::_doublit_getExpectation() as $method => $expectation) {
             if (!isset(self::$_doublit_calls[$method])) {
                 continue;
             }
@@ -407,7 +439,7 @@ class DoubleStub
      */
     public static function _doublit_close()
     {
-        if(self::$_doublit_closed){
+        if (self::$_doublit_closed) {
             return false;
         }
         self::_doublit_assertMethodCount();

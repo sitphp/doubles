@@ -13,7 +13,8 @@
 
 namespace Doublit;
 
-use Doublit\Lib\DoubleStub;
+use \Doublit\Exceptions\LogicException;
+use \Doublit\Lib\DoubleStub;
 use \Doublit\Lib\EvalLoader;
 use \Doublit\Lib\ClassManager;
 use \Doublit\Exceptions\InvalidArgumentException;
@@ -24,11 +25,11 @@ class Doublit
 
     protected static $type_hints = ['self', 'array', 'callable', 'bool', 'float', 'int', 'string'];
     protected static $count = 0;
-    protected static $config = [
-        'allow_final_doubles' => true,
-        'allow_non_existent_classes' => true,
-        'allow_protected_methods' => false,
-        'test_unexpected_methods' => false,
+    protected static $config_mapping = [
+        'allow_final_doubles' => 'allowFinalDoubles',
+        'allow_non_existent_classes' => 'allowNonExistentClasses',
+        'allow_protected_methods' => 'allowProtectedMethods',
+        'test_unexpected_methods' => 'testUnexpectedMethods',
     ];
     protected static $reflection_classes = [];
     protected static $doubles = [];
@@ -37,281 +38,670 @@ class Doublit
         'class_manager' => ClassManager::class
     ];
 
+    protected $original;
+    protected $interfaces = [];
+    protected $traits = [];
+    protected $methods = [];
+    protected $class_name;
+    protected $allow_final_doubles = true;
+    protected $test_unexpected_methods = false;
+    protected $allow_protected_methods = false;
+    protected $allow_non_existent_classes = true;
+    protected $type;
+    protected $class_type = 'class';
+
     /**
-     * Set config
+     * Set config mapping
      *
-     * @param $label
-     * @param null $value
+     * @param string $config_label
+     * @param string $method
      */
-    public static function config($label, $value = null)
+    static function setConfigMapping(string $config_label, string $method)
     {
-        if ($value === null) {
-            if (!is_array($label)) {
-                throw new InvalidArgumentException('Invalid "label" argument : should be an array when "value" is null');
-            }
-            foreach ($label as $key => $value) {
-                self::config($key, $value);
-                return;
-            }
+        if (!method_exists(static::class, $method)) {
+            throw new InvalidArgumentException('Invalid "' . $config_label . '" config mapping : method "' . $method . '" doesnt exist');
         }
-        if (!is_string($label)) {
-            throw new InvalidArgumentException('Invalid "label" argument : should be a string');
-        }
-        self::validate($label, $value);
-        self::$config[$label] = $value;
+        self::$config_mapping[$config_label] = $method;
     }
 
     /**
-     * Get config
+     * Build dummy type double
      *
-     * @param string|null $label
-     * @return array|mixed|null
+     * @param string $class
+     * @param array|null $config
+     * @return Doublit
      */
-    protected static function getConfig($label = null)
+    static function dummy(string $class, array $config = null)
     {
-        if (isset($label) && !is_string($label)) {
-            throw new InvalidArgumentException('Invalid "label" argument : should be a string');
-        }
-        if (!isset($label)) {
-            return self::$config;
-        }
-        $config_parts = explode('.', $label);
-        $config = &self::$config;
-        foreach ($config_parts as $config_part) {
-            if (!isset($config[$config_part])) {
-                return null;
-            }
-            $config = &$config[$config_part];
-        }
-        return $config;
+        return new self('dummy', $class, $config);
     }
 
     /**
-     * Validate config value
+     * Build mock type double
      *
-     * @param $label
-     * @param $value
+     * @param string $class
+     * @param array|null $config
+     * @return Doublit
      */
-    protected static function validate($label, $value)
+    static function mock(string $class, array $config = null)
     {
-        switch ($label) {
-            case 'type':
-                if (!in_array($value, ['dummy', 'mock', 'alias'])) {
-                    throw new InvalidArgumentException('Invalid config value for label "' . $label . '".');
-                }
-                break;
-            case 'class':
-                if (!is_string($value)) {
-                    throw new InvalidArgumentException('Invalid "class" argument : should be a string.');
-                }
-                break;
-            case 'implements':
-                if ($value !== null && !is_string($value) && !is_array($value)) {
-                    throw new InvalidArgumentException('Invalid config value for "' . $label . '"": should be null, array or string.');
-                }
-                break;
-            case 'allow_final_doubles':
-            case 'test_unexpected_methods':
-            case 'allow_protected_methods':
-            case 'allow_non_existent_classes':
-                if (!is_bool($value)) {
-                    throw new InvalidArgumentException('Invalid config value for "' . $label . '" : should be a boolean.');
-                }
-                break;
+        return new self('mock', $class, $config);
+    }
 
-            default:
-                throw new InvalidArgumentException('Invalid config key "' . $label);
+    /**
+     * Build alias type double
+     *
+     * @param string $class
+     * @param array|null $config
+     * @return Doublit
+     */
+    static function alias(string $class, array $config = null)
+    {
+        return new self('alias', $class, $config);
+    }
+
+    /**
+     * Doublit constructor
+     *
+     * @param string $type
+     * @param string $class
+     * @param array|null $config
+     */
+    function __construct(string $type, string $class, array $config = null)
+    {
+        $this->setType($type);
+        $this->setOriginal($class);
+        $this->addInterface(Lib\DoubleInterface::class);
+
+        if (isset($config)) {
+            $this->setConfig($config);
+        }
+    }
+
+    /**
+     * Set config values
+     *
+     * @param array $config
+     * @return $this
+     */
+    function setConfig(array $config)
+    {
+        foreach ($config as $key => $value) {
+            $config_method = self::$config_mapping[$key] ??  null;
+            if ($config_method === null) {
+                throw new InvalidArgumentException('Invalid config "' . $key . '"');
+            }
+            $this->$config_method($value);
+        }
+        return $this;
+    }
+
+    /**
+     * Set original class
+     *
+     * @param $original
+     */
+    protected function setOriginal($original){
+        $this->original = ClassManager::normalizeClass($original);
+    }
+
+    /**
+     * Get original class
+     *
+     * @return mixed
+     */
+    protected function getOriginal(){
+        return $this->original;
+    }
+
+    /**
+     * Set double type
+     *
+     * @param $type
+     */
+    protected function setType($type)
+    {
+        if (!in_array($type, ['alias', 'mock', 'dummy'])) {
+            throw new \RuntimeException('Invalid argument type : expected "mock", "dummy" or "alias", found "' . $this->type . '"');
+        }
+        $this->type = $type;
+    }
+
+
+    /**
+     * Get double type
+     *
+     * @return mixed
+     */
+    protected function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * Add interfaces to implement
+     *
+     * @param $interface
+     * @return $this
+     */
+    function addInterface($interface)
+    {
+        if (is_string($interface)) {
+            $this->interfaces[] = $this->normalizeInterface($interface);
+        } else if (is_array($interface)) {
+            foreach ($interface as $item) {
+                $this->interfaces[] = $this->normalizeInterface($item);
+            }
+        } else {
+            throw new \InvalidArgumentException('Invalid $interface argument type : expected string or array');
+        }
+        return $this;
+    }
+
+    /**
+     * Return implemented interface
+     *
+     * @return array
+     */
+    function getInterfaces()
+    {
+        return $this->interfaces;
+    }
+
+    /**
+     * Normalize interface
+     *
+     * @param string $interface
+     * @return string
+     */
+    protected function normalizeInterface(string $interface)
+    {
+        if (!interface_exists($interface)) {
+            throw new \InvalidArgumentException('Invalid trait "' . $interface . '"');
+        }
+        return ClassManager::normalizeClass($interface);
+    }
+
+    /**
+     * Add trait to implement
+     *
+     * @param $trait
+     * @return $this
+     */
+    function addTrait($trait)
+    {
+        if (is_string($trait)) {
+            $this->traits[] = $this->normalizeTrait($trait);
+        } else if (is_array($trait)) {
+            foreach ($trait as $item) {
+                $this->traits[] = $this->normalizeTrait($item);
+            }
+        } else {
+            throw new \InvalidArgumentException('Invalid $interface argument type : expected string or array');
+        }
+        return $this;
+    }
+
+    /**
+     * Get implemented trait
+     *
+     * @return array
+     */
+    function getTraits()
+    {
+        return $this->traits;
+    }
+
+    /**
+     * Normalize trait
+     *
+     * @param $trait
+     * @return string
+     */
+    protected function normalizeTrait($trait)
+    {
+        if (!trait_exists($trait)) {
+            throw new \InvalidArgumentException('Invalid trait "' . $trait . '"');
+        }
+        return ClassManager::normalizeClass($trait);
+    }
+
+    /**
+     * Add method(s) to implement
+     *
+     * @param $method
+     * @return $this
+     */
+    function addMethod($method)
+    {
+        if (is_string($method)) {
+            $this->methods[] = $this->normalizeMethod($method);
+        } else if (is_array($method)) {
+            foreach ($method as $item) {
+                $this->methods[] = $this->normalizeMethod($item);
+            }
+        } else {
+            throw new \InvalidArgumentException('Invalid $method argument type : expected string or array');
+        }
+        return $this;
+    }
+
+    /**
+     * Get implemented methods
+     *
+     * @return array
+     */
+    function getMethods()
+    {
+        return $this->methods;
+    }
+
+
+    /**
+     * Normalize method
+     *
+     * @param string $method
+     * @return string
+     */
+    protected function normalizeMethod(string $method)
+    {
+        return trim($method);
+    }
+
+    function setAliasClassType(string $type = 'class')
+    {
+        if ($this->getType() != 'alias') {
+            throw new LogicException('Alias class type can only be set for alias doubles');
+        }
+        $this->class_type = $type;
+    }
+
+    function getClassType()
+    {
+        return $this->class_type;
+    }
+
+    /**
+     * Set double name
+     *
+     * @param string $class_name
+     * @return $this
+     */
+    function setName(string $class_name)
+    {
+        $this->class_name = $class_name;
+        return $this;
+    }
+
+    /**
+     * Get defined double
+     *
+     * @return mixed
+     */
+    function getName(){
+        return $this->class_name;
+    }
+
+    /**
+     * Set allow_final_doubles config param
+     *
+     * @param bool $bool
+     * @return $this
+     */
+    function allowFinalDoubles(bool $bool)
+    {
+        $this->allow_final_doubles = $bool;
+        return $this;
+    }
+
+    /**
+     * Set test_unexpected_methods config param
+     *
+     * @param bool $bool
+     * @return $this
+     */
+    function testUnexpectedMethods(bool $bool)
+    {
+        $this->test_unexpected_methods = $bool;
+        return $this;
+    }
+
+    /**
+     * Set allow_protected_methods config param
+     *
+     * @param bool $bool
+     * @return $this
+     */
+    function allowProtectedMethods(bool $bool)
+    {
+        $this->allow_protected_methods = $bool;
+        return $this;
+    }
+
+    /**
+     * Set allow_non allow_non_existent_classes config param
+     *
+     * @param bool $bool
+     * @return $this
+     */
+    function allowNonExistentClasses(bool $bool)
+    {
+        $this->allow_non_existent_classes = $bool;
+        return $this;
+    }
+
+    /**
+     * Return double class
+     *
+     * @return DoubleStub
+     * @throws \ReflectionException
+     */
+    function getClass()
+    {
+        $double_definition = $this->resolveDoubleDefinition();
+        return $this->makeDouble($double_definition);
+    }
+
+    /**
+     * Return instance of double
+     *
+     * @param array|null $construct_params
+     * @return DoubleStub
+     * @throws \ReflectionException
+     */
+    function getInstance(array $construct_params = null)
+    {
+        $double_definition = $this->resolveDoubleDefinition();
+        $double = $this->makeDouble($double_definition);
+        if (isset($construct_params)) {
+            return new $double(...$construct_params);
+        } else {
+            $params = $double::_doublit_getMethodTypeParams('__construct', 1);
+            if ($params[0] == 'dummy') {
+                $_doublit_reference_reflexion = new \ReflectionClass($double);
+                return $_doublit_reference_reflexion->newInstanceWithoutConstructor();
+            }
+            return new $double();
         }
     }
 
     /**
      * Make a class double and return its definition
      *
-     * @param $type
-     * @param string $class
-     * @param array $implements
-     * @param array|null $config self::$config
-     * @return array|mixed
-     * @throws \ReflectionException
+     * @param array $double_definition
+     * @return DoubleStub
      */
-    protected static function makeDouble($type, $class, $implements = null, array $config = null)
+    protected function makeDouble(array $double_definition)
     {
-        self::validate('class', $class);
-        self::validate('type', $type);
-        self::validate('implements', $implements);
-        if (isset($config)) {
-            foreach ($config as $key => $value) {
-                self::validate($key, $value);
-            }
-        }
-        // Double definition
-        $double_definition = self::resolveBaseDoubleDefinition($type, $class, $implements, $config);
-        $double_definition = self::resolveMethodsToImplement($double_definition);
         // Load double
         $code = self::resolveDoubleCode($double_definition);
         EvalLoader::load($code);
 
+        $double = isset($double_definition['namespace']) ? $double_definition['namespace'] . '\\' . $double_definition['short_name'] : $double_definition['short_name'];
+
         // Prepare double
         /* @var $double DoubleStub */
-        $double = $double_definition['class_name'];
-        $double::_doublit_initialize($double_definition['config']);
+        $double::_doublit_initialize($double_definition['type'], [
+            'allow_protected_methods' => $this->allow_protected_methods,
+            'test_unexpected_methods' => $this->test_unexpected_methods,
+            'reference' => $double_definition['reference']
+        ]);
 
-        // Save double definition
-        self::addDouble($double_definition['class_name'], $double_definition);
+        // Save double with its definition
+
+        self::addDouble($double, $double_definition);
+
+        return $double;
+    }
+
+    /**
+     * Return double definition array
+     *
+     * @return array
+     * @throws \ReflectionException
+     */
+    protected function resolveDoubleDefinition()
+    {
+        $double_definition = [
+            'original' => $this->getOriginal(),
+            'class_type' => $this->getClassType(),
+            'reference' => null,
+            'type' => $this->getType(),
+            'short_name' => null,
+            'namespace' => null,
+            'extends' => null,
+            'interfaces' => $this->getInterfaces(),
+            'traits' => $this->getTraits(),
+            'methods' => $this->getMethods()
+        ];
+
+
+        if ($double_definition['type'] === 'alias') {
+            $this->populateAliasDoubleDefinition($double_definition);
+        } else if (class_exists($double_definition['original'])) {
+            $this->populateClassDoubleDefinition($double_definition);
+        } else if (trait_exists($double_definition['original'])) {
+            $this->populateTraitDoubleDefinition($double_definition);
+        } else if (interface_exists($double_definition['original'])) {
+            $this->populateInterfaceDoubleDefinition($double_definition);
+        } else {
+            throw new InvalidArgumentException('Undefined class "'.$double_definition['original'].'" : Use the "alias" method to  create doubles of non existent classes');
+        }
+        $this->populateMethodsToImplement($double_definition);
 
         return $double_definition;
     }
 
     /**
-     * Return a double class name
-     *
-     * @param $type
-     * @param string $class
-     * @param array $implements
-     * @param array|null $config self::$config
-     * @return DoubleStub $double DoubleStub
-     * @throws \ReflectionException
-     */
-    public static function name($type, $class, $implements = null, array $config = null)
-    {
-        $double_definition = self::makeDouble($type, $class, $implements, $config);
-        /* @var $double DoubleStub */
-        $double = $double_definition['class_name'];
-        return $double;
-    }
-
-    /**
-     * Shortcut to name('mock', ...) method
-     *
-     * @param $class
-     * @param array|null $implements
-     * @param array|null $config
-     * @return DoubleStub
-     * @throws \ReflectionException
-     */
-    public static function mock_name($class, $implements = null, array $config = null)
-    {
-        return self::name('mock', $class, $implements, $config);
-    }
-
-    /**
-     * Shortcut to name('dummy', ...) method
-     *
-     * @param $class
-     * @param array|null $implements
-     * @param array|null $config
-     * @return DoubleStub
-     * @throws \ReflectionException
-     */
-    public static function dummy_name($class, $implements = null, array $config = null)
-    {
-        return self::name('dummy', $class, $implements, $config);
-    }
-
-    /**
-     * Shortcut to name('alias', ...) method
-     *
-     * @param $class
-     * @param array|null $implements
-     * @param array|null $config
-     * @return DoubleStub
-     * @throws \ReflectionException
-     */
-    public static function alias_name($class, $implements = null, array $config = null)
-    {
-        return self::name('alias', $class, $implements, $config);
-    }
-
-    /**
-     * Return a double instance
-     *
-     * @param $type
-     * @param string $class
-     * @param array|null $arguments
-     * @param array $implements
-     * @param null $config
-     * @return DoubleStub $instance
-     * @throws \ReflectionException
-     */
-    public static function instance($type, $class, array $arguments = null, $implements = null, $config = null)
-    {
-        /* @var $double DoubleStub */
-
-        $double_definition = self::makeDouble($type, $class, $implements, $config);
-        $double = $double_definition['class_name'];
-        if (isset($arguments)) {
-            if (method_exists($double, '__construct')) {
-                $double::_method('__construct')->mock();
-            }
-            $instance = new $double(...$arguments);
-        } else {
-            if (method_exists($double, '__construct')) {
-                $double::_method('__construct')->dummy();
-            }
-            $instance = new $double();
-        }
-        self::addInstance($double, $instance);
-        return $instance;
-    }
-
-    /**
-     * Shortcut to instance('mock', ...) method
-     *
-     * @param $class
-     * @param array|null $arguments
-     * @param array|null $implements
-     * @param array|null $config
-     * @return DoubleStub
-     * @throws \ReflectionException
-     */
-    public static function mock_instance($class, array $arguments = null, $implements = null, array $config = null)
-    {
-        return self::instance('mock', $class, $arguments, $implements, $config);
-    }
-
-    /**
-     * Shortcut to instance('dummy', ...) method
-     *
-     * @param $class
-     * @param array|null $arguments
-     * @param null $implements
-     * @param array|null $config
-     * @return DoubleStub
-     * @throws \ReflectionException
-     */
-    public static function dummy_instance($class, array $arguments = null, $implements = null, array $config = null)
-    {
-        return self::instance('dummy', $class, $arguments, $implements, $config);
-    }
-
-    /**
-     * Shortcut to instance('alias', ...) method
-     *
-     * @param $class
-     * @param array|null $arguments
-     * @param null $implements
-     * @param array|null $config
-     * @return DoubleStub
-     * @throws \ReflectionException
-     */
-    public static function alias_instance($class, array $arguments = null, $implements = null, array $config = null)
-    {
-        return self::instance('alias', $class, $arguments, $implements, $config);
-    }
-
-    /**
-     * Resolve double code from definition
+     * Populate alias type double definition with required parameters
      *
      * @param $double_definition
-     * @return bool|mixed|string
+     * @return mixed
+     */
+    protected function populateAliasDoubleDefinition(&$double_definition)
+    {
+        $this->class_name = $double_definition['original'];
+        $original = $double_definition['original'];
+
+        if (!$this->allow_non_existent_classes) {
+            throw new InvalidArgumentException('Class ' . $original . ' doesnt exist. Set config parameter "allow_non_existent_classes" to "true" to allow creating alias class doubles');
+        }
+        if (isset($this->name)) {
+            throw new InvalidArgumentException('Cannot make named "alias" doubles');
+        }
+
+        $class_type = $this->getClassType();
+        if ($class_type == 'class' && class_exists($original, false)) {
+            throw new InvalidArgumentException('Unable to make class alias of ' . $original . ' : class was already loaded');
+        } else if ($class_type == 'trait' && trait_exists($original, false)) {
+            throw new InvalidArgumentException('Unable to make trait alias of ' . $original . ' : class was already loaded');
+        } else if ($class_type == 'interface' && interface_exists($original, true)) {
+            throw new InvalidArgumentException('Unable to make interface alias of ' . $original . ' : class was already loaded');
+        }
+
+        $class_definition = $this->resolveClassDefinition($original);
+
+        $double_definition['class_type'] = $class_type;
+        $double_definition['short_name'] = $class_definition['short_name'];
+        $double_definition['namespace'] = $class_definition['namespace'];
+
+        return $double_definition;
+    }
+
+    /**
+     * Populate class double definition with required parameters
+     *
+     * @param $double_definition
      * @throws \ReflectionException
      */
+    protected function populateClassDoubleDefinition(&$double_definition)
+    {
+
+        $original = $double_definition['original'];
+
+        $reflection_class = ClassManager::getReflection($original);
+
+        if ($reflection_class->isFinal()) {
+            if (!$this->allow_final_doubles) {
+                throw new InvalidArgumentException('Cannot make double of class "' . $original . '" because it is marked final. Set config parameter "allow_final_doubles" to "true" to allow doubles of final classes');
+            }
+            if ($reflection_class->isInternal()) {
+                throw new InvalidArgumentException('Cannot make double of class "' . $original . '" because it is internal and marked final.');
+            }
+        }
+        if (ClassManager::hasFinalCalls($original) && $this->allow_final_doubles && !$reflection_class->isInternal()) {
+            $new_class_name = self::generateDoublitClassName();
+            $new_class_code = ClassManager::getCode($original, ['clean_final' => true]);
+            $new_class_code = preg_replace('#class\s+' . $reflection_class->getShortName() . '\s*{#', 'class ' . $new_class_name . '{', $new_class_code);
+            EvalLoader::load($new_class_code);
+            $double_extends = '';
+            if ($reflection_class->inNamespace()) {
+                $double_extends .= '\\' . $reflection_class->getNamespaceName() . '\\';
+            }
+            $double_extends .= $new_class_name;
+        } else {
+            /* if($reflection_class->isInternal()){
+                 $double_definition['reference'] = $original;
+             }*/
+            $double_extends = $original;
+        }
+
+        $class_definition = $this->resolveClassDefinition($original);
+
+        $double_definition['class_type'] = 'class';
+        $double_definition['short_name'] = $class_definition['short_name'];
+        $double_definition['namespace'] = $class_definition['namespace'];
+        $double_definition['extends'] = $double_extends;
+
+    }
+
+    /**
+     * Populate trait double definition with required parameters
+     *
+     * @param $double_definition
+     * @throws \ReflectionException
+     */
+    protected function populateTraitDoubleDefinition(&$double_definition)
+    {
+        $original = $double_definition['original'];
+
+        $double_extends = '';
+        $reflection_class = ClassManager::getReflection($original);
+        $new_class_name = self::generateDoublitClassName($reflection_class->getName());
+        // Trait has final calls, prepare a similar class without final calls
+        if ($this->allow_final_doubles && !$reflection_class->isInternal() && ClassManager::hasFinalCalls($original)) {
+            $new_class_code = ClassManager::getCode($original, ['clean_final' => true]);
+            $replacement = '';
+            if (ClassManager::hasAbstractCalls($original)) {
+                $replacement .= 'abstract ';
+            }
+            $replacement .= 'class ' . $new_class_name . '{';
+            $new_class_code = preg_replace('#trait\s+' . $reflection_class->getShortName() . '\s*{#', $replacement, $new_class_code);
+            if ($reflection_class->inNamespace()) {
+                $double_extends .= '\\' . $reflection_class->getNamespaceName() . '\\';
+            }
+            $double_extends .= $new_class_name;
+        } // Implement trait in a new class
+        else {
+            $new_class_code = '<?php ';
+            if (ClassManager::hasAbstractCalls($original)) {
+                $new_class_code .= 'abstract ';
+            }
+            $new_class_code .= 'class ' . $new_class_name . ' { use ' . $original . '; }';
+            $double_extends .= $new_class_name;
+        }
+        EvalLoader::load($new_class_code);
+
+        $class_definition = $this->resolveClassDefinition($original);
+
+        $double_definition['original'] = $original;
+        $double_definition['class_type'] = 'class';
+        $double_definition['namespace'] = $class_definition['namespace'];
+        $double_definition['short_name'] = $class_definition['short_name'];
+        $double_definition['extends'] = $double_extends;
+    }
+
+
+    /**
+     * Populate interface double definition with required parameters
+     *
+     * @param $double_definition
+     */
+    protected function populateInterfaceDoubleDefinition(&$double_definition)
+    {
+        $original = $double_definition['original'];
+
+        $class_definition = $this->resolveClassDefinition($original);
+
+        $double_definition['class_type'] = 'class';
+        $double_definition['namespace'] = $class_definition['namespace'];
+        $double_definition['short_name'] = $class_definition['short_name'];
+        $double_definition['interfaces'][] = $original;
+    }
+
+    /**
+     * Resolve class namespace and short-name
+     *
+     * @param $class
+     * @return array
+     */
+    protected function resolveClassDefinition(string $class)
+    {
+        if (null !== $name = $this->getName()) {
+            $class_parse = ClassManager::parseClass($name);
+            $double_short_name = $class_parse['short_name'];
+            $double_namespace = $class_parse['namespace'];
+        } else {
+            $double_short_name = self::generateDoublitClassName($class);
+            $double_namespace = null;
+        }
+        return ['namespace' => $double_namespace, 'short_name' => $double_short_name];
+    }
+
+
+    /**
+     * Resolve double class methods to implement from base double definition
+     *
+     * @param $double_definition
+     * @return mixed
+     * @throws \ReflectionException
+     */
+    protected function populateMethodsToImplement(&$double_definition)
+    {
+        // Resolve extend methods
+        if ($double_definition['extends'] !== null && class_exists($double_definition['extends'])) {
+            $reflection_extends = ClassManager::getReflection($double_definition['extends']);
+            $extend_methods = $reflection_extends->getMethods();
+            foreach ($extend_methods as $extend_method) {
+                $reflection_method = new \ReflectionMethod($double_definition['extends'], $extend_method->name);
+                $double_definition['methods'][] = $reflection_method;
+            }
+        }
+
+        foreach ($double_definition['interfaces'] as $interface) {
+            if (!interface_exists($interface)) {
+                continue;
+            }
+            $reflection_interface = ClassManager::getReflection($interface);
+            $interface_methods = $reflection_interface->getMethods();
+            foreach ($interface_methods as $interface_method) {
+                // Skip if double will already implement interface method by heritage
+                if ($double_definition['extends'] !== null && method_exists($double_definition['extends'], $interface_method->name)) {
+                    continue;
+                }
+                $reflection_method = new \ReflectionMethod($interface, $interface_method->name);
+                $double_definition['methods'][] = $reflection_method;
+            }
+        }
+    }
+
     protected static function resolveDoubleCode($double_definition)
     {
         /* @var $method \ReflectionMethod */
 
-        if (class_exists($double_definition['class_name'], false)) {
-            throw new InvalidArgumentException('Cannot make double with name "' . $double_definition['class_name'] . '" : class name already taken');
+        $class_name = isset($double_definition['namespace']) ? $double_definition['namespace'] . '\\' . $double_definition['short_name'] : $double_definition['short_name'];
+        if (class_exists($class_name, false)) {
+            throw new InvalidArgumentException('Cannot make double with name "' . $class_name . '" : class name already taken');
         }
         $code = file_get_contents(__DIR__ . '/Lib/DoubleStub.stub');
         if (isset($double_definition['namespace'])) {
@@ -319,20 +709,20 @@ class Doublit
         } else {
             $code = str_replace('namespace Doublit\Lib;', '', $code);
         }
-        $class_code = 'class ' . trim($double_definition['short_name'], '\\');
+        $class_code = $double_definition['class_type'] . ' ' . trim($double_definition['short_name'], '\\');
         if (isset($double_definition['extends'])) {
             $class_code .= ' extends ' . $double_definition['extends'];
         }
-        if (isset($double_definition['interfaces'])) {
+        if (!empty($double_definition['interfaces'])) {
             $class_code .= ' implements ' . implode(',', $double_definition['interfaces']);
         }
         $class_code .= '{';
-        if (isset($double_definition['traits'])) {
+        if (!empty($double_definition['traits'])) {
             $class_code .= PHP_EOL . 'use ' . implode(',', $double_definition['traits']) . ';';
         }
         $code = preg_replace('#class\s+DoubleStub\s*{#', $class_code, $code);
 
-        if (isset($double_definition['methods'])) {
+        if (!empty($double_definition['methods'])) {
             $implemented_methods = [];
             $methods_code = [];
             foreach ($double_definition['methods'] as $method) {
@@ -341,7 +731,7 @@ class Doublit
                 // Check method was not already implemented
                 $method_name = $method instanceof \ReflectionMethod ? $method->getShortName() : $method;
                 if (in_array($method_name, $implemented_methods)) {
-                    throw new InvalidArgumentException('Trying to implement method "' . $method_name . '" twice');
+                    throw new InvalidArgumentException('Cannot to implement method "' . $method_name . '" more than one time');
                 }
                 $implemented_methods[] = $method_name;
 
@@ -361,9 +751,8 @@ class Doublit
                         $method_code .= ' static';
                     }
                     $method_code .= ' function ' . $method->getShortName() . '(';
-                    $params = ($method->getShortName() != '__construct') ? $method->getParameters() : [];
                     $first_param = true;
-                    foreach ($params as $key => $param) {
+                    foreach ($method->getParameters() as $key => $param) {
                         if (!$first_param) {
                             $method_code .= ', ';
                         }
@@ -374,7 +763,7 @@ class Doublit
                             $param_type = $param->getType();
                             if (!in_array($param_type, self::$type_hints)) {
                                 $param_type = ClassManager::normalizeClass($param->getClass()->getName());
-                            } else if(isset($double_definition['extends']) && $param_type == 'self') {
+                            } else if (isset($double_definition['extends']) && $param_type == 'self') {
                                 $param_type = $double_definition['extends'];
                             }
                             $method_code .= $param_type . ' ';
@@ -386,25 +775,25 @@ class Doublit
                         if ($param->isVariadic()) {
                             $method_code .= '...';
                         }
-                        $method_code .= '$'.$param->getName();
+                        $method_code .= '$' . $param->getName();
                         if ($param->isDefaultValueAvailable()) {
-                            $method_code .=  ' = ';
+                            $method_code .= ' = ';
                             $method_default_value = $param->getDefaultValue();
-                            if($method_default_value === null){
+                            if ($method_default_value === null) {
                                 $method_code .= 'null';
-                            } else if(is_string($method_default_value)){
-                                $method_code .= '"' . addslashes( $method_default_value) . '"';
-                            } else if(is_bool($method_default_value)){
+                            } else if (is_string($method_default_value)) {
+                                $method_code .= '"' . addslashes($method_default_value) . '"';
+                            } else if (is_bool($method_default_value)) {
                                 $method_code .= $method_default_value ? 'true' : 'false';
-                            } else if(is_array($method_default_value)){
+                            } else if (is_array($method_default_value)) {
                                 $method_code .= self::arrayToString($method_default_value);
-                            } else if(is_numeric($method_default_value)) {
+                            } else if (is_numeric($method_default_value)) {
                                 $method_code .= $method_default_value;
                             } else {
                                 $method_code .= var_export($method_default_value);
                             }
-                        } else if($param->isOptional() && !$param->isVariadic()){
-                            $method_code .=  ' = null';
+                        } else if ($param->isOptional() && !$param->isVariadic()) {
+                            $method_code .= ' = null';
                         }
                     }
                     $method_code .= ')';
@@ -441,193 +830,6 @@ class Doublit
             $code = substr($code, 0, strrpos($code, "}")) . implode($methods_code, PHP_EOL) . '}';
         }
         return $code;
-    }
-
-    /**
-     * Resolve double class base definition
-     *
-     * @param $type
-     * @param $class
-     * @param $implements
-     * @param null $config
-     * @return array
-     * @throws \ReflectionException
-     */
-    protected static function resolveBaseDoubleDefinition($type, $class, $implements = null, $config = null)
-    {
-
-        $allow_final_doubles = isset($config['allow_final_doubles']) ? $config['allow_final_doubles'] : self::getConfig('allow_final_doubles');
-        $allow_non_existent_classes = isset($config['allow_non_existent_classes']) ? $config['allow_non_existent_classes'] : self::getConfig('allow_non_existent_classes');
-
-        // Check for methods to implement
-        if (preg_match('#\[([a-zA-Z0-9_\x7f-\xff,\s:]*)](?=\s*$)#', $class, $match)) {
-            $class = str_replace($match[0], '', $class);
-            $double_methods = array_map('trim', explode(',', trim($match[0], '[]')));
-        } else {
-            $double_methods = null;
-        }
-
-        // Normalize and initialize things
-        $double_short_name = null;
-        $double_namespace = null;
-        $double_extends = null;
-        $class = explode(':', trim($class), 2);
-        if (isset($class[1])) {
-            $original = ClassManager::normalizeClass($class[1]);
-            $class_parse = ClassManager::parseClass($class[0]);
-            $double_short_name = $class_parse['short_name'];
-            $double_namespace = $class_parse['namespace'];
-        } else {
-            $original = ClassManager::normalizeClass($class[0]);
-        }
-
-        if (is_string($implements)) {
-            $implements = [$implements];
-        }
-        $double_traits = [];
-        $double_interfaces = [];
-        if (isset($implements)) {
-            foreach ($implements as $implement) {
-                if (trait_exists($implement)) {
-                    $double_traits[] = ClassManager::normalizeClass($implement);
-                } else {
-                    $double_interfaces[] = ClassManager::normalizeClass($implement);
-                }
-            }
-        }
-        $double_interfaces[] = '\Doublit\Lib\DoubleInterface';
-
-        if ($type == 'alias') {
-            if (class_exists($original, false)) {
-                throw new InvalidArgumentException('Unable to make class alias of ' . $original . ' : class was already loaded');
-            }
-            if (isset($double_short_name)) {
-                throw new InvalidArgumentException('Cannot make named doubles of type "alias"');
-            }
-            if (!$allow_non_existent_classes) {
-                throw new InvalidArgumentException('Class ' . $original . ' doesn\'t exist. Set config parameter "allow_non_existent_classes" to "true" to allow creating non existent class doubles');
-            }
-
-            $class_parse = ClassManager::parseClass($original);
-            $double_short_name = $class_parse['short_name'];
-            $double_namespace = $class_parse['namespace'];
-        } else if (class_exists($original)) {
-            $reflection_class = ClassManager::getReflection($original);
-            if ($reflection_class->isFinal()) {
-                if(!$allow_final_doubles){
-                    throw new InvalidArgumentException('Cannot make double of class "' . $original . '" because it is marked final. Set config parameter "allow_final_doubles" to "true" to allow doubles of final classes');
-                }
-                if($reflection_class->isInternal()){
-                    throw new InvalidArgumentException('Cannot make double of class "' . $original . '" because it is internal and marked final.');
-                }
-            }
-            if (ClassManager::hasFinalCalls($original) && $allow_final_doubles && !$reflection_class->isInternal()) {
-                $new_class_name = self::generateDoublitClassName();
-                $new_class_code = ClassManager::getCode($original, ['clean_final' => true]);
-                $new_class_code = preg_replace('#class\s+' . $reflection_class->getShortName() . '\s*{#', 'class ' . $new_class_name . '{', $new_class_code);
-                EvalLoader::load($new_class_code);
-                $double_extends = '';
-                if($reflection_class->inNamespace()){
-                    $double_extends .= '\\'.$reflection_class->getNamespaceName().'\\';
-                }
-                $double_extends .= $new_class_name;
-            } else {
-                $double_extends = $original;
-            }
-        } else if (trait_exists($original)) {
-            $double_extends = '';
-            $reflection_class = ClassManager::getReflection($original);
-            $new_class_name = self::generateDoublitClassName($reflection_class->getName());
-            if ($allow_final_doubles && !$reflection_class->isInternal() && ClassManager::hasFinalCalls($original)) {
-                $new_class_code = ClassManager::getCode($original, ['clean_final' => true]);
-                $replacement = '';
-                if (ClassManager::hasAbstractCalls($original)) {
-                    $replacement .= 'abstract ';
-                }
-                $replacement .= 'class '.$new_class_name . '{';
-                $new_class_code = preg_replace('#trait\s+' . $reflection_class->getShortName() . '\s*{#', $replacement, $new_class_code);
-                if($reflection_class->inNamespace()){
-                    $double_extends .= '\\'.$reflection_class->getNamespaceName().'\\';
-                }
-                $double_extends .= $new_class_name;
-            } else {
-                $new_class_code = '<?php ';
-                if (ClassManager::hasAbstractCalls($original)) {
-                    $new_class_code .= 'abstract ';
-                }
-                $new_class_code .= 'class ' . $new_class_name . ' { use ' . $original . '; }';
-                $double_extends .= $new_class_name;
-            }
-            EvalLoader::load($new_class_code);
-        } else if (interface_exists($original)) {
-            $double_interfaces[] = $original;
-        } else {
-            throw new InvalidArgumentException('Class/trait/interface ' . $original . ' doesn\'t exist. Use the "instance_alias" or "double_alias" method to create non existent class/trait/interface doubles');
-        }
-
-        $double_config = [
-            'type' => $type,
-            'reference' => isset($reference) ? $reference : null,
-            'allow_protected_methods' => isset($config['allow_protected_methods']) ? $config['allow_protected_methods'] : self::getConfig('allow_protected_methods'),
-            'test_unexpected_methods' => isset($config['test_unexpected_methods']) ? $config['test_unexpected_methods'] : self::getConfig('test_unexpected_methods')
-        ];
-        $double_short_name = isset($double_short_name) ? $double_short_name : self::generateDoublitClassName($original);
-        $double_definition = [
-            'original' => $original,
-            'short_name' => $double_short_name,
-            'namespace' => $double_namespace,
-            'class_name' => isset($double_namespace) ? ClassManager::normalizeClass($double_namespace . '\\' . $double_short_name) : ClassManager::normalizeClass($double_short_name),
-            'extends' => $double_extends,
-            'interfaces' => !empty($double_interfaces) ? $double_interfaces : null,
-            'traits' => !empty($double_traits) ? $double_traits : null,
-            'use' => !empty($double_use) ? $double_use : null,
-            'methods' => $double_methods,
-            'config' => $double_config
-        ];
-        return $double_definition;
-    }
-
-    /**
-     * Resolve double class methods to implement from base double definition
-     *
-     * @param $double_definition
-     * @return mixed
-     * @throws \ReflectionException
-     */
-    protected static function resolveMethodsToImplement($double_definition)
-    {
-        $methods = isset($double_definition['methods']) ? $double_definition['methods'] : [];
-        // Resolve interface methods
-        if (isset($double_definition['interfaces'])) {
-            foreach ($double_definition['interfaces'] as $interface) {
-                if (!interface_exists($interface)) {
-                    continue;
-                }
-                $reflection_interface = ClassManager::getReflection($interface);
-                $interface_methods = $reflection_interface->getMethods();
-                foreach ($interface_methods as $interface_method) {
-                    if (isset($double_definition['extends']) && method_exists($double_definition['extends'], $interface_method->name)) {
-                        continue;
-                    }
-                    $reflection_method = new \ReflectionMethod($interface, $interface_method->name);
-                    $methods[] = $reflection_method;
-                }
-            }
-        }
-
-        // Resolve extend methods
-        if (isset($double_definition['extends']) && class_exists($double_definition['extends'])) {
-            $reflection_extends = ClassManager::getReflection($double_definition['extends']);
-            $extend_methods = $reflection_extends->getMethods();
-            foreach ($extend_methods as $extend_method) {
-                $reflection_method = new \ReflectionMethod($double_definition['extends'], $extend_method->name);
-                $methods[] = $reflection_method;
-            }
-        }
-        if (!empty($methods)) {
-            $double_definition['methods'] = $methods;
-        }
-        return $double_definition;
     }
 
     /**
@@ -668,61 +870,36 @@ class Doublit
         return isset($label) ? self::$doubles[$label] : self::$doubles;
     }
 
-    /**
-     * Save a double instance
-     *
-     * @param $label
-     * @param $instance
-     */
-    protected static function addInstance($label, $instance)
+    public static function close()
     {
-        self::$instances[$label] = $instance;
+        /* @var $double DoubleStub */
+        foreach (self::getDouble() as $double => $double_definition) {
+            $double::_doublit_close();
+        }
     }
 
-    protected static function arrayToString(array $array){
+    protected static function arrayToString(array $array)
+    {
         $first_run = true;
         $string = '[';
-        foreach ($array as $key => $value){
-            if($first_run){
+        foreach ($array as $key => $value) {
+            if ($first_run) {
                 $first_run = false;
             } else {
                 $string .= ', ';
             }
-            if(is_int($key)){
+            if (is_int($key)) {
                 $string .= $key;
             } else {
-                $string .= '"'.addslashes($key).'"';
+                $string .= '"' . addslashes($key) . '"';
             }
-            if(is_array($value)){
+            if (is_array($value)) {
                 $string .= self::arrayToString($value);
             } else {
-                $string .= ' => "'.addslashes($value).'"';
+                $string .= ' => "' . addslashes($value) . '"';
             }
         }
         $string .= ']';
         return $string;
-    }
-
-    /**
-     * Get a double instance
-     *
-     * @param null $label
-     * @return array|mixed
-     */
-    public static function getInstance($label = null)
-    {
-        if (isset($label)) {
-            return isset(self::$instances[$label]) ? self::$instances[$label] : null;
-        }
-        return self::$instances;
-    }
-
-    public static function close()
-    {
-        /* @var $double DoubleStub */
-        foreach (self::getDouble() as $double_definition) {
-            $double = $double_definition['class_name'];
-            $double::_doublit_close();
-        }
     }
 }

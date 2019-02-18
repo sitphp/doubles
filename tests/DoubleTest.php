@@ -26,13 +26,13 @@ class DoubleTest extends TestCase
     public function testConfigShouldFailWithInvalidKey()
     {
         $this->expectException(InvalidArgumentException::class);
-        Doublit::config('key', 'value');
+        Doublit::mock(ClassWithConstructor::class, ['invalid_config' => true]);
     }
 
-    public function testConfigShouldFailWithInvalidKeyType()
+    function testConfigMappingShouldFailWithNonExistentMethod()
     {
         $this->expectException(InvalidArgumentException::class);
-        Doublit::config(new \stdClass(), 'value');
+        Doublit::setConfigMapping('label', 'non_existent_method');
     }
 
     /* -----
@@ -40,44 +40,42 @@ class DoubleTest extends TestCase
     ---- */
     public function testClassDoubleShouldImplementDoubleInterface()
     {
-        $double = Doublit::mock_instance(DoubleStandardClass::class);
+        $double = Doublit::dummy(DoubleStandardClass::class)->getInstance();
         $this->assertInstanceOf(DoubleInterface::class, $double);
     }
 
     public function testNamedClassDoubleShouldBeInstanceOfNamedClass()
     {
-        $double = Doublit::mock_instance('MyClass:' . DoubleStandardClass::class);
+        $double = Doublit::dummy(DoubleStandardClass::class)
+            ->setName('MyClass')
+            ->getInstance();
         $this->assertInstanceOf('MyClass', $double);
     }
 
     public function testNamespaceNamedClassDoubleShouldBeInstanceOfNamedClass()
     {
-        $double = Doublit::mock_instance('MyNamespacePart1\MyNamespacePart2\MyClass:' . DoubleStandardClass::class);
+        $double = Doublit::dummy(DoubleStandardClass::class)
+            ->setName('MyNamespacePart1\MyNamespacePart2\MyClass')
+            ->getInstance();
         $this->assertInstanceOf('MyNamespacePart1\MyNamespacePart2\MyClass', $double);
     }
 
     public function testInternalClassDoubleShouldImplementItself()
     {
-        $double = Doublit::dummy_instance(\ReflectionClass::class);
+        $double = Doublit::dummy(\ReflectionClass::class)->getInstance();
         $this->assertInstanceOf(\ReflectionClass::class, $double);
     }
 
     public function testNonExistentClassDoubleShouldFail()
     {
         $this->expectException(InvalidArgumentException::class);
-        Doublit::mock_instance('SomeNonExistentClass');
-    }
-
-    public function testClassDoubleWithInvalidTypeShouldFail()
-    {
-        $this->expectException(InvalidArgumentException::class);
-        Doublit::instance('invalid_type', DoubleStandardClass::class);
+        Doublit::dummy('SomeNonExistentClass')->getInstance();
     }
 
     public function testClassDoubleOfFinalInternalClassShouldFail()
     {
         $this->expectException(InvalidArgumentException::class);
-        Doublit::mock_instance(\Closure::class);
+        Doublit::dummy(\Closure::class)->getInstance();
     }
 
     /* -----
@@ -85,14 +83,18 @@ class DoubleTest extends TestCase
     ---- */
     public function testNamedClassWithShouldImplementOriginalMethods()
     {
-        $double = Doublit::mock_instance('MyNamedClass:' . DoubleStandardClass::class);
+        $double = Doublit::mock(DoubleStandardClass::class)
+            ->setName('MyNamedClass')
+            ->getInstance();
         $this->assertEquals('foo', $double->foo());
     }
 
     public function testNamedDoubleWithAlreadyTakenClassNameShouldFail()
     {
         $this->expectException(InvalidArgumentException::class);
-        Doublit::mock_instance(Doublit::class . ':' . DoubleStandardClass::class);
+        Doublit::dummy(DoubleStandardClass::class)
+            ->setName(Doublit::class)
+            ->getInstance();
     }
 
     /* -----
@@ -100,7 +102,9 @@ class DoubleTest extends TestCase
     ---- */
     public function testClassDoubleWithUndefinedMethodsShouldImplementThem()
     {
-        $double = Doublit::mock_instance(DoubleStandardClass::class . '[myMethod, static:myOtherMethod]');
+        $double = Doublit::dummy(DoubleStandardClass::class)
+            ->addMethod(['myMethod', 'static:myOtherMethod'])
+            ->getInstance();
         $this->assertNull($double->myMethod());
         $this->assertNull($double::myOtherMethod());
     }
@@ -109,7 +113,9 @@ class DoubleTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        Doublit::mock_instance(DoubleStandardClass::class . '[foo]');
+        Doublit::dummy(DoubleStandardClass::class)
+            ->addMethod('foo')
+            ->getInstance();
     }
 
 
@@ -118,13 +124,13 @@ class DoubleTest extends TestCase
     ---- */
     public function testClassDoubleMethodWithArgumentsShouldImplementThem()
     {
-        $double = Doublit::mock_instance(DoubleStandardClass::class);
+        $double = Doublit::mock(DoubleStandardClass::class)->getInstance();
         $this->assertEquals(['one', 'two'], $double->argument('one', 'two'));
     }
 
     public function testClassDoubleMethodWithReferenceArgumentShouldImplementIt()
     {
-        $double = Doublit::mock_instance(DoubleStandardClass::class);
+        $double = Doublit::mock(DoubleStandardClass::class)->getInstance();
         $a = 1;
         $double->reference($a);
         $this->assertEquals(2, $a);
@@ -133,39 +139,39 @@ class DoubleTest extends TestCase
 
     public function testClassDoubleMethodWithVariadicArgumentShouldImplementIt()
     {
-        $double = Doublit::mock_instance(DoubleStandardClass::class);
+        $double = Doublit::mock(DoubleStandardClass::class)->getInstance();
         $this->assertEquals([1, 2, 3], $double->variadic(1, 2, 3));
     }
 
     public function testClassDoubleMethodWithDefaultArgumentShouldImplementIt()
     {
-        $double = Doublit::mock_instance(DoubleStandardClass::class);
+        $double = Doublit::mock(DoubleStandardClass::class)->getInstance();
         $this->assertEquals(1, $double->defaultWithOptional());
     }
 
     public function testClassDoubleMethodWithOptionalSlashedArgumentsShouldBeCorrect()
     {
-        $double = Doublit::mock_instance(DoubleStandardClass::class);
+        $double = Doublit::mock(DoubleStandardClass::class)->getInstance();
         $this->assertEquals('\\', $double->defaultWithEscape());
     }
 
     public function testClassDoubleMethodWithTypeArgumentShouldImplementIt()
     {
         $this->expectException(\TypeError::class);
-        $double = Doublit::mock_instance(DoubleStandardClass::class);
+        $double = Doublit::mock(DoubleStandardClass::class)->getInstance();
         $double->type('string');
     }
 
     public function testClassDoubleMethodWithClassTypeArgumentShouldImplementIt()
     {
         $this->expectException(\TypeError::class);
-        $double = Doublit::mock_instance(DoubleStandardClass::class);
+        $double = Doublit::mock(DoubleStandardClass::class)->getInstance();
         $double->classType('string');
     }
 
     public function testClassDoubleMethodWithReturnTypeShouldImplementIt()
     {
-        $double = Doublit::mock_instance(DoubleStandardClass::class);
+        $double = Doublit::mock(DoubleStandardClass::class)->getInstance();
         $this->assertEquals('string', $double->returnType());
     }
 
@@ -175,13 +181,13 @@ class DoubleTest extends TestCase
     ---- */
     public function testMockDoubleShouldExtendOriginalClass()
     {
-        $double = Doublit::mock_instance(DoubleStandardClass::class);
+        $double = Doublit::mock(DoubleStandardClass::class)->getInstance();
         $this->assertInstanceOf(DoubleStandardClass::class, $double);
     }
 
     public function testMockDoubleMethodShouldBehaveLikeOriginalClass()
     {
-        $double = Doublit::mock_instance(DoubleStandardClass::class);
+        $double = Doublit::mock(DoubleStandardClass::class)->getInstance();
         $this->assertEquals('foo', $double->foo());
         $this->assertEquals('bar', $double::bar());
     }
@@ -191,13 +197,13 @@ class DoubleTest extends TestCase
     ---- */
     public function testDummyDoubleShouldExtendOriginalClass()
     {
-        $double = Doublit::dummy_instance(DoubleStandardClass::class);
+        $double = Doublit::dummy(DoubleStandardClass::class)->getInstance();
         $this->assertInstanceOf(DoubleStandardClass::class, $double);
     }
 
     public function testDummyDoubleMethodShouldReturnNull()
     {
-        $double = Doublit::dummy_instance(DoubleStandardClass::class);
+        $double = Doublit::dummy(DoubleStandardClass::class)->getInstance();
         $this->assertNull($double->foo());
         $this->assertNull($double::bar());
     }
@@ -207,14 +213,14 @@ class DoubleTest extends TestCase
     ---- */
     public function testNonExistentClassAliasDoubleShouldExtendOriginalClass()
     {
-        $double = Doublit::alias_instance('NonExistentClass1', null, null, ['allow_non_existent_classes' => true]);
+        $double = Doublit::alias('NonExistentClass1', ['allow_non_existent_classes' => true])->getInstance();
         $this->assertInstanceOf('NonExistentClass1', $double);
     }
 
     public function testNonExistentClassAliasDoubleShouldFailWhenConfigSaySo()
     {
         $this->expectException(InvalidArgumentException::class);
-        Doublit::alias_instance('OtherNonExistentClass', null, null, ['allow_non_existent_classes' => false]);
+        Doublit::alias('OtherNonExistentClass', ['allow_non_existent_classes' => false])->getInstance();
     }
 
     /* -----
@@ -222,7 +228,7 @@ class DoubleTest extends TestCase
     ---- */
     public function testClassUsingTraitDoubleShouldImplementTraitMethod()
     {
-        $double = Doublit::dummy_instance(ClassUsingTrait::class);
+        $double = Doublit::dummy(ClassUsingTrait::class)->getInstance();
         $this->assertNull($double->foo());
     }
 
@@ -232,19 +238,19 @@ class DoubleTest extends TestCase
     ---- */
     public function testAbstractClassDoubleShouldExtendAbstractClass()
     {
-        $double = Doublit::mock_instance(AbstractClass::class);
+        $double = Doublit::mock(AbstractClass::class)->getInstance();
         $this->assertInstanceOf(AbstractClass::class, $double);
     }
 
     public function testAbstractClassDoubleShouldImplementAbstractMethod()
     {
-        $double = Doublit::mock_instance(AbstractClass::class);
+        $double = Doublit::mock(AbstractClass::class)->getInstance();
         $this->assertNull($double->foo());
     }
 
     public function testAbstractClassDoubleMethodBehaveLikeOriginalClass()
     {
-        $double = Doublit::mock_instance(AbstractClass::class);
+        $double = Doublit::mock(AbstractClass::class)->getInstance();
         $this->assertEquals('bar', $double->bar());
     }
 
@@ -253,20 +259,20 @@ class DoubleTest extends TestCase
    ---- */
     public function testFinalClassDoubleShouldImplementFinalMethodWhenConfigSaySo()
     {
-        $double = Doublit::dummy_instance(FinalClass::class, null, null, ['allow_final_doubles' => true]);
+        $double = Doublit::dummy(FinalClass::class, ['allow_final_doubles' => true])->getInstance();
         $this->assertNull($double->foo());
     }
 
     public function testFinalClassWithFinalMethodDoubleShouldNotImplementFinalMethodWhenConfigSaySo()
     {
-        $double = Doublit::dummy_instance(ClassWithFinalMethods::class, null, null, ['allow_final_doubles' => false]);
+        $double = Doublit::dummy(ClassWithFinalMethods::class, ['allow_final_doubles' => false])->getInstance();
         $this->assertEquals('foo', $double->foo());
     }
 
     public function testMakingFinalClassDoubleShouldFailWhenConfigSaysSo()
     {
         $this->expectException(InvalidArgumentException::class);
-        Doublit::mock_instance(FinalClass::class, null, null, ['allow_final_doubles' => false]);
+        Doublit::dummy(FinalClass::class, ['allow_final_doubles' => false])->getInstance();
     }
 
     /* -----
@@ -274,13 +280,13 @@ class DoubleTest extends TestCase
     ---- */
     public function testInterfaceDoubleShouldImplementInterface()
     {
-        $double = Doublit::mock_instance(StandardInterface::class);
+        $double = Doublit::mock(StandardInterface::class)->getInstance();
         $this->assertInstanceOf(StandardInterface::class, $double);
     }
 
     public function testInterfaceDoubleMethodShouldReturnNull()
     {
-        $double = Doublit::mock_instance(StandardInterface::class);
+        $double = Doublit::mock(StandardInterface::class)->getInstance();
         $this->assertNull($double->foo());
     }
 
@@ -289,25 +295,25 @@ class DoubleTest extends TestCase
     ---- */
     public function testTraitDoubleShouldImplementOriginalTraitMethod()
     {
-        $double = Doublit::dummy_instance(StandardTrait::class);
+        $double = Doublit::dummy(StandardTrait::class)->getInstance();
         $this->assertNull($double->foo());
     }
 
     public function testTraitWithAbstractShouldImplementAbstractMethod()
     {
-        $double = Doublit::mock_instance(TraitWithAbstractMethod::class);
+        $double = Doublit::mock(TraitWithAbstractMethod::class)->getInstance();
         $this->assertNull($double->foo());
     }
 
     public function testTraitWithFinalMethodDoubleShouldImplementFinalMethodWhenConfigSaySo()
     {
-        $double = Doublit::dummy_instance(TraitWithFinalMethod::class, null, null, ['allow_final_doubles' => true]);
+        $double = Doublit::dummy(TraitWithFinalMethod::class, ['allow_final_doubles' => true])->getInstance();
         $this->assertNull($double->foo());
     }
 
     public function testTraitWithFinalMethodDoubleShouldNotImplementFinalMethodWhenConfigSaySo()
     {
-        $double = Doublit::dummy_instance(TraitWithFinalMethod::class, null, null, ['allow_final_doubles' => false]);
+        $double = Doublit::dummy(TraitWithFinalMethod::class, ['allow_final_doubles' => false])->getInstance();
         $this->assertEquals('foo', $double->foo());
     }
 
@@ -316,25 +322,27 @@ class DoubleTest extends TestCase
     ---- */
     public function testClassWithConstructorMockDoubleShouldExecuteOriginalConstructor()
     {
-        $double = Doublit::mock_instance(ClassWithConstructor::class, ['bar']);
+        $double = Doublit::mock(ClassWithConstructor::class)->getInstance(['bar']);
         $this->assertEquals('bar', $double->foo);
     }
-    public function testClassWithoutConstructorMockDoubleShouldNotExecuteOriginalConstructor()
+
+    public function testClassWithoutConstructorMockDoubleShouldFail()
     {
-        $double = Doublit::mock_instance(ClassWithConstructor::class);
+        $this->expectException(\ArgumentCountError::class);
+        $double = Doublit::mock(ClassWithConstructor::class)->getInstance();
         $this->assertEquals('foo', $double->foo);
     }
 
     public function testClassWithConstructorDummyDoubleShouldNotExecuteOriginalConstructor()
     {
-        $double = Doublit::dummy_instance(ClassWithConstructor::class);
+        $double = Doublit::dummy(ClassWithConstructor::class)->getInstance();
         $this->assertEquals('foo', $double->foo);
     }
 
-    public function testClassWithConstructorDummyDoubleWithConstructorArgumentsShouldExecuteOriginalConstructor()
+    public function testClassWithConstructorDummyDoubleWithConstructorArgumentsShouldNotExecuteOriginalConstructor()
     {
-        $double = Doublit::dummy_instance(ClassWithConstructor::class, ['bar']);
-        $this->assertEquals('bar', $double->foo);
+        $double = Doublit::dummy(ClassWithConstructor::class)->getInstance(['bar']);
+        $this->assertEquals('foo', $double->foo);
     }
 
     public function testClassWithConstructorDoubleWithWrongNumberOfConstructorArgumentsShouldFail()
@@ -344,7 +352,7 @@ class DoubleTest extends TestCase
         } else {
             $this->expectException(\ArgumentCountError::class);
         }
-        Doublit::mock_instance(ClassWithConstructor::class, []);
+        Doublit::mock(ClassWithConstructor::class)->getInstance([]);
     }
 
 
@@ -353,13 +361,15 @@ class DoubleTest extends TestCase
     ---- */
     public function testClassDoubleShouldImplementInterface()
     {
-        $double = Doublit::dummy_instance(DoubleStandardClass::class, null, StandardInterface::class);
+        $double = Doublit::dummy(DoubleStandardClass::class)
+            ->addInterface(StandardInterface::class)
+            ->getInstance();
         $this->assertInstanceOf(StandardInterface::class, $double);
     }
 
     public function testClassDoubleShouldImplementTrait()
     {
-        $double = Doublit::dummy_instance(DoubleStandardClass::class, null, StandardTrait::class);
+        $double = Doublit::dummy(DoubleStandardClass::class)->addTrait(StandardTrait::class)->getInstance();
         $this->assertEquals(StandardTrait::class, class_uses($double)[StandardTrait::class]);
     }
 
