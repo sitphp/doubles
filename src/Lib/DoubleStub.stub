@@ -14,9 +14,7 @@
 namespace Doublit\Lib;
 
 use \Doublit\Constraints;
-use \Doublit\Doublit;
 use \Doublit\Lib\Expectation;
-use \Doublit\Lib\ClassManager;
 use \Doublit\Stubs\StubInterface;
 use \PHPUnit\Framework\Assert;
 use \Doublit\Lib\ExpectationCollection;
@@ -122,7 +120,7 @@ class DoubleStub
         if (!in_array($type, ['mock', 'dummy', 'alias'])) {
             throw new InvalidArgumentException('Invalid doublit type : expected "mock", "dummy" or "alias"');
         }
-        return self::$type;
+        self::$type = $type;
     }
 
     /**
@@ -183,7 +181,7 @@ class DoubleStub
         $type = $type_params[0];
         switch ($type) {
             case 'dummy':
-                if ($method == '__construct' && null !== $_doublit_reference = self::_doublit_getReference()) {
+                if($method == '__construct' && null !== $_doublit_reference = self::_doublit_getReference()){
                     $_doublit_reference_reflexion = new \ReflectionClass($_doublit_reference);
                     self::$_doublit_reference_instance = $_doublit_reference_reflexion->newInstanceWithoutConstructor();
                 } else {
@@ -325,7 +323,7 @@ class DoubleStub
      * @return array
      * @throws \ReflectionException
      */
-    protected static function _doublit_getMethodTypeParams($method, $call_count)
+    static function _doublit_getMethodTypeParams($method, $call_count)
     {
         if (self::_doublit_hasExpectation($method)) {
             $expectation = self::_doublit_getExpectation($method);

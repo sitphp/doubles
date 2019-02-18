@@ -11,19 +11,9 @@
  *
  */
 
-namespace Doublit\Lib;
+namespace Doublit\Exceptions;
 
 
-class EvalLoader
+class LogicException extends \LogicException implements DoublitException
 {
-
-    /**
-     * Load php code
-     *
-     * @param $code
-     */
-    public static function load($code)
-    {
-        eval('?>' . $code);
-    }
 }
