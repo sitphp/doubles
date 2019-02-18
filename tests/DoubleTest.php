@@ -328,7 +328,11 @@ class DoubleTest extends TestCase
 
     public function testClassWithoutConstructorMockDoubleShouldFail()
     {
-        $this->expectException(\ArgumentCountError::class);
+        if (version_compare(PHP_VERSION, '7.1.0') < 0) {
+            $this->expectException(\PHPUnit\Framework\Error\Warning::class);
+        } else {
+            $this->expectException(\ArgumentCountError::class);
+        }
         $double = Doublit::mock(ClassWithConstructor::class)->getInstance();
         $this->assertEquals('foo', $double->foo);
     }
