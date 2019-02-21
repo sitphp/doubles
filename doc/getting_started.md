@@ -22,7 +22,7 @@ This will make sure the `Doublit\Doublit::close()` method is executed after each
 ## Creating a double
 
 ### Creating a "dummy" double
-A double is called a "dummy" when all the methods of the original class are overwritten to return `null`. If you are not sure what doubles of type "dummy" are, you can get more details on the [introduction page](/doc/intro). To get a "dummy" double instance, use the `dummy_instance` method located in the `Doublit\Doublit` class :
+A double is called a "dummy" when all the methods of the original class are overwritten to return `null`. If you are not sure what doubles of type "dummy" are, you can get more details on the [introduction page](/doc/intro). To get a "dummy" double, use the `dummy` method class :
 
     {.language-php} 
    
@@ -33,13 +33,13 @@ A double is called a "dummy" when all the methods of the original class are over
         
         function testMyFirstTest(){
             // Get a double instance of type "dummy" for class "Foo"
-            $double = Doublit::dummy_instance(Foo::class);
+            $double = Doublit::dummy(Foo::class)->getInstance();
         }
         
     }
 
 ### Creating a "mock" double
-A double is called a "mock" when all the methods of the original class are overwritten to behave the same as in the original class. If you are not sure what doubles of type "mock" are, you can get more details on the [introduction page](/doc/intro). To get a "mock" double instance, use the `mock_instance` method :
+A double is called a "mock" when all the methods of the original class are overwritten to behave the same as in the original class. If you are not sure what doubles of type "mock" are, you can get more details on the [introduction page](/doc/intro). To get a "mock" double instance, use the `mock` method :
 
     {.language-php} 
     use \Doublit\Doublit;
@@ -49,7 +49,7 @@ A double is called a "mock" when all the methods of the original class are overw
         
         function testMyFirstTest(){
             // Get a double instance of type "mock" for class "Foo"
-            $double = Doublit::mock_instance(Foo::class);
+            $double = Doublit::mock(Foo::class)->getInstance();
         }
         
     }
@@ -76,7 +76,7 @@ Here is a full working example :
         function testMyFirstTest(){
 
             /* Get a double instance of type "dummy" for class "Foo" */
-            $double = Doublit::dummy_instance(Foo::class);
+            $double = Doublit::dummy(Foo::class)->getInstance();
 
             /* Set double test expectations for method "myMethod" */
             $double::_method('myMethod')

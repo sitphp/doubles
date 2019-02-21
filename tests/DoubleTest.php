@@ -322,7 +322,7 @@ class DoubleTest extends TestCase
     ---- */
     public function testClassWithConstructorMockDoubleShouldExecuteOriginalConstructor()
     {
-        $double = Doublit::mock(ClassWithConstructor::class)->getInstance(['bar']);
+        $double = Doublit::mock(ClassWithConstructor::class)->getInstance('bar');
         $this->assertEquals('bar', $double->foo);
     }
 
@@ -356,7 +356,7 @@ class DoubleTest extends TestCase
         } else {
             $this->expectException(\ArgumentCountError::class);
         }
-        Doublit::mock(ClassWithConstructor::class)->getInstance([]);
+        Doublit::mock(ClassWithConstructor::class)->getInstance();
     }
 
 

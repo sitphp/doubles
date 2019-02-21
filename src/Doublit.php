@@ -409,11 +409,11 @@ class Doublit
      * @return DoubleStub
      * @throws \ReflectionException
      */
-    function getInstance(array $construct_params = null)
+    function getInstance(... $construct_params)
     {
         $double_definition = $this->resolveDoubleDefinition();
         $double = $this->makeDouble($double_definition);
-        if (isset($construct_params)) {
+        if (!empty($construct_params)) {
             return new $double(...$construct_params);
         } else {
             $params = $double::_doublit_getMethodTypeParams('__construct', 1);
