@@ -64,7 +64,7 @@ You define the configuration for a specific double using the 2nd argument of the
         'allow_final_doubles' => true,
         'allow_non_existent_classes' => true
     ])->getInstance();
-
+	
 Here is a list of all available config parameters :
 
 - `allow_final_doubles` : Set this parameter to `false` to stop Doublit from trying to make doubles of final classes/methods.
