@@ -9,11 +9,11 @@ See full documentation at [https://getdoublit.com](https://getdoublit.com)
 
 ## Installation
 
-Add the line `"gealex/doublit": "~1.0"` in the `"require-dev"` section of your composer.json file :
+Add the line `"gealex/doublit": "~2.0"` in the `"require-dev"` section of your composer.json file :
     
     {
         "require-dev": {
-            "gealex/doublit": "~1.0"
+            "gealex/doublit": "~2.0"
         }
     }
 
@@ -25,15 +25,15 @@ This will install the latest version of Doublit with the required PhpUnit packag
 
 ## Creating a double
 
-A double is called a "dummy" when all the methods of the original class are overwritten to return `null`. To get a "dummy" double instance, use the `dummy_instance` method :
+A double is called a "dummy" when all the methods of the original class are overwritten to return `null`. To get a "dummy" double instance, use the `dummy` method :
 
     // Get a double instance of type "dummy" for class "MyClass"
-    $my_double = Doublit::dummy_instance(MyClass::class);
+    $my_double = Doublit::dummy(MyClass::class)->getInstance();
 
-A double is called a "mock" when all the methods of the original class are overwritten to behave the same as in the original class. To get a "mock" double instance, use the `mock_instance` method :
+A double is called a "mock" when all the methods of the original class are overwritten to behave the same as in the original class. To get a "mock" double instance, use the `mock` method :
    
     // Get a double instance of type "mock" for class "MyClass"
-    $my_double = Doublit::mock_instance(MyClass::class);
+    $my_double = Doublit::mock(MyClass::class)->getInstance();
    
 For more details : [Read the doc on creating doubles](doc/creating_doubles.md)
 
@@ -57,13 +57,13 @@ For more details : [Read the doc on testing doubles](doc/testing_doubles.md)
 
 ## Configuration
 
-You define the configuration for a specific double using the 4th argument of a Doublit instance method :</p>
+You define the configuration for a specific double using the 2nd argument of the `dummy` and `mock` methods :</p>
 
     {.language-php} // Get double instance with config
-    $my_double = Doublit::dummy_instance(MyClass::class, null, null, [
-        'config_param_1' => 'value_1',
-        'config_param_2' => 'value_1'
-    ]);
+    $my_double = Doublit::dummy(MyClass::class, [
+        'allow_final_doubles' => true,
+        'allow_non_existent_classes' => true
+    ]->getInstance());
 
 Here is a list of all available config parameters :
 
