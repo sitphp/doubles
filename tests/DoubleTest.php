@@ -77,6 +77,11 @@ class DoubleTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         Doublit::dummy(\Closure::class)->getInstance();
     }
+    public function testMakingDoubleOfDoubleShouldFail(){
+        $this->expectException(InvalidArgumentException::class);
+        $double = Doublit::dummy(DoubleStandardClass::class)->getClass();
+        Doublit::dummy($double)->getClass();
+    }
 
     /* -----
     Test named doubles
@@ -223,6 +228,13 @@ class DoubleTest extends TestCase
         Doublit::alias('OtherNonExistentClass', ['allow_non_existent_classes' => false])->getInstance();
     }
 
+    public function testAliasDoubleShouldFailWhenClassWasAlreadyLoaded()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $double = new DoubleStandardClass();
+        Doublit::alias(DoubleStandardClass::class, ['allow_non_existent_classes' => true])->getInstance();
+    }
+
     /* -----
     Test classes using trait
     ---- */
@@ -361,7 +373,7 @@ class DoubleTest extends TestCase
 
 
     /* -----
-    Test class with implements
+    Test add interface/trait
     ---- */
     public function testClassDoubleShouldImplementInterface()
     {
@@ -370,11 +382,37 @@ class DoubleTest extends TestCase
             ->getInstance();
         $this->assertInstanceOf(StandardInterface::class, $double);
     }
-
+    public function testAddInterfaceShouldAcceptArrayOfInterfaces(){
+        $double = Doublit::dummy(DoubleStandardClass::class)
+            ->addInterface([StandardInterface::class, StandardOtherInterface::class])
+            ->getInstance();
+        $this->assertInstanceOf(StandardInterface::class, $double);
+        $this->assertInstanceOf(StandardOtherInterface::class, $double);
+    }
     public function testClassDoubleShouldImplementTrait()
     {
         $double = Doublit::dummy(DoubleStandardClass::class)->addTrait(StandardTrait::class)->getInstance();
         $this->assertEquals(StandardTrait::class, class_uses($double)[StandardTrait::class]);
+    }
+    public function testAddInterfaceShouldAcceptArrayOfTraits(){
+        $double = Doublit::dummy(DoubleStandardClass::class)
+            ->addTrait([StandardTrait::class, StandardOtherTrait::class])
+            ->getInstance();
+
+        $this->assertEquals(StandardTrait::class, class_uses($double)[StandardTrait::class]);
+        $this->assertEquals(StandardOtherTrait::class, class_uses($double)[StandardOtherTrait::class]);
+    }
+    public function testAddInterfaceWithInvalidClassShouldFail(){
+        $this->expectException(InvalidArgumentException::class);
+        Doublit::dummy(DoubleStandardClass::class)->addInterface(new \stdClass());
+    }
+    public function testAddTraitWithInvalidClassShouldFail(){
+        $this->expectException(InvalidArgumentException::class);
+        Doublit::dummy(DoubleStandardClass::class)->addTrait(new \stdClass());
+    }
+    public function testAddInterfaceWithInvalidMethodShouldFail(){
+        $this->expectException(InvalidArgumentException::class);
+        Doublit::dummy(DoubleStandardClass::class)->addInterface(IncompatibleInterface::class)->getClass();
     }
 
 }
@@ -518,12 +556,27 @@ interface StandardInterface
 {
     function foo();
 }
+interface StandardOtherInterface
+{
+    public static function bar();
+}
+interface IncompatibleInterface
+{
+    static function foo();
+}
 
 trait StandardTrait
 {
     function foo()
     {
         return 'foo';
+    }
+}
+trait StandardOtherTrait
+{
+    function bar()
+    {
+        return 'bar';
     }
 }
 

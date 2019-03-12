@@ -14,6 +14,7 @@
 namespace Doublit;
 
 use \Doublit\Exceptions\LogicException;
+use Doublit\Lib\DoubleInterface;
 use \Doublit\Lib\DoubleStub;
 use \Doublit\Lib\EvalLoader;
 use \Doublit\Lib\ClassManager;
@@ -141,7 +142,10 @@ class Doublit
      *
      * @param $original
      */
-    protected function setOriginal($original){
+    protected function setOriginal(string $original){
+        if($this->getType() !== 'alias' && is_subclass_of($original,DoubleInterface::class)){
+            throw new InvalidArgumentException('Invalid class : cannot make doubles of doubles');
+        }
         $this->original = ClassManager::normalizeClass($original);
     }
 
@@ -190,12 +194,21 @@ class Doublit
             $this->interfaces[] = $this->normalizeInterface($interface);
         } else if (is_array($interface)) {
             foreach ($interface as $item) {
-                $this->interfaces[] = $this->normalizeInterface($item);
+                if(!is_string($item)){
+                    $this->throwInterfaceException();
+                }
+                $this->addInterface($item);
             }
         } else {
-            throw new \InvalidArgumentException('Invalid $interface argument type : expected string or array');
+            $this->throwInterfaceException();
         }
         return $this;
+    }
+    /**
+     * Throw an invalid interface exception
+     */
+    protected function throwInterfaceException(){
+        throw new InvalidArgumentException('Invalid $interface argument type : expected string or array of strings');
     }
 
     /**
@@ -217,7 +230,7 @@ class Doublit
     protected function normalizeInterface(string $interface)
     {
         if (!interface_exists($interface)) {
-            throw new \InvalidArgumentException('Invalid trait "' . $interface . '"');
+            throw new InvalidArgumentException('Invalid interface "' . $interface . '"');
         }
         return ClassManager::normalizeClass($interface);
     }
@@ -234,12 +247,22 @@ class Doublit
             $this->traits[] = $this->normalizeTrait($trait);
         } else if (is_array($trait)) {
             foreach ($trait as $item) {
-                $this->traits[] = $this->normalizeTrait($item);
+                if(!is_string($item)){
+                    $this->throwTraitException();
+                }
+                $this->addTrait($item);
             }
         } else {
-            throw new \InvalidArgumentException('Invalid $interface argument type : expected string or array');
+            $this->throwTraitException();
         }
         return $this;
+    }
+
+    /**
+     * Throw an invalid trait exception
+     */
+    protected function throwTraitException(){
+        throw new InvalidArgumentException('Invalid $trait argument type : expected string or array of strings');
     }
 
     /**
@@ -261,7 +284,7 @@ class Doublit
     protected function normalizeTrait($trait)
     {
         if (!trait_exists($trait)) {
-            throw new \InvalidArgumentException('Invalid trait "' . $trait . '"');
+            throw new InvalidArgumentException('Invalid trait "' . $trait . '"');
         }
         return ClassManager::normalizeClass($trait);
     }
@@ -679,14 +702,20 @@ class Doublit
         }
 
         foreach ($double_definition['interfaces'] as $interface) {
-            if (!interface_exists($interface)) {
-                continue;
-            }
             $reflection_interface = ClassManager::getReflection($interface);
             $interface_methods = $reflection_interface->getMethods();
             foreach ($interface_methods as $interface_method) {
                 // Skip if double will already implement interface method by heritage
                 if ($double_definition['extends'] !== null && method_exists($double_definition['extends'], $interface_method->name)) {
+                    $extend_method = new \ReflectionMethod($double_definition['extends'], $interface_method->name);
+                    if(
+                        !$extend_method->isPublic()
+                        || ($interface_method->isStatic() && !$extend_method->isStatic())
+                        || (!$interface_method->isStatic() && $extend_method->isStatic())
+                        || ($interface_method->getReturnType() !== $extend_method->getReturnType())
+                    ){
+                        throw new InvalidArgumentException('Interface method '.$interface.'::'.$interface_method->name.' is not compatible with class method '.$double_definition['extends'].'::'.$interface_method->name);
+                    }
                     continue;
                 }
                 $reflection_method = new \ReflectionMethod($interface, $interface_method->name);

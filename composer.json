@@ -1,7 +1,7 @@
 {
     "name": "gealex/doublit",
-    "description": "Doublit : Double and test your PHP classes easily in PhpUnit",
-    "keywords": ["test", "testing", "test-doubles", "mock", "phpunit", "unit-testing"],
+    "description": "Doublit : A simple tool to test your class dependencies in PhpUnit",
+    "keywords": ["php", "test", "testing", "doubles", "mock", "phpunit", "unit-testing"],
     "homepage": "https://github.com/gealex/doublit",
     "license": "MIT",
     "authors": [

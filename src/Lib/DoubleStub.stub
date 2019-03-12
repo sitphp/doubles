@@ -131,12 +131,13 @@ class DoubleStub
         return self::$type;
     }
 
+
     /**
      * Check if method can be asserted and return method expectation
      *
      * @param $method
      * @return \Doublit\Lib\Expectation|\Doublit\Lib\ExpectationCollection
-     * @throws \ReflectionException
+     * @throws InvalidArgumentException
      */
     public static function _method($method)
     {

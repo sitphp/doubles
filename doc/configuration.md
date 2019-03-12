@@ -15,7 +15,7 @@ Or you can also use config methods :
         ->allowNonExistentClasses(true)
         ->getInstance();
     
-### Configuration list
+## Configuration list
 Here is a list of all available config parameters :
 
 - `allow_final_doubles` : Set this parameter to `false` to stop Doublit from trying to make doubles of final classes/methods. You can also use the `allowFinalDoubles method. Read more [here](#dealing-with-final-classes).
