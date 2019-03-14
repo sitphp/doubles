@@ -98,14 +98,12 @@ class Expectation
     function stub($return, $call_number = null)
     {
         $this->validateCallCount($call_number);
-        if (is_string($return)) {
-            $stub = Stubs::returnValue($return);
-        } else if (is_callable($return)) {
+        if (is_callable($return)) {
             $stub = Stubs::returnCallback($return);
         } else if ($return instanceof StubInterface) {
             $stub = $return;
         } else {
-            throw new InvalidArgumentException('Invalid "return" argument. Should be string, callable or instance of ' . StubInterface::class);
+            $stub = Stubs::returnValue($return);
         }
         if (isset($call_number)) {
             if (is_array($call_number)) {

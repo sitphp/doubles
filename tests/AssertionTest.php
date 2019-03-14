@@ -234,13 +234,6 @@ class AssertionTest extends TestCase
         $this->assertEquals('foo', $double->foo());
     }
 
-    public function testAssertStubUsingWrongArgumentShouldFail()
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $double = Doublit::mock(AssertionStandardClass::class)->getInstance();
-        $double::_method('foo')->stub(new \stdClass());
-    }
-
     public function testAssertStubUsingInvalidCallCountShouldFail()
     {
         $this->expectException(InvalidArgumentException::class);
