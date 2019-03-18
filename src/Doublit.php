@@ -779,7 +779,11 @@ class Doublit
                     if ($method->isStatic()) {
                         $method_code .= ' static';
                     }
-                    $method_code .= ' function ' . $method->getShortName() . '(';
+                    $method_code .= ' function ';
+                    if($method->returnsReference()){
+                        $method_code.='&';
+                    }
+                    $method_code .= $method->getShortName() . '(';
                     $first_param = true;
                     foreach ($method->getParameters() as $key => $param) {
                         if (!$first_param) {

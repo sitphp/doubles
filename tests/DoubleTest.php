@@ -450,6 +450,10 @@ class DoubleStandardClass
         $a++;
     }
 
+    public function &referenceMethod(){
+        return 1;
+    }
+
     public function variadic(...$a)
     {
         return $a;
