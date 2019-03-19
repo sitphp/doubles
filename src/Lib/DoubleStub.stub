@@ -32,6 +32,7 @@ class DoubleStub
     private static $_doublit_calls = [];
     private static $_doublit_config = [];
     private static $_doublit_reference;
+    private static $_doublit_reference_instance;
     protected static $_doublit_blacklisted_methods = [
         '_doublit_initialize',
         '_doublit_setConfig',
@@ -402,6 +403,7 @@ class DoubleStub
      */
     protected static function _doublit_assertMethodArgs()
     {
+        /** @var Expectation $expectation */
         foreach (self::_doublit_getExpectation() as $method => $expectation) {
             if (!isset(self::$_doublit_calls[$method])) {
                 continue;
@@ -416,18 +418,15 @@ class DoubleStub
                 if (is_callable($assert_args)) {
                     $assert_args(...$call['args']);
                 } else if (is_array($assert_args)) {
-                    $j = 0;
-                    $test_count = max(count($assert_args), count($call_args));
-                    while ($j < $test_count) {
-                        $constraint = isset($assert_args[$j]) ? $assert_args[$j] : Constraints::isNull();
-                        $value = isset($call_args[$j]) ? $call_args[$j] : null;
-                        if ($constraint instanceof Constraint) {
-                            Assert::assertThat($value, $constraint, 'Argument ' . ($j + 1) . ' of method "' . $method . '" didn\'t match expected value on call ' . $call_count);
+                    foreach($assert_args as $i => $assert_arg){
+                        if ($assert_arg instanceof Constraint) {
+                            Assert::assertThat($call_args[$i], $assert_arg, 'Argument ' . ($i + 1) . ' of method "' . $method . '" didn\'t match expected value on call ' . $call_count);
                         } else {
-                            Assert::assertEquals($constraint, $value, 'Argument ' . ($j + 1) . ' of method "' . $method . '" didn\'t match expected value on call ' . $call_count);
+                            Assert::assertEquals($assert_arg, $call_args[$i], 'Argument ' . ($i + 1) . ' of method "' . $method . '" didn\'t match expected value on call ' . $call_count);
                         }
-                        $j++;
                     }
+                } else if(is_string($assert_args) && $assert_args == 'no-args') {
+                    Assert::assertEquals([], $call_args, 'No arguments expected but '.count($call_args).'found on call ' . $call_count);
                 } else {
                     throw new RuntimeException('Invalid assertion type');
                 }

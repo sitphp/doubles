@@ -198,7 +198,7 @@ class Expectation
                 }
             }
         } else if ($arguments_assertions === null) {
-            $arguments_assertions = [null];
+            $arguments_assertions = 'no-args';
         } else if (!$arguments_assertions instanceof \Closure) {
             throw new InvalidArgumentException('Invalid "arguments_assertions" argument. Should be array, null or callback');
         }
@@ -315,7 +315,7 @@ class Expectation
     }
 
     /**
-     * Reset arguments assertios array
+     * Reset arguments assertions array
      */
     protected function resetArgs()
     {
@@ -325,7 +325,7 @@ class Expectation
     /**
      * Set default arguments constraints
      *
-     * @param $constraint
+     * @param $constraints
      */
     protected function setArgsDefault($constraints)
     {
@@ -336,7 +336,7 @@ class Expectation
      * Set arguments constraints on specific call
      *
      * @param $call_number
-     * @param callable $callback
+     * @param $constraints
      */
     protected function setArgsCall($call_number, $constraints)
     {

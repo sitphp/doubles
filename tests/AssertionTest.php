@@ -368,6 +368,12 @@ class AssertionTest extends TestCase
         $double->foo('arg_1', 'arg_2');
         $double->foo('arg_1', 'arg_2');
     }
+    public function testAssertArgsMethodWithArguments(){
+        $double = Doublit::mock(AssertionStandardClass::class)->getInstance();
+        $double::_method('arg')->args([1])->count(1);
+
+        $double->arg(1, false);
+    }
 
     public function testAssertArgsWithInvalidArgumentShouldFail()
     {
@@ -408,6 +414,11 @@ class AssertionStandardClass
     }
 
     function bar()
+    {
+        return 'bar';
+    }
+
+    function arg(int $arg1, $arg2 = false)
     {
         return 'bar';
     }

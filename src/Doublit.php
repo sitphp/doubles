@@ -331,12 +331,30 @@ class Doublit
         return trim($method);
     }
 
-    function setAliasClassType(string $type = 'class')
-    {
+    /**
+     * Make an alias trait
+     *
+     * @return $this
+     */
+    function aliasTrait(){
         if ($this->getType() != 'alias') {
             throw new LogicException('Alias class type can only be set for alias doubles');
         }
-        $this->class_type = $type;
+        $this->class_type = 'trait';
+        return $this;
+    }
+
+    /**
+     * Make an alias class abstract
+     *
+     * @return $this
+     */
+    function aliasAbstract(){
+        if ($this->getType() != 'alias') {
+            throw new LogicException('Alias class type can only be set for alias doubles');
+        }
+        $this->class_type = 'abstract class';
+        return $this;
     }
 
     function getClassType()
@@ -534,7 +552,7 @@ class Doublit
         }
 
         $class_type = $this->getClassType();
-        if ($class_type == 'class' && class_exists($original, false)) {
+        if (($class_type == 'class' || $class_type == 'abstract class') && class_exists($original, false)) {
             throw new InvalidArgumentException('Unable to make class alias of ' . $original . ' : class was already loaded');
         } else if ($class_type == 'trait' && trait_exists($original, false)) {
             throw new InvalidArgumentException('Unable to make trait alias of ' . $original . ' : class was already loaded');
@@ -547,6 +565,11 @@ class Doublit
         $double_definition['class_type'] = $class_type;
         $double_definition['short_name'] = $class_definition['short_name'];
         $double_definition['namespace'] = $class_definition['namespace'];
+
+        // Remove interfaces if trait alias
+        if($class_type == 'trait'){
+            $double_definition['interfaces'] = [];
+        }
 
         return $double_definition;
     }

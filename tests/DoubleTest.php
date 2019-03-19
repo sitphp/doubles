@@ -13,6 +13,7 @@
 
 namespace Tests;
 
+use Doublit\Exceptions\LogicException;
 use \Doublit\TestCase;
 use \Doublit\Lib\DoubleInterface;
 use \Doublit\Doublit;
@@ -218,7 +219,7 @@ class DoubleTest extends TestCase
     ---- */
     public function testNonExistentClassAliasDoubleShouldExtendOriginalClass()
     {
-        $double = Doublit::alias('NonExistentClass1', ['allow_non_existent_classes' => true])->getInstance();
+        $double = Doublit::alias('NonExistentClass1')->getInstance();
         $this->assertInstanceOf('NonExistentClass1', $double);
     }
 
@@ -226,6 +227,29 @@ class DoubleTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
         Doublit::alias('OtherNonExistentClass', ['allow_non_existent_classes' => false])->getInstance();
+    }
+
+    public function testTraitAlias()
+    {
+        $double = Doublit::alias('NonExistentTrait')
+            ->aliasTrait()
+            ->getClass();
+        $this->assertTrue(trait_exists($double));
+    }
+    public function testAbstractAlias()
+    {
+        $double = Doublit::alias('NonExistentAbstract')
+            ->aliasAbstract()
+            ->getClass();
+        $this->assertTrue(class_exists($double));
+    }
+    public function testAliasTraitShouldFailWithoutAlias(){
+        $this->expectException(LogicException::class);
+        $double = Doublit::dummy('NonExistentTrait')->aliasTrait();
+    }
+    public function testAliasAbstractShouldFailWithoutAlias(){
+        $this->expectException(LogicException::class);
+        $double = Doublit::dummy('NonExistentTrait')->aliasAbstract();
     }
 
     public function testAliasDoubleShouldFailWhenClassWasAlreadyLoaded()
