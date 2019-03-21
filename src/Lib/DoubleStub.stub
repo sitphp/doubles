@@ -177,20 +177,21 @@ class DoubleStub
 
         // Resolve return value
         $call_count = count(self::$_doublit_calls[$method]);
-        $type_params = self::_doublit_getMethodTypeParams($method, $call_count);
-        $type = $type_params[0];
+        $method_definition = self::_doublit_getMethodTypeDefinition($method, $call_count);
+        $type = $method_definition[0];
         switch ($type) {
             case 'dummy':
                 if($method == '__construct' && null !== $_doublit_reference = self::_doublit_getReference()){
                     $_doublit_reference_reflexion = new \ReflectionClass($_doublit_reference);
                     self::$_doublit_reference_instance = $_doublit_reference_reflexion->newInstanceWithoutConstructor();
+                    return;
                 } else {
                     $return = null;
                 }
                 break;
             case 'stub':
                 /** @var StubInterface $stub */
-                $stub = $type_params[1];
+                $stub = $method_definition[1];
                 $return = $stub->invoke([
                     'args' => $args,
                     'method' => $method,
@@ -237,7 +238,7 @@ class DoubleStub
 
         // Resolve return value
         $call_count = count(self::$_doublit_calls[$method]);
-        $type_params = self::_doublit_getMethodTypeParams($method, $call_count);
+        $type_params = self::_doublit_getMethodTypeDefinition($method, $call_count);
         $type = $type_params[0];
         switch ($type) {
             case 'dummy':
@@ -253,8 +254,7 @@ class DoubleStub
                 ]);
                 break;
             case 'mock':
-                $_doublit_reference = self::_doublit_getReference();
-                if ($_doublit_reference !== null) {
+                if (null !== $_doublit_reference = self::_doublit_getReference()) {
                     $return = $_doublit_reference::$method($args);
                 } else if (!get_parent_class(__CLASS__)) {
                     $return = null;
@@ -323,7 +323,7 @@ class DoubleStub
      * @return array
      * @throws \ReflectionException
      */
-    static function _doublit_getMethodTypeParams($method, $call_count)
+    static function _doublit_getMethodTypeDefinition($method, $call_count)
     {
         if (self::_doublit_hasExpectation($method)) {
             $expectation = self::_doublit_getExpectation($method);

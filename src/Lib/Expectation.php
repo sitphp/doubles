@@ -183,9 +183,7 @@ class Expectation
         $this->validateCallCount($call_number);
         if (is_array($arguments_assertions)) {
             foreach ($arguments_assertions as $key => $argument_assertion) {
-                if (is_string($argument_assertion) || is_int($argument_assertion)) {
-                    $arguments_assertions[$key] = Constraints::equalTo($argument_assertion);
-                } else if (is_bool($argument_assertion)) {
+                if (is_bool($argument_assertion)) {
                     if ($argument_assertion) {
                         $arguments_assertions[$key] = Constraints::isTrue();
                     } else {
@@ -193,8 +191,10 @@ class Expectation
                     }
                 } else if ($argument_assertion === null) {
                     $arguments_assertions[$key] = Constraints::isNull();
-                } else if (!$argument_assertion instanceof Constraint) {
-                    throw new InvalidArgumentException('Invalid "arguments_assertions" argument "' . $key . '". Should be string, int, null or instance of ' . Constraint::class);
+                } else if ($argument_assertion instanceof Constraint) {
+                    continue;
+                } else {
+                    $arguments_assertions[$key] = Constraints::equalTo($argument_assertion);
                 }
             }
         } else if ($arguments_assertions === null) {

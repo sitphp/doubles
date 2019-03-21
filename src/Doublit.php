@@ -457,7 +457,7 @@ class Doublit
         if (!empty($construct_params)) {
             return new $double(...$construct_params);
         } else {
-            $params = $double::_doublit_getMethodTypeParams('__construct', 1);
+            $params = $double::_doublit_getMethodTypeDefinition('__construct', 1);
             if ($params[0] == 'dummy') {
                 $_doublit_reference_reflexion = new \ReflectionClass($double);
                 return $_doublit_reference_reflexion->newInstanceWithoutConstructor();

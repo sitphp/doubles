@@ -15,8 +15,6 @@ namespace Tests;
 use Doublit\TestCase;
 use Doublit\Constraints;
 use PHPUnit\Framework\Constraint\ArrayHasKey;
-use PHPUnit\Framework\Constraint\ArraySubset;
-use PHPUnit\Framework\Constraint\Attribute;
 use PHPUnit\Framework\Constraint\Callback;
 use PHPUnit\Framework\Constraint\ClassHasAttribute;
 use PHPUnit\Framework\Constraint\ClassHasStaticAttribute;
@@ -143,12 +141,6 @@ class ConstraintTest extends TestCase
         $this->assertInstanceOf(IsNan::class, $constraint);
     }
 
-    public function testAttribute()
-    {
-        $constraint = Constraints::attribute(Constraints::equalTo('1'), 'name');
-        $this->assertInstanceOf(Attribute::class, $constraint);
-    }
-
     public function testContains()
     {
         $constraint = Constraints::contains('value');
@@ -177,12 +169,6 @@ class ConstraintTest extends TestCase
     {
         $constraint = Constraints::equalTo('3');
         $this->assertInstanceOf(IsEqual::class, $constraint);
-    }
-
-    public function testAttributeEqualTo()
-    {
-        $constraint = Constraints::attributeEqualTo('attribute', 'value');
-        $this->assertInstanceOf(Attribute::class, $constraint);
     }
 
     public function testIsEmpty()
@@ -303,12 +289,6 @@ class ConstraintTest extends TestCase
     {
         $constraint = Constraints::countOf('3');
         $this->assertInstanceOf(Count::class, $constraint);
-    }
-
-    public function testArraySubset()
-    {
-        $constraint = Constraints::arraySubset(new \ArrayIterator());
-        $this->assertInstanceOf(ArraySubset::class, $constraint);
     }
 
     public function testJsonMatch()

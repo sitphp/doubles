@@ -188,16 +188,6 @@ class Constraints
     }
 
 
-    /**
-     * @param Constraint $constraint
-     * @param $attributeName
-     * @return Attribute
-     */
-    public static function attribute(Constraint $constraint, $attributeName)
-    {
-        return Assert::attribute($constraint, $attributeName);
-    }
-
 
     /**
      * @param $value
@@ -242,17 +232,6 @@ class Constraints
 
 
     /**
-     * @param $subset
-     * @param bool $strict
-     * @return ArraySubset
-     */
-    public static function arraySubset($subset, $strict = false)
-    {
-        return new ArraySubset($subset, $strict);
-    }
-
-
-    /**
      * @param $value
      * @param float $delta
      * @param int $maxDepth
@@ -263,21 +242,6 @@ class Constraints
     public static function equalTo($value, $delta = 0.0, $maxDepth = 10, $canonicalize = false, $ignoreCase = false)
     {
         return Assert::equalTo($value, $delta, $maxDepth, $canonicalize, $ignoreCase);
-    }
-
-
-    /**
-     * @param $attributeName
-     * @param $value
-     * @param float $delta
-     * @param int $maxDepth
-     * @param bool $canonicalize
-     * @param bool $ignoreCase
-     * @return Attribute
-     */
-    public static function attributeEqualTo($attributeName, $value, $delta = 0.0, $maxDepth = 10, $canonicalize = false, $ignoreCase = false)
-    {
-        return Assert::attributeEqualTo($attributeName, $value, $delta, $maxDepth, $canonicalize, $ignoreCase);
     }
 
 
