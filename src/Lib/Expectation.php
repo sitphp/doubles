@@ -123,39 +123,39 @@ class Expectation
     /**
      * Set method count constraint
      *
-     * @param $range
+     * @param $count
      * @return $this
      * @throws \Exception
      */
-    function count($range)
+    function count($count)
     {
-        if ($this->isInt($range)) {
-            if ($range < 0) {
+        if ($this->isInt($count)) {
+            if ($count < 0) {
                 throw new InvalidArgumentException('Invalid "range" argument. Should be "i", ">i", "<i" ">=i", "<=i" (where i is a positive integer), callable or instance of ' . Constraint::class);
             }
-        } else if (is_string($range)) {
-            if ($range[0] == '>') {
-                if ($range[1] === '=') {
-                    $limit = ltrim($range, '>=');
+        } else if (is_string($count)) {
+            if ($count[0] == '>') {
+                if ($count[1] === '=') {
+                    $limit = ltrim($count, '>=');
                 } else {
-                    $limit = ltrim($range, '>');
+                    $limit = ltrim($count, '>');
                 }
                 if (!$this->isPositiveInt($limit)) {
                     throw new InvalidArgumentException('Invalid "range" argument. Should be "i", ">i", "<i" ">=i", "<=i" (where i is a positive integer), callable or instance of ' . Constraint::class);
                 }
-            } else if ($range[0] == '<') {
-                if ($range[1] == '=') {
-                    $limit = ltrim($range, '<=');
+            } else if ($count[0] == '<') {
+                if ($count[1] == '=') {
+                    $limit = ltrim($count, '<=');
                 } else {
-                    $limit = ltrim($range, '<');
+                    $limit = ltrim($count, '<');
                 }
                 if (!$this->isPositiveInt($limit)) {
                     throw new InvalidArgumentException('Invalid "range" argument. Should be "i", ">i", "<i" ">=i", "<=i" (where i is a positive integer), callable or instance of ' . Constraint::class);
                 }
 
-            } else if (strpos('-', $range)) {
-                $limits = explode('-', $range);
-                if ($range($limits) != 2) {
+            } else if (strpos('-', $count)) {
+                $limits = explode('-', $count);
+                if ($count($limits) != 2) {
                     throw new InvalidArgumentException('Invalid "range" argument. Should be "i", ">i", "<i" ">=i", "<=i" (where i is a positive integer), callable or instance of ' . Constraint::class);
                 }
                 foreach ($limits as $limit) {
@@ -164,10 +164,10 @@ class Expectation
                     }
                 }
             }
-        } else if (!$range instanceof Constraint && !is_callable($range)) {
+        } else if (!$count instanceof Constraint && !is_callable($count)) {
             throw new InvalidArgumentException('Invalid "range" argument. Should be "i", ">i", "<i" ">=i", "<=i" (where i is a positive integer), callable or instance of ' . Constraint::class);
         }
-        $this->count = $range;
+        $this->count = $count;
         return $this;
     }
 

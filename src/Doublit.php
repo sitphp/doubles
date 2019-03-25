@@ -873,8 +873,11 @@ class Doublit
                 }
                 $method_code .= '{ $args = func_get_args(); ';
                 foreach ($reference_params as $key => $reference_param) {
-                    $method_code .= '$args[' . $key . '] = &$' . $reference_param . '; ';
+                    $method_code .= 'if(isset($args['.$key.'])){
+                        $args[' . $key . '] = &$' . $reference_param . ';
+                    }';
                 }
+
                 if ($is_static) {
                     $method_code .= '$return = self::_doublit_handleStaticCall(__FUNCTION__, $args); ';
                 } else {
