@@ -397,7 +397,7 @@ class DoubleStub
             }
         }
     }
-    
+
     /**
      * Run arguments assertions
      */
