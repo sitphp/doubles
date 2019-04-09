@@ -46,6 +46,15 @@ To get an "alias" double use the `alias` method. Then add the methods you want t
     // Test class using the class "MyClass"
     $my_class_to_test = new MyClassToTest();
     $my_class_to_test->methodUsingMyClass();
+
+## Get a double class name
+Sometimes, you may need to instantiate the double yourself or you may not need a double instance at all (if you are working with a static class for example). You can get the class name of the generated double only with the `getClass` method.
+    
+    {.language-php} // Get class name of double of type "dummy" for class "MyClass"
+    $my_dummy_double_class = Doublit::dummy(MyClass::class)->getClass();
+    
+    $my_dummy_double_class::foo();
+    
         
 ## Implementing undefined methods
 When you create a double, it will automatically implements all the methods of the original class (unless you're creating an [alias](#double-instance-of-type-alias) double). If you want your double to implement some methods that are not present in the original class, use the `addMethod` method. If you want to implement a static method, prefix it with the "static:" keyword :
@@ -85,10 +94,4 @@ Double class names are automaticaly generated but you can also set the name of t
     $my_dummy_double_class = Doublit::dummy(MyClass::class)
 		->setName('MyDoubleClassName')
 		->getInstance();
-
-## Non instantiated class double
-Sometimes, you may need to instantiate the double yourself or you may not need a double instance at all (if you are working with a static class for example). You can get the class name of the generated double only with the `getName` method.
-    
-    {.language-php} // Get class name of double of type "dummy" for class "MyClass"
-    $my_dummy_double_class_name = Doublit::dummy(MyClass::class, MyInterfaceToImplement::class)->getName();
   
