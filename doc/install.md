@@ -9,7 +9,7 @@ Once you have composer installed, add the line `"gealex/doublit": "~2.1"` in the
 
     {.language-json}{
         "require-dev": {
-            "gealex/doublit": "~2.1"
+            "gealex/doublit": "~2.1.0"
         }
     }
 
