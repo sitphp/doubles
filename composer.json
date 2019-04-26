@@ -11,9 +11,7 @@
         }
     ],
     "require": {
-        "php": ">=7"
-    },
-    "require-dev": {
+        "php": ">=7",
         "phpunit/phpunit": "~6.5|~7.0"
     },
     "autoload": {
