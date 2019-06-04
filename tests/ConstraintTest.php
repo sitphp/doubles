@@ -1,19 +1,17 @@
 <?php
 /**
+ * This file is part of the "sitphp/doubles" package.
  *
- * This file is part of the Doublit package.
- *
- * @license    MIT License
- * @link       https://github.com/gealex/doublit
- * @copyright  Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
- *
+ *  @license MIT License
+ *  @link https://github.com/sitphp/doubles
+ *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
 namespace Tests;
 
 
-use Doublit\TestCase;
-use Doublit\Constraints;
+use Doubles\TestCase;
+use Doubles\Constraints;
 use PHPUnit\Framework\Constraint\ArrayHasKey;
 use PHPUnit\Framework\Constraint\Callback;
 use PHPUnit\Framework\Constraint\ClassHasAttribute;
@@ -248,6 +246,30 @@ class ConstraintTest extends TestCase
         $constraint = Constraints::isType('string');
         $this->assertInstanceOf(IsType::class, $constraint);
     }
+
+    public function testTypeShorthands(){
+        $this->assertInstanceOf(IsType::class, Constraints::isArray());
+        $this->assertInstanceOf(LogicalNot::class, Constraints::isNotArray());
+        $this->assertInstanceOf(IsType::class, Constraints::isBool());
+        $this->assertInstanceOf(LogicalNot::class, Constraints::isNotBool());
+        $this->assertInstanceOf(IsType::class, Constraints::isFloat());
+        $this->assertInstanceOf(LogicalNot::class, Constraints::isNotFloat());
+        $this->assertInstanceOf(IsType::class, Constraints::isInt());
+        $this->assertInstanceOf(LogicalNot::class, Constraints::isNotInt());
+        $this->assertInstanceOf(IsType::class, Constraints::isNumeric());
+        $this->assertInstanceOf(LogicalNot::class, Constraints::isNotNumeric());
+        $this->assertInstanceOf(IsType::class, Constraints::isObject());
+        $this->assertInstanceOf(LogicalNot::class, Constraints::isNotObject());
+        $this->assertInstanceOf(IsType::class, Constraints::isResource());
+        $this->assertInstanceOf(LogicalNot::class, Constraints::isNotResource());
+        $this->assertInstanceOf(IsType::class, Constraints::isString());
+        $this->assertInstanceOf(LogicalNot::class, Constraints::isNotString());
+        $this->assertInstanceOf(IsType::class, Constraints::isScalar());
+        $this->assertInstanceOf(LogicalNot::class, Constraints::isNotScalar());
+        $this->assertInstanceOf(IsType::class, Constraints::isCallable());
+        $this->assertInstanceOf(LogicalNot::class, Constraints::isNotCallable());
+    }
+
 
     public function testLessThan()
     {

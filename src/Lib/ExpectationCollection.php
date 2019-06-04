@@ -1,17 +1,15 @@
 <?php
 /**
- * *
- *  *
- *  * This file is part of the Doublit package.
- *  *
- *  * @license    MIT License
- *  * @link       https://github.com/gealex/doublit
- *  * @copyright  Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
- *  *
+ * This file is part of the "sitphp/doubles" package.
  *
+ *  @license MIT License
+ *  @link https://github.com/sitphp/doubles
+ *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
-namespace Doublit\Lib;
+namespace Doubles\Lib;
+
+use Doubles\Stubs;
 
 class ExpectationCollection
 {
@@ -26,6 +24,7 @@ class ExpectationCollection
      */
     function dummy($call_number = null)
     {
+        /** @var Expectation $expectation */
         foreach ($this->expectations as $expectation) {
             $expectation->dummy($call_number);
         }
@@ -41,8 +40,17 @@ class ExpectationCollection
      */
     function mock($call_number = null)
     {
+        /** @var Expectation $expectation */
         foreach ($this->expectations as $expectation) {
             $expectation->mock($call_number);
+        }
+        return $this;
+    }
+
+    function default($call_number = null){
+        /** @var Expectation $expectation */
+        foreach ($this->expectations as $expectation) {
+            $expectation->default($call_number);
         }
         return $this;
     }
@@ -55,12 +63,19 @@ class ExpectationCollection
      * @param null $call_number
      * @return ExpectationCollection
      */
-    function stub($return, $call_number = null)
+    function return($return, $call_number = null)
     {
+        /** @var Expectation $expectation */
         foreach ($this->expectations as $expectation) {
-            $expectation->stub($return, $call_number);
+            $expectation->return($return, $call_number);
         }
         return $this;
+    }
+
+    function whenArgsReturn(array $args, $return, $call_number){
+        foreach ($this->expectations as $expectation) {
+            $expectation->return(Stubs::returnValueMap($args, $return), $call_number);
+        }
     }
 
     /**
@@ -88,6 +103,7 @@ class ExpectationCollection
      */
     function args($arguments_assertions, $call_number = null)
     {
+        /** @var Expectation $expectation */
         foreach ($this->expectations as $expectation) {
             $expectation->args($arguments_assertions, $call_number);
         }

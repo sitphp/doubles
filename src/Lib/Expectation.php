@@ -1,23 +1,19 @@
 <?php
 /**
- * *
- *  *
- *  * This file is part of the Doublit package.
- *  *
- *  * @license    MIT License
- *  * @link       https://github.com/gealex/doublit
- *  * @copyright  Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
- *  *
+ * This file is part of the "sitphp/doubles" package.
  *
+ *  @license MIT License
+ *  @link https://github.com/sitphp/doubles
+ *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
-namespace Doublit\Lib;
+namespace Doubles\Lib;
 
-use \Doublit\Stubs;
-use \Doublit\Constraints;
-use \Doublit\Stubs\StubInterface;
+use \Doubles\Stubs;
+use \Doubles\Constraints;
+use \Doubles\Stubs\StubInterface;
 use PHPUnit\Framework\Constraint\Constraint;
-use \Doublit\Exceptions\InvalidArgumentException;
+use \Doubles\Exceptions\InvalidArgumentException;
 
 class Expectation
 {
@@ -46,15 +42,11 @@ class Expectation
      */
     function dummy($call_number = null)
     {
-        if (isset($call_number) && is_array($call_number)) {
-            foreach ($call_number as $value) {
-                $this->dummy($value);
+        $call_counts = $this->validateCallCounts($call_number);
+        if ($call_counts !== null) {
+            foreach($call_counts as $value) {
+                $this->setTypeCall($value, ['dummy']);
             }
-            return $this;
-        }
-        $this->validateCallCount($call_number);
-        if (isset($call_number)) {
-            $this->setTypeCall($call_number, ['dummy']);
         } else {
             $this->resetType();
             $this->setTypeDefault(['dummy']);
@@ -71,20 +63,27 @@ class Expectation
      */
     function mock($call_number = null)
     {
-        if (isset($call_number) && is_array($call_number)) {
-            foreach ($call_number as $value) {
-                $this->mock($value);
+        $call_counts = $this->validateCallCounts($call_number);
+        if ($call_counts !== null) {
+            foreach($call_counts as $value){
+                $this->setTypeCall($value, ['mock']);
             }
-            return $this;
-        }
-        $this->validateCallCount($call_number);
-        if (isset($call_number)) {
-            $this->setTypeCall($call_number, ['mock']);
         } else {
             $this->resetType();
             $this->setTypeDefault(['mock']);
         }
         return $this;
+    }
+
+    function default($call_number = null){
+        $call_counts = $this->validateCallCounts($call_number);
+        if($call_counts !== null){
+            foreach($call_number as $value){
+                $this->resetTypeCall($value);
+            }
+        } else {
+            $this->resetType();
+        }
     }
 
     /**
@@ -95,9 +94,9 @@ class Expectation
      * @param null $call_number
      * @return Expectation
      */
-    function stub($return, $call_number = null)
+    function return($return, $call_number = null)
     {
-        $this->validateCallCount($call_number);
+        $call_counts = $this->validateCallCounts($call_number);
         if (is_callable($return)) {
             $stub = Stubs::returnCallback($return);
         } else if ($return instanceof StubInterface) {
@@ -105,13 +104,9 @@ class Expectation
         } else {
             $stub = Stubs::returnValue($return);
         }
-        if (isset($call_number)) {
-            if (is_array($call_number)) {
-                foreach ($call_number as $value) {
-                    $this->setTypeCall($value, ['stub', $stub]);
-                }
-            } else {
-                $this->setTypeCall($call_number, ['stub', $stub]);
+        if ($call_counts !== null) {
+            foreach ($call_counts as $value) {
+                $this->setTypeCall($value, ['stub', $stub]);
             }
         } else {
             $this->resetType();
@@ -180,7 +175,7 @@ class Expectation
      */
     function args($arguments_assertions, $call_number = null)
     {
-        $this->validateCallCount($call_number);
+        $call_counts = $this->validateCallCounts($call_number);
         if (is_array($arguments_assertions)) {
             foreach ($arguments_assertions as $key => $argument_assertion) {
                 if (is_bool($argument_assertion)) {
@@ -203,13 +198,9 @@ class Expectation
             throw new InvalidArgumentException('Invalid "arguments_assertions" argument. Should be array, null or callback');
         }
 
-        if (isset($call_number)) {
-            if (is_array($call_number)) {
-                foreach ($call_number as $value) {
-                    $this->setArgsCall($value, $arguments_assertions);
-                }
-            } else {
-                $this->setArgsCall($call_number, $arguments_assertions);
+        if ($call_counts !== null) {
+            foreach ($call_counts as $value) {
+                $this->setArgsCall($value, $arguments_assertions);
             }
         } else {
             $this->resetArgs();
@@ -231,19 +222,23 @@ class Expectation
     /**
      * Validate call count value
      *
-     * @param $call_count
+     * @param $call_counts
+     * @return null
      */
-    protected function validateCallCount($call_count)
+    protected function validateCallCounts($call_counts)
     {
-        if (is_array($call_count)) {
-            foreach ($call_count as $value) {
-                $this->validateCallCount($value);
+        if($call_counts === null){
+            return null;
+        }
+        if(!is_array($call_counts)){
+            $call_counts = [$call_counts];
+        }
+        foreach ($call_counts as $value) {
+            if (!$this->isPositiveInt($value) || $value < 1) {
+                throw new InvalidArgumentException('Argument "call_number" should be a positive int');
             }
-            return;
         }
-        if ($call_count !== null && (!$this->isInt($call_count) || $call_count < 1)) {
-            throw new InvalidArgumentException('Argument "call_number" should be a positive int');
-        }
+        return $call_counts;
     }
 
 
@@ -272,6 +267,10 @@ class Expectation
         $this->type = [];
     }
 
+    protected function resetTypeCall(int $call_number){
+        unset($this->type[$call_number]);
+    }
+
     /**
      * Set method default type
      *
@@ -280,6 +279,10 @@ class Expectation
     protected function setTypeDefault(array $type)
     {
         $this->type['_default'] = $type;
+    }
+
+    protected function resetTypeDefault(){
+        $this->type['_default'] = null;
     }
 
     /**

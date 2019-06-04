@@ -1,19 +1,19 @@
-# Doublit - Double and test PHP classes easily in PhpUnit
+# Double and test PHP classes easily in PhpUnit
 
-[![Build Status](https://travis-ci.org/gealex/doublit.svg?branch=master)](https://travis-ci.org/gealex/doublit)
+[![Build Status](https://travis-ci.org/sitphp/doubles.svg?branch=master)](https://travis-ci.org/sitphp/doubles)
 
-Doublit can help you to test your PHP classes by generating doubles that look like the original classes but can be manipulated and tested (sort of a copy of a class). These doubles then can then be used instead of the original classes for your test. Doublit can create doubles of any kind of class, interface or trait. 
+The "sitphp/doubles" library can help you to test your PHP classes by generating doubles that look like the original classes but can be manipulated and tested (sort of a copy of a class). These doubles then can then be used instead of the original classes for your test. This library can create doubles of any kind of class, interface or trait. 
 
-See full documentation at [https://getdoublit.com](https://getdoublit.com)
+See full documentation at [https://sitphp.com/doubles/intro](https://sitphp.com/doubles/intro)
 
 
 ## Installation
 
-Add the line `"gealex/doublit": "~2.1.0"` in the `"require-dev"` section of your composer.json file :
+Add the line `"sitphp/doubles": "~2.1.0"` in the `"require-dev"` section of your composer.json file :
     
     {
         "require-dev": {
-            "gealex/doublit": "~2.1.0"
+            "sitphp/doubles": "~2.1.0"
         }
     }
 
@@ -21,7 +21,7 @@ And run the following command :
     
     $ composer update
     
-This will install the latest version of Doublit with the required PhpUnit package.
+This will install the latest version of the "sitphp/doubles" library with the required PhpUnit package.
 
 ## Creating a double
 
@@ -29,14 +29,14 @@ A double is called a "dummy" when all the methods of the original class are over
 
     ```php
     // Get a double instance of type "dummy" for class "MyClass"
-    $my_double = Doublit::dummy(MyClass::class)->getInstance();
+    $my_double = Double::dummy(MyClass::class)->getInstance();
     ```
 
 A double is called a "mock" when all the methods of the original class are overwritten to behave the same as in the original class. To get a "mock" double instance, use the `mock` method :
    
     ```php
     // Get a double instance of type "mock" for class "MyClass"
-    $my_double = Doublit::mock(MyClass::class)->getInstance();
+    $my_double = Double::mock(MyClass::class)->getInstance();
     ```
    
 For more details : [Read the doc on creating doubles](doc/creating_doubles.md)
@@ -60,7 +60,7 @@ To change the return value of a method, use the `stub` method. :
     
     ```php
     // Make method "myMethod" return "hello"
-    $my_double::_method('myMethod')->stub('hello');
+    $my_double::_method('myMethod')->return('hello');
     ```
 
 For more details : [Read the doc on testing doubles](doc/testing_doubles.md)
@@ -71,7 +71,7 @@ You define the configuration for a specific double using the 2nd argument of the
 
     ```php
     // Get double instance with config
-    $my_double = Doublit::dummy(MyClass::class, [
+    $my_double = Double::dummy(MyClass::class, [
         'allow_final_doubles' => true,
         'allow_non_existent_classes' => true
     ])->getInstance();
@@ -79,7 +79,7 @@ You define the configuration for a specific double using the 2nd argument of the
 	
 Here is a list of all available config parameters :
 
-- `allow_final_doubles` : Set this parameter to `false` to stop Doublit from trying to make doubles of final classes/methods.
+- `allow_final_doubles` : Set this parameter to `false` to stop trying to make doubles of final classes/methods.
 - `allow_protected_methods` : Set this parameter to `false` to disallow testing protected methods.
 - `allow_non_existent_classes` : Set this parameter to `false` to disallow alias doubles of non existent classes.
 - `test_unexpected_methods` : Set this parameter to `true` to automatically receive an assertion error whenever an unexpected method is called.
@@ -89,7 +89,7 @@ For more details : [Read the doc on configuration](doc/configuration.md)
 ## About
 
 ### License
-Doublit is licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This library is licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
 ### Author
 Alexandre Geiswiller - [alexandre.geiswiller@gmail.com](mailto:alexandre.geiswiller@gmail.com).

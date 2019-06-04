@@ -1,27 +1,23 @@
 <?php
 /**
- * *
- *  *
- *  * This file is part of the Doublit package.
- *  *
- *  * @license    MIT License
- *  * @link       https://github.com/gealex/doublit
- *  * @copyright  Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
- *  *
+ * This file is part of the "sitphp/doubles" package.
  *
+ *  @license MIT License
+ *  @link https://github.com/sitphp/doubles
+ *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
-namespace Doublit;
+namespace Doubles;
 
-use \Doublit\Exceptions\LogicException;
-use Doublit\Lib\DoubleInterface;
-use \Doublit\Lib\DoubleStub;
-use \Doublit\Lib\EvalLoader;
-use \Doublit\Lib\ClassManager;
-use \Doublit\Exceptions\InvalidArgumentException;
-use \Doublit\Exceptions\RuntimeException;
+use \Doubles\Exceptions\LogicException;
+use \Doubles\Lib\DoubleInterface;
+use \Doubles\Lib\DoubleStub;
+use \Doubles\Lib\EvalLoader;
+use \Doubles\Lib\ClassManager;
+use \Doubles\Exceptions\InvalidArgumentException;
+use \Doubles\Exceptions\RuntimeException;
 
-class Doublit
+class Double
 {
 
     protected static $type_hints = ['self', 'array', 'callable', 'bool', 'float', 'int', 'string'];
@@ -70,7 +66,7 @@ class Doublit
      *
      * @param string $class
      * @param array|null $config
-     * @return Doublit
+     * @return Double
      */
     static function dummy(string $class, array $config = null)
     {
@@ -82,7 +78,7 @@ class Doublit
      *
      * @param string $class
      * @param array|null $config
-     * @return Doublit
+     * @return Double
      */
     static function mock(string $class, array $config = null)
     {
@@ -94,7 +90,7 @@ class Doublit
      *
      * @param string $class
      * @param array|null $config
-     * @return Doublit
+     * @return Double
      */
     static function alias(string $class, array $config = null)
     {
@@ -102,7 +98,7 @@ class Doublit
     }
 
     /**
-     * Doublit constructor
+     * Doubles constructor
      *
      * @param string $type
      * @param string $class
@@ -457,10 +453,10 @@ class Doublit
         if (!empty($construct_params)) {
             return new $double(...$construct_params);
         } else {
-            $params = $double::_doublit_getMethodTypeDefinition('__construct', 1);
+            $params = $double::_double_getMethodTypeDefinition('__construct', 1);
             if ($params[0] == 'dummy') {
-                $_doublit_reference_reflexion = new \ReflectionClass($double);
-                return $_doublit_reference_reflexion->newInstanceWithoutConstructor();
+                $__reference_reflexion = new \ReflectionClass($double);
+                return $__reference_reflexion->newInstanceWithoutConstructor();
             }
             return new $double();
         }
@@ -482,14 +478,13 @@ class Doublit
 
         // Prepare double
         /* @var $double DoubleStub */
-        $double::_doublit_initialize($double_definition['type'], [
+        $double::_double_initialize($double_definition['type'], [
             'allow_protected_methods' => $this->allow_protected_methods,
             'test_unexpected_methods' => $this->test_unexpected_methods,
             'reference' => $double_definition['reference']
         ]);
 
         // Save double with its definition
-
         self::addDouble($double, $double_definition);
 
         return $double;
@@ -596,7 +591,7 @@ class Doublit
             }
         }
         if (ClassManager::hasFinalCalls($original) && $this->allow_final_doubles && !$reflection_class->isInternal()) {
-            $new_class_name = self::generateDoublitClassName();
+            $new_class_name = self::generateDoubleClassName();
             $new_class_code = ClassManager::getCode($original, ['clean_final' => true]);
             $new_class_code = preg_replace('#class\s+' . $reflection_class->getShortName() . '\s*{#', 'class ' . $new_class_name . '{', $new_class_code);
             EvalLoader::load($new_class_code);
@@ -633,7 +628,7 @@ class Doublit
 
         $double_extends = '';
         $reflection_class = ClassManager::getReflection($original);
-        $new_class_name = self::generateDoublitClassName($reflection_class->getName());
+        $new_class_name = self::generateDoubleClassName($reflection_class->getName());
         // Trait has final calls, prepare a similar class without final calls
         if ($this->allow_final_doubles && !$reflection_class->isInternal() && ClassManager::hasFinalCalls($original)) {
             $new_class_code = ClassManager::getCode($original, ['clean_final' => true]);
@@ -698,7 +693,7 @@ class Doublit
             $double_short_name = $class_parse['short_name'];
             $double_namespace = $class_parse['namespace'];
         } else {
-            $double_short_name = self::generateDoublitClassName($class);
+            $double_short_name = self::generateDoubleClassName($class);
             $double_namespace = null;
         }
         return ['namespace' => $double_namespace, 'short_name' => $double_short_name];
@@ -757,9 +752,9 @@ class Doublit
         }
         $code = file_get_contents(__DIR__ . '/Lib/DoubleStub.stub');
         if (isset($double_definition['namespace'])) {
-            $code = str_replace('namespace Doublit\Lib;', 'namespace ' . $double_definition['namespace'] . ';', $code);
+            $code = str_replace('namespace Doubles\Lib;', 'namespace ' . $double_definition['namespace'] . ';', $code);
         } else {
-            $code = str_replace('namespace Doublit\Lib;', '', $code);
+            $code = str_replace('namespace Doubles\Lib;', '', $code);
         }
         $class_code = $double_definition['class_type'] . ' ' . trim($double_definition['short_name'], '\\');
         if (isset($double_definition['extends'])) {
@@ -879,9 +874,9 @@ class Doublit
                 }
 
                 if ($is_static) {
-                    $method_code .= '$return = self::_doublit_handleStaticCall(__FUNCTION__, $args); ';
+                    $method_code .= '$return = self::_double_handleStaticCall(__FUNCTION__, $args); ';
                 } else {
-                    $method_code .= '$return = $this->_doublit_handleInstanceCall(__FUNCTION__, $args); ';
+                    $method_code .= '$return = $this->_double_handleInstanceCall(__FUNCTION__, $args); ';
                 }
                 $method_code .= 'return $return; }';
                 $methods_code[] = $method_code;
@@ -897,9 +892,9 @@ class Doublit
      * @param null $from
      * @return string
      */
-    protected static function generateDoublitClassName($from = null)
+    protected static function generateDoubleClassName($from = null)
     {
-        $class_name = 'Doublit_' . self::$count;
+        $class_name = 'Double_' . self::$count;
         if ($from) {
             $class_name .= '_' . str_replace('\\', '_', trim($from, '\\'));
         }
@@ -933,7 +928,7 @@ class Doublit
     {
         /* @var $double DoubleStub */
         foreach (self::getDouble() as $double => $double_definition) {
-            $double::_doublit_close();
+            $double::_double_close();
         }
     }
 
