@@ -27,31 +27,41 @@ This will install the latest version of Doublit with the required PhpUnit packag
 
 A double is called a "dummy" when all the methods of the original class are overwritten to return `null`. To get a "dummy" double instance, use the `dummy` method :
 
+    ```php
     // Get a double instance of type "dummy" for class "MyClass"
     $my_double = Doublit::dummy(MyClass::class)->getInstance();
+    ```
 
 A double is called a "mock" when all the methods of the original class are overwritten to behave the same as in the original class. To get a "mock" double instance, use the `mock` method :
    
+    ```php
     // Get a double instance of type "mock" for class "MyClass"
     $my_double = Doublit::mock(MyClass::class)->getInstance();
+    ```
    
 For more details : [Read the doc on creating doubles](doc/creating_doubles.md)
 
 ## Testing a double
 To test how many times a double method is called, use the `count` method :
     
+    ```php
     // Test that the method "myMethod" is called a least one time
     $double::_method('myMethod')->count('>=1');
+    ```
 
 To test the values of the arguments passed to a double method, use the `args` method :
 
+    ```php
     // Test that the arguments passed to method "myMethod" are "value1" and "value2"
     $double::_method('myMethod')->args(['value1', 'value2']);
+    ```
 
 To change the return value of a method, use the `stub` method. :
     
+    ```php
     // Make method "myMethod" return "hello"
     $my_double::_method('myMethod')->stub('hello');
+    ```
 
 For more details : [Read the doc on testing doubles](doc/testing_doubles.md)
 
@@ -59,11 +69,13 @@ For more details : [Read the doc on testing doubles](doc/testing_doubles.md)
 
 You define the configuration for a specific double using the 2nd argument of the `dummy` and `mock` methods :</p>
 
-    {.language-php} // Get double instance with config
+    ```php
+    // Get double instance with config
     $my_double = Doublit::dummy(MyClass::class, [
         'allow_final_doubles' => true,
         'allow_non_existent_classes' => true
     ])->getInstance();
+    ```
 	
 Here is a list of all available config parameters :
 
