@@ -137,7 +137,7 @@ class DoubleStub
      * Check if method can be asserted and return method expectation
      *
      * @param $method
-     * @return \Doublit\Lib\Expectation|\Doublit\Lib\ExpectationCollection
+     * @return \Doublit\Lib\Expectation
      * @throws InvalidArgumentException
      */
     public static function _method($method)
