@@ -1,22 +1,19 @@
 <?php
 /**
- * *
- *  *
- *  * This file is part of the Doublit package.
- *  *
- *  * @license    MIT License
- *  * @link       https://github.com/gealex/doublit
- *  * @copyright  Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
- *  *
+ * This file is part of the "sitphp/doubles" package.
  *
+ *  @license MIT License
+ *  @link https://github.com/sitphp/doubles
+ *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
 namespace Tests;
 
-use \Doublit\Doublit;
-use \Doublit\Exceptions\InvalidArgumentException;
-use \Doublit\Stubs;
-use \Doublit\TestCase;
+use Doubles\Constraints;
+use \Doubles\Double;
+use \Doubles\Exceptions\InvalidArgumentException;
+use \Doubles\Stubs;
+use \Doubles\TestCase;
 
 class StubTest extends TestCase
 {
@@ -25,8 +22,8 @@ class StubTest extends TestCase
     ---- */
     function testReturnValueShouldReturnValue()
     {
-        $double = Doublit::mock(StubStandardClass::class)->getInstance();
-        $double::_method('foo')->stub(Stubs::returnValue('value'));
+        $double = Double::mock(StubStandardClass::class)->getInstance();
+        $double::_method('foo')->return(Stubs::returnValue('value'));
         $this->assertEquals('value', $double->foo());
     }
 
@@ -35,23 +32,23 @@ class StubTest extends TestCase
     ---- */
     function testReturnArgumentShouldReturnArgument()
     {
-        $double = Doublit::mock(StubStandardClass::class)->getInstance();
-        $double::_method('foo')->stub(Stubs::returnArgument(2));
+        $double = Double::mock(StubStandardClass::class)->getInstance();
+        $double::_method('foo')->return(Stubs::returnArgument(2));
         $this->assertEquals('arg_2', $double->foo('arg_1', 'arg_2'));
     }
 
     function testReturnArgumentShouldFailWhenArgIndexIsNotValid()
     {
         $this->expectException(InvalidArgumentException::class);
-        $double = Doublit::mock(StubStandardClass::class)->getInstance();
-        $double::_method('foo')->stub(Stubs::returnArgument('string'));
+        $double = Double::mock(StubStandardClass::class)->getInstance();
+        $double::_method('foo')->return(Stubs::returnArgument('string'));
     }
 
     function testReturnArgumentShouldFailWhenArgIndexIsNotDefined()
     {
         $this->expectException(InvalidArgumentException::class);
-        $double = Doublit::mock(StubStandardClass::class)->getInstance();
-        $double::_method('foo')->stub(Stubs::returnArgument(2));
+        $double = Double::mock(StubStandardClass::class)->getInstance();
+        $double::_method('foo')->return(Stubs::returnArgument(2));
         $double->foo();
     }
 
@@ -60,8 +57,8 @@ class StubTest extends TestCase
     ---- */
     function testReturnCallbackWithAnonymousFunctionShouldReturnCallbackResult()
     {
-        $double = Doublit::mock(StubStandardClass::class)->getInstance();
-        $double::_method('foo')->stub(Stubs::returnCallback(function ($a, $b) {
+        $double = Double::mock(StubStandardClass::class)->getInstance();
+        $double::_method('foo')->return(Stubs::returnCallback(function ($a, $b) {
             return $a + $b;
         }));
         $this->assertEquals(5, $double->foo('2', '3'));
@@ -69,16 +66,16 @@ class StubTest extends TestCase
 
     function testReturnCallbackWithUserFunctionShouldReturnCallbackResult()
     {
-        $double = Doublit::mock(StubStandardClass::class)->getInstance();
-        $double::_method('foo')->stub(Stubs::returnCallback([new MyCallbackClass(), 'myMethod']));
+        $double = Double::mock(StubStandardClass::class)->getInstance();
+        $double::_method('foo')->return(Stubs::returnCallback([new MyCallbackClass(), 'myMethod']));
         $this->assertEquals(5, $double->foo('2', '3'));
     }
 
     function testReturnCallbackNonValidArgumentShouldFail()
     {
         $this->expectException(InvalidArgumentException::class);
-        $double = Doublit::mock(StubStandardClass::class)->getInstance();
-        $double::_method('foo')->stub(Stubs::returnCallback(Stubs::returnValue('value')));
+        $double = Double::mock(StubStandardClass::class)->getInstance();
+        $double::_method('foo')->return(Stubs::returnCallback(Stubs::returnValue('value')));
     }
 
     /* -----
@@ -86,15 +83,15 @@ class StubTest extends TestCase
     ---- */
     function testReturnSelfOfInstanceDoubleShouldReturnSelf()
     {
-        $double = Doublit::mock(StubStandardClass::class)->getInstance();
-        $double::_method('foo')->stub(Stubs::returnSelf());
+        $double = Double::mock(StubStandardClass::class)->getInstance();
+        $double::_method('foo')->return(Stubs::returnSelf());
         $this->assertSame($double, $double->foo());
     }
 
     function testReturnSelfOfStaticDoubleShouldReturnSelf()
     {
-        $double = Doublit::mock(StubStandardClass::class)->getClass();
-        $double::_method('bar')->stub(Stubs::returnSelf());
+        $double = Double::mock(StubStandardClass::class)->getClass();
+        $double::_method('bar')->return(Stubs::returnSelf());
         $this->assertSame($double, $double::bar());
     }
 
@@ -103,17 +100,45 @@ class StubTest extends TestCase
     ---- */
     function testReturnValueMapShouldReturnMappedValue()
     {
-        $double = Doublit::mock(StubStandardClass::class)->getInstance();
-        $double::_method('foo')->stub(Stubs::returnValueMap([['pink', 'yellow'], ['one', 'two']], ['colors', 'numbers']));
+        $double = Double::mock(StubStandardClass::class)->getInstance();
+        $double::_method('foo')->return(Stubs::returnValueMap([
+            ['pink', 'yellow'], ['one', 'two']
+        ], ['colors', 'numbers']));
         $this->assertEquals('colors', $double->foo('pink', 'yellow'));
         $this->assertEquals('numbers', $double->foo('one', 'two'));
+    }
+
+    function testReturnValueMapWithConstraints()
+    {
+        $double = Double::mock(StubStandardClass::class)->getInstance();
+        $double::_method('foo')->return(Stubs::returnValueMap([
+            [Constraints::isTrue(), Constraints::isFalse()]
+        ], ['colors']));
+        $this->assertEquals('colors', $double->foo(true, false));
+        $this->assertEquals('foo', $double->foo(true, 'two'));
     }
 
     function testReturnValueMapWithWrongReturnCountShouldFail()
     {
         $this->expectException(InvalidArgumentException::class);
-        $double = Doublit::mock(StubStandardClass::class)->getInstance();
-        $double::_method('foo')->stub(Stubs::returnValueMap([['pink', 'yellow'], ['one', 'two']], ['colors']));
+        $double = Double::mock(StubStandardClass::class)->getInstance();
+        $double::_method('foo')->return(Stubs::returnValueMap([['pink', 'yellow'], ['one', 'two']], ['colors']));
+    }
+
+    function testReturnValueMapWithNonMappedValue(){
+        $double = Double::mock(StubStandardClass::class)->getInstance();
+        $double::_method('foo')->return(Stubs::returnValueMap([
+            ['pink', 'yellow'], ['one', 'two']
+        ], ['colors', 'numbers']));
+        $this->assertEquals('foo',$double->foo('pink', 'red'));
+    }
+
+    function testReturnValueMapWithNonMappedValueStatic(){
+        $double = Double::mock(StubStandardClass::class)->getClass();
+        $double::_method('bar')->return(Stubs::returnValueMap([
+            ['pink', 'yellow'], ['one', 'two']
+        ], ['colors', 'numbers']));
+        $this->assertEquals('foo',$double::bar('pink', 'red'));
     }
 
     /* -----
@@ -122,16 +147,16 @@ class StubTest extends TestCase
     function testThrowExceptionShouldThrowExceptionOfCorrectType()
     {
         $this->expectException(MyException::class);
-        $double = Doublit::mock(StubStandardClass::class)->getInstance();
-        $double::_method('foo')->stub(Stubs::throwException(MyException::class));
+        $double = Double::mock(StubStandardClass::class)->getInstance();
+        $double::_method('foo')->return(Stubs::throwException(MyException::class));
         $double->foo();
     }
 
     function testThrowExceptionWithMessageShouldThrowExceptionOfCorrectType()
     {
         $this->expectException(MyException::class);
-        $double = Doublit::mock(StubStandardClass::class)->getInstance();
-        $double::_method('foo')->stub(Stubs::throwException(MyException::class, 'my message'));
+        $double = Double::mock(StubStandardClass::class)->getInstance();
+        $double::_method('foo')->return(Stubs::throwException(MyException::class, 'my message'));
         $double->foo();
     }
 

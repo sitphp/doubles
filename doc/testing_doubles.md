@@ -1,5 +1,5 @@
 # Testing doubles
-> {.note.important} Important : For your tests to work, your PhpUnit test case classes must extend the `Doublit\TestCase` class. Read more on the [getting started page](/doc/getting_started#testing-a-double).
+> {.note.important} Important : For your tests to work, your PhpUnit test case classes must extend the `Doubles\TestCase` class. Read more on the [getting started page](/doc/getting_started#testing-a-double).
 
 ## Counting method calls
 To test how many times a double method is being called, use the `count` method. There are two ways :
@@ -50,36 +50,36 @@ You can change the behaviour of a double method with the `stub` method.
 You can replace the return value of a method with a custom value :
 
     {.language-php} // Make "myMethod" method return "hello"
-    $my_double::_method('myMethod')->stub('hello');
+    $my_double::_method('myMethod')->return('hello');
 
 ### Return a custom value
-You can also use the stubs methods gathered in the `Doublit\Stubs` class. They give a little bit more options. Here are some examples on how to use them :
+You can also use the stubs methods gathered in the `Doubles\Stubs` class. They give a little bit more options. Here are some examples on how to use them :
 
     {.language-php}
-    use Doublit\Stubs;
+    use Doubles\Stubs;
     ... 
     
     // Make "myMethod" method return its second argument
-    $my_double::_method('myMethod')->stub(Stubs::returnArgument(2));
+    $my_double::_method('myMethod')->return(Stubs::returnArgument(2));
     
     // Make "myMethod" method return the result of the "MyClass::myMethod" method
-    $my_double::_method('myMethod')->stub(Stubs::callback('MyClass::myMethod'));
+    $my_double::_method('myMethod')->return(Stubs::callback('MyClass::myMethod'));
     
     // Make "myMethod" method throw a "MyException" exception with message "my message" (optional)
-    $my_double::_method('myMethod')->stub(Stubs::throwException(MyException::class, 'my message'));
+    $my_double::_method('myMethod')->return(Stubs::throwException(MyException::class, 'my message'));
     
     // Make "myMethod" method return the instance of class double
-    $my_double::_method('myMethod')->stub(Stubs::returnSelf());
+    $my_double::_method('myMethod')->return(Stubs::returnSelf());
     
     // Make "myMethod" method return "numbers" when arguments "one" and "two" are passed,
     // and return "color" when arguments "blue" and "yellow" are passed
-    $my_double::_method('myMethod')->stub(Stubs::returnValueMap([['one', 'two'],['blue', 'yellow']], ['numbers', 'colors']);
+    $my_double::_method('myMethod')->return(Stubs::returnValueMap([['one', 'two'],['blue', 'yellow']], ['numbers', 'colors']);
 
 ### Run a callback
 If you want to have full control on the behaviour of a double method, you may also define your own callback to replace it :
 
     {.language-php} // Make "myMethod" return "my_return" when first argument is "my_value" and return "my_other_return" otherwise
-    $my_double::_method('myMethod')->stub(function($arg1){
+    $my_double::_method('myMethod')->return(function($arg1){
         if($arg1 == 'my_value'){
             return 'my_return';
         } else {
@@ -91,10 +91,10 @@ If you want to have full control on the behaviour of a double method, you may al
 For each of the above ways of changing a method's behaviour, you can specify which calls is concerned by the change:
 
     {.language-php} // Make "myMethod" method return "hello" the second time it is called
-    $my_double::_method('my_method')->stub('hello', 2);
+    $my_double::_method('my_method')->return('hello', 2);
 
     // Make "myOtherMethod" method return "hello" the second time and third time it is called
-    $my_double::_method('my_other_method')->stub('hello', [2,3]);  
+    $my_double::_method('my_other_method')->return('hello', [2,3]);  
   
 ### Make method behave like a "mock"
 If you have a "mock" double and you still want some method to behave as in the original class, you should use the `mock` method :
@@ -129,9 +129,9 @@ You can test a method's arguments values with an array of values that the argume
     $double::_method('myOtherMethod')->args(null);
    
 ### Against PhpUnit constraints
-You can also use the PhpUnit constraints, gathered in the `Doublit\Constraints` class. These will give you more options to test your arguments :
+You can also use the PhpUnit constraints, gathered in the `Doubles\Constraints` class. These will give you more options to test your arguments :
 
-    {.language-php} use Doublit\Constraints;
+    {.language-php} use Doubles\Constraints;
     
     // Test that the first argument passed to method "myMethod" an array and the second arguments an instance of class "MyClass"
     $double::_method('myMethod')->args([Constraints::isType('array'), Constraints::isInstanceOf(MyClass::class)]);
@@ -209,7 +209,7 @@ You can chain your test assertions :
     // Test "myMethod"
     $double::_method('myMethod')
         ->count('1') // make sure it is called exactly 1 time,
-        ->stub('my_return') // replace the return value by "my_return",
+        ->return('my_return') // replace the return value by "my_return",
         ->args(['value1', 'value2'], 3);  // and test its arguments are "value1" and "value2" on the third call
 
 ## Overwriting public properties
@@ -225,7 +225,7 @@ Somethings you may wish to run your double code first and test it afterwards. Th
 To make a spy test, you would write your test in that order :
     
     {.language-php} // Create class double
-    $double = Doublit::dummy_instance(MyClass::class);
+    $double = Double::dummy_instance(MyClass::class);
     
     // Run method "myMethod"
     $double->myMethod('arg1','arg2');
@@ -238,7 +238,7 @@ To make a spy test, you would write your test in that order :
 Instead of writing it in that order :
     
     {.language-php} // Create class double
-    $double = Doublit::dummy_instance(MyClass::class);
+    $double = Double::dummy_instance(MyClass::class);
     
     // Test method
     $double::_method('myMethod')
