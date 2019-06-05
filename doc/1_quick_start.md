@@ -3,18 +3,19 @@
 ## Creating a compatible test case
 In order to run PhpUnit test cases with this library, your test class should extend the `Doubles\TestCase` class. This class extends the  `PHPUnit\Framework\TestCase` class so you can still use the PhpUnit methods normally. Here is what a test class should look like :
 
-    {.language-php} 
+```php
     
-    use \Doubles\TestCase;
-    
-    class MyTestClass extends TestCase {
-    
-        function testMyFirstTest(){
-            // your test here ...
-        }
-        
+use \Doubles\TestCase;
 
+class MyTestClass extends TestCase {
+
+    function testMyFirstTest(){
+        // your test here ...
     }
+    
+
+}
+```
     
 This will make sure the `Doubles\Double::close()` method is executed after each test. The next step is to create class double of the class we want to test.
 
@@ -24,36 +25,37 @@ This will make sure the `Doubles\Double::close()` method is executed after each 
 ### Creating a "dummy" double
 A double is called a "dummy" when all the methods of the original class are overwritten to return `null`. If you are not sure what doubles of type "dummy" are, you can get more details on the [introduction page](/doc/intro). To get a "dummy" double, use the `dummy` method class :
 
-    {.language-php} 
+```php 
    
-    use \Doubles\Double;
-    use \Doubles\TestCase;
+use \Doubles\Double;
+use \Doubles\TestCase;
+
+class MyTestClass extends TestCase {
     
-    class MyTestClass extends TestCase {
-        
-        function testMyFirstTest(){
-            // Get a double instance of type "dummy" for class "Foo"
-            $double = Double::dummy(Foo::class)->getInstance();
-        }
-        
+    function testMyFirstTest(){
+        // Get a double instance of type "dummy" for class "Foo"
+        $double = Double::dummy(Foo::class)->getInstance();
     }
+    
+}
+```
 
 ### Creating a "mock" double
 A double is called a "mock" when all the methods of the original class are overwritten to behave the same as in the original class. If you are not sure what doubles of type "mock" are, you can get more details on the [introduction page](/doc/intro). To get a "mock" double instance, use the `mock` method :
 
-    {.language-php} 
-    use \Doubles\Double;
-    use \Doubles\TestCase;
-    
-    class MyTestClass extends TestCase {
-        
-        function testMyFirstTest(){
-            // Get a double instance of type "mock" for class "Foo"
-            $double = Double::mock(Foo::class)->getInstance();
-        }
-        
-    }
+```php
+use \Doubles\Double;
+use \Doubles\TestCase;
 
+class MyTestClass extends TestCase {
+    
+    function testMyFirstTest(){
+        // Get a double instance of type "mock" for class "Foo"
+        $double = Double::mock(Foo::class)->getInstance();
+    }
+    
+}
+```
 
 ## Testing a double
 
@@ -65,29 +67,30 @@ First use the `Double::_method` method to define which method you are going to t
 
 Here is a full working example :
 
-    {.language-php} 
-    use \Doubles\Double;
-    use \Doubles\TestCase;
+```php
+use \Doubles\Double;
+use \Doubles\TestCase;
 
-    class MyTestClass extends TestCase {
+class MyTestClass extends TestCase {
 
-        function testMyFirstTest(){
+    function testMyFirstTest(){
 
-            /* Get a double instance of type "dummy" for class "Foo" */
-            $double = Double::dummy(Foo::class)->getInstance();
+        /* Get a double instance of type "dummy" for class "Foo" */
+        $double = Double::dummy(Foo::class)->getInstance();
 
-            /* Set double test expectations for method "myMethod" */
-            $double::_method('myMethod')
-                ->count('>=1') // Test that the method is called a least one time
-                ->args(['value1', 'value2']); // Test that the given arguments are "value1" and "value2"
-                ->return('hello'); // Make the method return "hello"
+        /* Set double test expectations for method "myMethod" */
+        $double::_method('myMethod')
+            ->count('>=1') // Test that the method is called a least one time
+            ->args(['value1', 'value2']); // Test that the given arguments are "value1" and "value2"
+            ->return('hello'); // Make the method return "hello"
 
-            /* We can now test the "ClassToTest" class injecting our "Foo" class double */
-            $class_to_test = new ClassToTest($double);
-            $result = $class_to_test->methodToTest();
-            
-            /* Test the result with PhpUnit */
-            $this->assertEquals('result', $result);
+        /* We can now test the "ClassToTest" class injecting our "Foo" class double */
+        $class_to_test = new ClassToTest($double);
+        $result = $class_to_test->methodToTest();
+        
+        /* Test the result with PhpUnit */
+        $this->assertEquals('result', $result);
 
-        }
     }
+}
+```

@@ -10,16 +10,20 @@ See full documentation at [https://sitphp.com/doubles/intro](https://sitphp.com/
 ## Installation
 
 Add the line `"sitphp/doubles": "2.2.*"` in the `"require-dev"` section of your composer.json file :
-    
-    {
-        "require-dev": {
-            "sitphp/doubles": "2.2.*"
-        }
+
+```json
+{
+    "require-dev": {
+        "sitphp/doubles": "2.2.*"
     }
+}
+```
 
 And run the following command :
-    
-    $ composer update
+
+```bash    
+composer update
+```
     
 This will install the latest version of the "sitphp/doubles" library with the required PhpUnit package.
 
@@ -27,41 +31,41 @@ This will install the latest version of the "sitphp/doubles" library with the re
 
 A double is called a "dummy" when all the methods of the original class are overwritten to return `null`. To get a "dummy" double instance, use the `dummy` method :
 
-    ```php
-    // Get a double instance of type "dummy" for class "MyClass"
-    $my_double = Double::dummy(MyClass::class)->getInstance();
-    ```
+```php
+// Get a double instance of type "dummy" for class "MyClass"
+$my_double = Double::dummy(MyClass::class)->getInstance();
+```
 
 A double is called a "mock" when all the methods of the original class are overwritten to behave the same as in the original class. To get a "mock" double instance, use the `mock` method :
    
-    ```php
-    // Get a double instance of type "mock" for class "MyClass"
-    $my_double = Double::mock(MyClass::class)->getInstance();
-    ```
+```php
+// Get a double instance of type "mock" for class "MyClass"
+$my_double = Double::mock(MyClass::class)->getInstance();
+```
    
 For more details : [Read the doc on creating doubles](doc/2_creating_doubles.md)
 
 ## Testing a double
 To test how many times a double method is called, use the `count` method :
     
-    ```php
-    // Test that the method "myMethod" is called a least one time
-    $double::_method('myMethod')->count('>=1');
-    ```
+```php
+// Test that the method "myMethod" is called a least one time
+$double::_method('myMethod')->count('>=1');
+```
 
 To test the values of the arguments passed to a double method, use the `args` method :
 
-    ```php
-    // Test that the arguments passed to method "myMethod" are "value1" and "value2"
-    $double::_method('myMethod')->args(['value1', 'value2']);
-    ```
+```php
+// Test that the arguments passed to method "myMethod" are "value1" and "value2"
+$double::_method('myMethod')->args(['value1', 'value2']);
+```
 
 To change the return value of a method, use the `stub` method. :
     
-    ```php
-    // Make method "myMethod" return "hello"
-    $my_double::_method('myMethod')->return('hello');
-    ```
+```php
+// Make method "myMethod" return "hello"
+$my_double::_method('myMethod')->return('hello');
+```
 
 For more details : [Read the doc on testing doubles](doc/3_testing_doubles.md)
 
@@ -69,13 +73,13 @@ For more details : [Read the doc on testing doubles](doc/3_testing_doubles.md)
 
 You define the configuration for a specific double using the 2nd argument of the `dummy` and `mock` methods :</p>
 
-    ```php
-    // Get double instance with config
-    $my_double = Double::dummy(MyClass::class, [
-        'allow_final_doubles' => true,
-        'allow_non_existent_classes' => true
-    ])->getInstance();
-    ```
+```php
+// Get double instance with config
+$my_double = Double::dummy(MyClass::class, [
+    'allow_final_doubles' => true,
+    'allow_non_existent_classes' => true
+])->getInstance();
+```
 	
 Here is a list of all available config parameters :
 
@@ -93,8 +97,3 @@ This library is licensed under the [MIT license](https://opensource.org/licenses
 
 ### Author
 Alexandre Geiswiller - [alexandre.geiswiller@gmail.com](mailto:alexandre.geiswiller@gmail.com).
-<<<<<<< Updated upstream
-
-For more details : [Read the doc on about](doc/5_about.md)
-=======
->>>>>>> Stashed changes
