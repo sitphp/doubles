@@ -62,6 +62,7 @@ As you can see, every method of the original class is overwritten in the double 
 ### What is a "mock" double  ?
 A double is called a "mock" when all the methods of the original class are overwritten to behave the same as in the original class.
 Here is what a "mock" of our previously created "Name" class  would look like :
+
 ```php
 class NameDouble extends Name {
     protected $name;
