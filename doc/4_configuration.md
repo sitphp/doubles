@@ -26,8 +26,8 @@ Here is a list of all available config parameters :
 ## Notes
 
 ### Dealing with final classes
-The sitphp/commands library can create doubles of classes marked final or having final methods. However, the double will not extend the original class. Therefore, that double will not be an instance of the original class and that may sometimes be a problem for testing.
-If you really need your double class to be an instance of the original class implementing final methods, you can set the `allow_final_doubles` config parameter to `false`. Your double will then extend your original class but final calls will always behave like in the original class and will not be testable. Also note that this will work only work if your class has final methods but is not marked final.
+The "sitphp/commands" library can create doubles of classes marked final or having final methods. However, the double will not extend the original class. Therefore, that double will not be an instance of the original class and that may sometimes be a problem for testing.
+If you really need your double class to be an instance of the original class implementing final methods, you can set the `allow_final_doubles` config parameter to `false`. Your double will then extend your original class but final calls will always behave like in the original class and will not be testable. Also note that this will not work if your call is marked final, but only if it has final methods.
 
     {.language-php}// This will fail if MyFinalClass class is marked final
     $double_instance = Double::dummy(MyFinalClass::class, ['allow_final_doubles' => false])->getInstance();

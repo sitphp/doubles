@@ -1,9 +1,9 @@
 # Introduction
 
-## Learn about doubles
+## What is a double
 A double is just a class that implements the same methods as the original class (like a copy) except that these methods can be tested and manipulated. The are two types of doubles that you should know about : doubles of type "dummy" and doubles of type "mock" :
 
-### What are doubles of type "dummy" ?
+### What is a "dummy" double ?
 A double is called a "dummy" when all the methods of the original class are overwritten to return `null`.
 For example, let's say your original class looks like this :
 
@@ -32,7 +32,7 @@ Here is what the double of type "dummy" would look like :
 
 As you can see, every method of the original class is overwritten in the double to return `null`.
 
-### What are doubles of type "mock" ?
+### What is a "mock" double  ?
 A double is called a "mock" when all the methods of the original class are overwritten to behave the same as in the original class.
 Here is what a "mock" of our previously created "Name" class  would look like :
 
@@ -68,3 +68,23 @@ Here are the 3 things that doubles can do for testing :
 - **The method of a double can be manipulated** : you can overwrite a double method to change its behaviour.
 
 >{.note.info} Note : Doubles are often called "mocks". But in this library, the "mock" word is used to name a special kind of double.
+
+ 
+## Requirements
+The "sitphp/doubles" library requires at least PhpUnit 6 and at least PHP 7. It should be installed from composer which will make sure your configuration matches requirements.
+ > {.note.info} Note : You can get composer here : [https://getcomposer.org](https://getcomposer.org).
+        
+## Install
+Once you have composer installed, add the line `"sitphp/doubles": "~2.1"` in the `"require-dev"` section of your composer.json file :
+
+    {.language-json}{
+        "require-dev": {
+            "sitphp/doubles": "~2.1.0"
+        }
+    }
+
+Then run the following composer command :
+
+    {.language-bash}composer update
+        
+This will install the latest version of the "sitphp/doubles' library with the required PhpUnit package.
