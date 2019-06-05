@@ -54,8 +54,6 @@ A double is called a "mock" when all the methods of the original class are overw
         
     }
 
-For more details : [Read the doc on creating doubles](/doc/creating_doubles)
-
 
 ## Testing a double
 
@@ -93,5 +91,3 @@ Here is a full working example :
 
         }
     }
-
-For more details : [Read the doc on testing doubles](/doc/testing_doubles)

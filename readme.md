@@ -9,11 +9,11 @@ See full documentation at [https://sitphp.com/doubles/intro](https://sitphp.com/
 
 ## Installation
 
-Add the line `"sitphp/doubles": "~2.1.0"` in the `"require-dev"` section of your composer.json file :
+Add the line `"sitphp/doubles": "2.2.*"` in the `"require-dev"` section of your composer.json file :
     
     {
         "require-dev": {
-            "sitphp/doubles": "~2.1.0"
+            "sitphp/doubles": "2.2.*"
         }
     }
 
@@ -39,7 +39,7 @@ A double is called a "mock" when all the methods of the original class are overw
     $my_double = Double::mock(MyClass::class)->getInstance();
     ```
    
-For more details : [Read the doc on creating doubles](doc/creating_doubles.md)
+For more details : [Read the doc on creating doubles](doc/2_creating_doubles.md)
 
 ## Testing a double
 To test how many times a double method is called, use the `count` method :
@@ -63,7 +63,7 @@ To change the return value of a method, use the `stub` method. :
     $my_double::_method('myMethod')->return('hello');
     ```
 
-For more details : [Read the doc on testing doubles](doc/testing_doubles.md)
+For more details : [Read the doc on testing doubles](doc/3_testing_doubles.md)
 
 ## Configuration
 
@@ -84,7 +84,7 @@ Here is a list of all available config parameters :
 - `allow_non_existent_classes` : Set this parameter to `false` to disallow alias doubles of non existent classes.
 - `test_unexpected_methods` : Set this parameter to `true` to automatically receive an assertion error whenever an unexpected method is called.
  
-For more details : [Read the doc on configuration](doc/configuration.md)
+For more details : [Read the doc on configuration](doc/4_configuration.md)
 
 ## About
 
@@ -93,5 +93,8 @@ This library is licensed under the [MIT license](https://opensource.org/licenses
 
 ### Author
 Alexandre Geiswiller - [alexandre.geiswiller@gmail.com](mailto:alexandre.geiswiller@gmail.com).
+<<<<<<< Updated upstream
 
-For more details : [Read the doc on about](doc/about.md)
+For more details : [Read the doc on about](doc/5_about.md)
+=======
+>>>>>>> Stashed changes
