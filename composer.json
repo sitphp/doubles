@@ -1,6 +1,6 @@
 {
     "name": "sitphp/doubles",
-    "description": "A simple tool to test your class dependencies in PhpUnit",
+    "description": "A simple yet powerful library to make class doubles for testing",
     "keywords": ["php", "test", "testing", "doubles", "mock", "phpunit", "unit-testing"],
     "homepage": "https://github.com/sitphp/doubles",
     "license": "MIT",

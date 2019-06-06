@@ -4,7 +4,6 @@
 In order to run PhpUnit test cases with this library, your test class should extend the `Doubles\TestCase` class. This class extends the  `PHPUnit\Framework\TestCase` class so you can still use the PhpUnit methods normally. Here is what a test class should look like :
 
 ```php
-    
 use \Doubles\TestCase;
 
 class MyTestClass extends TestCase {

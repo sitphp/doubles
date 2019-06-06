@@ -1,6 +1,6 @@
 # Double and test PHP classes easily in PhpUnit
 
-[![Build Status](https://travis-ci.org/sitphp/doubles.svg?branch=master)](https://travis-ci.org/sitphp/doubles)
+![Build Status](https://travis-ci.org/sitphp/doubles.svg?branch=master)
 
 The "sitphp/doubles" library can help you to test your PHP classes by generating doubles that look like the original classes but can be manipulated and tested (sort of a copy of a class). These doubles then can then be used instead of the original classes for your test. This library can create doubles of any kind of class, interface or trait. 
 
