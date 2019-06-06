@@ -4,7 +4,7 @@
 
 The "sitphp/doubles" library can help you to test your PHP classes by generating doubles that look like the original classes but can be manipulated and tested (sort of a copy of a class). These doubles then can then be used instead of the original classes for your test. This library can create doubles of any kind of class, interface or trait. 
 
-See full documentation at [https://sitphp.com/doubles/intro](https://sitphp.com/doubles/intro)
+See full documentation [here](https://sitphp.com/doubles/doc/intro)
 
 
 ## Installation
