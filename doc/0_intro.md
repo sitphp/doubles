@@ -2,7 +2,7 @@
 
 ## Requirements
 The "sitphp/doubles" library requires at least PhpUnit 6 and at least PHP 7. It should be installed from composer which will make sure your configuration matches requirements.
- > {.note.info} Note : You can get composer here : [https://getcomposer.org](https://getcomposer.org).
+ > {.note .info} Note : You can get composer here : [https://getcomposer.org](https://getcomposer.org).
         
 ## Install
 Once you have composer installed, add the line `"sitphp/doubles": "~2.1"` in the `"require-dev"` section of your composer.json file :
@@ -98,4 +98,4 @@ Here are the 3 things that doubles can do for testing :
 - **The method arguments of a double  can be tested** : you can test which arguments were passed to a double method.
 - **The method of a double can be manipulated** : you can overwrite a double method to change its behaviour.
 
->{.note.info} Note : Doubles are often called "mocks". But in this library, the "mock" word is used to name a special kind of double.
+>{.note .info} Note : Doubles are often called "mocks". But in this library, the "mock" word is used to name a special kind of double.

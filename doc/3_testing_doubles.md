@@ -1,5 +1,5 @@
 # Testing doubles
-> {.note.important} Important : For your tests to work, your PhpUnit test case classes must extend the `Doubles\TestCase` class. Read more on the [getting started page](/doc/getting_started#testing-a-double).
+> {.note .important} Important : For your tests to work, your PhpUnit test case classes must extend the `Doubles\TestCase` class. Read more on the [getting started page](/doc/getting_started#testing-a-double).
 
 ## Counting method calls
 To test how many times a double method is being called, use the `count` method. There are two ways :
@@ -279,4 +279,4 @@ $double::_method('myMethod')
 $double->myMethod('arg1','arg2');
 ```
         
-> {.note.info} Info : It is no possible to change a method behaviour with spies.
+> {.note .info} Info : It is no possible to change a method behaviour with spies.

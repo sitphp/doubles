@@ -14,7 +14,7 @@ $my_double = Double::dummy(MyClass::class)->getInstance();
 $my_double->myMethod();
 ```
         
-> {.note.info} Note : The constructor will not be executed so you don't need to pass any of the constructor arguments to the `getInstance` method.
+> {.note .info} Note : The constructor will not be executed so you don't need to pass any of the constructor arguments to the `getInstance` method.
         
 ### Double instance of type "mock"
 A doubles of type "mock" will overwrite the original class methods to behave exactly the same as in the original class. If you are not sure what doubles of type "mock" are, you can get more details on the [introduction page](/doc/intro). You should use a "mock" double when you want to leave the behaviour of the original class unchanged. To get a "mock" double of a given class use the `mock` method and pass the constructor arguments to the `getInstance` method :
@@ -82,7 +82,7 @@ You can pass constructor arguments in the getInstance method :
 $my_dummy_double = Double::dummy(MyClass::class)->getInstance($arg1, $arg2);
 ```
     
-> {.note.info} Note : When you pass constructor arguments, the original `__construct` method will be called with the given arguments regardless if your double is of type "dummy" or "mock". In the same way, if you don't pass constructor arguments, the original `__construct` method will not be called regardless if your double is of type "dummy" or "mock".
+> {.note .info} Note : When you pass constructor arguments, the original `__construct` method will be called with the given arguments regardless if your double is of type "dummy" or "mock". In the same way, if you don't pass constructor arguments, the original `__construct` method will not be called regardless if your double is of type "dummy" or "mock".
 
 ## Implementing interfaces and trait
 Use `addInterface` and/or `addTrait` to declare the interfaces and/or traits you want to implement in your double class :
@@ -99,7 +99,7 @@ $my_dummy_double = Double::mock_instance(MyClass::class)
     ->getInstance();
 ```
     
-> {.note.info} Note : Every double class will automatically implement the `Doubles\DoubleInterface` interface in case you need to identify a double instance.
+> {.note .info} Note : Every double class will automatically implement the `Doubles\DoubleInterface` interface in case you need to identify a double instance.
 
 ## Naming the double class 
 Double class names are automaticaly generated but you can also set the name of the double class yourself with the `setName` method :
