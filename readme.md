@@ -7,6 +7,10 @@ The "sitphp/doubles" library can help you to test your PHP classes by generating
 See full documentation at [https://sitphp.com/doubles/intro](https://sitphp.com/doubles/intro)
 
 
+## Requirements
+The "sitphp/doubles" library requires at least PhpUnit 6.5 and at least PHP 7.0. It should be installed from composer which will make sure your configuration matches requirements.
+ > {.note .info} Note : You can get composer here : [https://getcomposer.org](https://getcomposer.org).
+
 ## Installation
 
 Add the line `"sitphp/doubles": "2.2.*"` in the `"require-dev"` section of your composer.json file :
