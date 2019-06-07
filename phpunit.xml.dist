@@ -4,7 +4,7 @@
     verbose="true"
 >
     <testsuites>
-        <testsuite name="Doublit Test Suite">
+        <testsuite name="sitphp/doubles Test Suite">
             <directory>./tests/</directory>
         </testsuite>
     </testsuites>

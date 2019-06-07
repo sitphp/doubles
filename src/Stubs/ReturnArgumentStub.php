@@ -1,19 +1,15 @@
 <?php
 /**
- * *
- *  *
- *  * This file is part of the Doublit package.
- *  *
- *  * @license    MIT License
- *  * @link       https://github.com/gealex/doublit
- *  * @copyright  Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
- *  *
+ * This file is part of the "sitphp/doubles" package.
  *
+ *  @license MIT License
+ *  @link https://github.com/sitphp/doubles
+ *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
-namespace Doublit\Stubs;
+namespace Doubles\Stubs;
 
-use Doublit\Exceptions\InvalidArgumentException;
+use Doubles\Exceptions\InvalidArgumentException;
 
 class ReturnArgumentStub implements StubInterface
 {

@@ -1,8 +1,8 @@
 {
-    "name": "gealex/doublit",
-    "description": "Doublit : A simple tool to test your class dependencies in PhpUnit",
+    "name": "sitphp/doubles",
+    "description": "A simple yet powerful library to make class doubles for testing",
     "keywords": ["php", "test", "testing", "doubles", "mock", "phpunit", "unit-testing"],
-    "homepage": "https://github.com/gealex/doublit",
+    "homepage": "https://github.com/sitphp/doubles",
     "license": "MIT",
     "authors": [
         {
@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Doublit\\": "src"
+            "Doubles\\": "src"
         }
     },
     "autoload-dev": {

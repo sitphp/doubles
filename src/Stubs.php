@@ -1,24 +1,20 @@
 <?php
 /**
- * *
- *  *
- *  * This file is part of the Doublit package.
- *  *
- *  * @license    MIT License
- *  * @link       https://github.com/gealex/doublit
- *  * @copyright  Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
- *  *
+ * This file is part of the "sitphp/doubles" package.
  *
+ *  @license MIT License
+ *  @link https://github.com/sitphp/doubles
+ *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
-namespace Doublit;
+namespace Doubles;
 
-use Doublit\Stubs\ReturnArgumentStub;
-use Doublit\Stubs\ReturnCallbackStub;
-use Doublit\Stubs\ReturnSelfStub;
-use Doublit\Stubs\ReturnValueMapStub;
-use Doublit\Stubs\ReturnValueStub;
-use Doublit\Stubs\ThrowExceptionStub;
+use Doubles\Stubs\ReturnArgumentStub;
+use Doubles\Stubs\ReturnCallbackStub;
+use Doubles\Stubs\ReturnSelfStub;
+use Doubles\Stubs\ReturnValueMapStub;
+use Doubles\Stubs\ReturnValueStub;
+use Doubles\Stubs\ThrowExceptionStub;
 
 class Stubs
 {

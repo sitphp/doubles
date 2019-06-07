@@ -9,6 +9,6 @@
 
 namespace Doubles\Exceptions;
 
-class RuntimeException extends \RuntimeException implements DoublesException
+interface DoublesException
 {
 }

@@ -1,22 +1,16 @@
 <?php
 /**
- * *
- *  *
- *  * This file is part of the Doublit package.
- *  *
- *  * @license    MIT License
- *  * @link       https://github.com/gealex/doublit
- *  * @copyright  Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
- *  *
+ * This file is part of the "sitphp/doubles" package.
  *
+ *  @license MIT License
+ *  @link https://github.com/sitphp/doubles
+ *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
-namespace Doublit;
+namespace Doubles;
 
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\ArrayHasKey;
-use PHPUnit\Framework\Constraint\ArraySubset;
-use PHPUnit\Framework\Constraint\Attribute;
 use PHPUnit\Framework\Constraint\Callback;
 use PHPUnit\Framework\Constraint\ClassHasAttribute;
 use PHPUnit\Framework\Constraint\ClassHasStaticAttribute;
@@ -117,7 +111,7 @@ class Constraints
 
     /**
      * @param $callback
-     * @return Callback
+     * @return callable
      */
     public static function callback($callback)
     {
@@ -367,6 +361,182 @@ class Constraints
     public static function isType($type)
     {
         return Assert::isType($type);
+    }
+
+    /**
+     * Asserts that a variable is of type array.
+     */
+    public static function isArray()
+    {
+        return Assert::isType(IsType::TYPE_ARRAY);
+    }
+
+    /**
+     * Asserts that a variable is of type bool.
+     */
+    public static function isBool()
+    {
+        return Assert::isType(IsType::TYPE_BOOL);
+    }
+
+    /**
+     * Asserts that a variable is of type float.
+     */
+    public static function isFloat()
+    {
+        return Assert::isType(IsType::TYPE_FLOAT);
+    }
+
+    /**
+     * Asserts that a variable is of type int.
+     */
+    public static function isInt()
+    {
+        return Assert::isType(IsType::TYPE_INT);
+    }
+
+    /**
+     * Asserts that a variable is of type numeric.
+     */
+    public static function isNumeric()
+    {
+        return Assert::isType(IsType::TYPE_NUMERIC);
+    }
+
+    /**
+     * Asserts that a variable is of type object.
+     */
+    public static function isObject()
+    {
+        return Assert::isType(IsType::TYPE_OBJECT);
+    }
+
+    /**
+     * Asserts that a variable is of type resource.
+     */
+    public static function isResource()
+    {
+        return Assert::isType(IsType::TYPE_RESOURCE);
+    }
+
+    /**
+     * Asserts that a variable is of type string.
+     */
+    public static function isString()
+    {
+        return Assert::isType(IsType::TYPE_STRING);
+    }
+
+    /**
+     * Asserts that a variable is of type scalar.
+     */
+    public static function isScalar()
+    {
+        return Assert::isType(IsType::TYPE_SCALAR);
+    }
+
+    /**
+     * Asserts that a variable is of type callable.
+     */
+    public static function isCallable()
+    {
+        return Assert::isType(IsType::TYPE_CALLABLE);
+    }
+
+    /**
+     * Asserts that a variable is of type iterable.
+     */
+    public static function isIterable()
+    {
+        return Assert::isType(IsType::TYPE_ITERABLE);
+    }
+
+    /**
+     * Asserts that a variable is of type array.
+     */
+    public static function isNotArray()
+    {
+        return self::logicalNot(Assert::isType(IsType::TYPE_ARRAY));
+    }
+
+    /**
+     * Asserts that a variable is of type bool.
+     */
+    public static function isNotBool()
+    {
+        return self::logicalNot(Assert::isType(IsType::TYPE_BOOL));
+    }
+
+    /**
+     * Asserts that a variable is of type float.
+     */
+    public static function isNotFloat()
+    {
+        return self::logicalNot(Assert::isType(IsType::TYPE_FLOAT));
+    }
+
+    /**
+     * Asserts that a variable is of type int.
+     */
+    public static function isNotInt()
+    {
+        return self::logicalNot(Assert::isType(IsType::TYPE_INT));
+    }
+
+    /**
+     * Asserts that a variable is of type numeric.
+     */
+    public static function isNotNumeric()
+    {
+        return self::logicalNot(Assert::isType(IsType::TYPE_NUMERIC));
+    }
+
+    /**
+     * Asserts that a variable is of type object.
+     */
+    public static function isNotObject()
+    {
+        return self::logicalNot(Assert::isType(IsType::TYPE_OBJECT));
+    }
+
+    /**
+     * Asserts that a variable is of type resource.
+     */
+    public static function isNotResource()
+    {
+        return self::logicalNot(Assert::isType(IsType::TYPE_RESOURCE));
+    }
+
+    /**
+     * Asserts that a variable is of type string.
+     */
+    public static function isNotString()
+    {
+        return self::logicalNot(Assert::isType(IsType::TYPE_STRING));
+    }
+
+    /**
+     * Asserts that a variable is of type scalar.
+     */
+    public static function isNotScalar()
+    {
+        return self::logicalNot(Assert::isType(IsType::TYPE_SCALAR));
+    }
+
+    /**
+     * Asserts that a variable is of type callable.
+     */
+    public static function isNotCallable()
+    {
+        return self::logicalNot(Assert::isType(IsType::TYPE_CALLABLE));
+    }
+
+    /**
+     * Asserts that a variable is of type iterable.
+     */
+    public static function isNotIterable()
+    {
+        return self::logicalNot(Assert::isType(IsType::TYPE_ITERABLE));
     }
 
 
