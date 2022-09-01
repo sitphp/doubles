@@ -48,6 +48,8 @@ use PHPUnit\Framework\Constraint\StringContains;
 use PHPUnit\Framework\Constraint\StringEndsWith;
 use PHPUnit\Framework\Constraint\StringStartsWith;
 use PHPUnit\Framework\Constraint\TraversableContains;
+use PHPUnit\Framework\Constraint\TraversableContainsEqual;
+use PHPUnit\Framework\Constraint\TraversableContainsIdentical;
 use PHPUnit\Framework\Constraint\TraversableContainsOnly;
 
 
@@ -143,6 +145,18 @@ class ConstraintTest extends TestCase
     {
         $constraint = Constraints::contains('value');
         $this->assertInstanceOf(TraversableContains::class, $constraint);
+    }
+
+    public function testContainsEqual()
+    {
+        $constraint = Constraints::containsEqual('value');
+        $this->assertInstanceOf(TraversableContainsEqual::class, $constraint);
+    }
+
+    public function testContainsIdentical()
+    {
+        $constraint = Constraints::containsIdentical('value');
+        $this->assertInstanceOf(TraversableContainsIdentical::class, $constraint);
     }
 
     public function testContainsOnly()
@@ -268,6 +282,7 @@ class ConstraintTest extends TestCase
         $this->assertInstanceOf(LogicalNot::class, Constraints::isNotScalar());
         $this->assertInstanceOf(IsType::class, Constraints::isCallable());
         $this->assertInstanceOf(LogicalNot::class, Constraints::isNotCallable());
+        $this->assertInstanceOf(LogicalNot::class, Constraints::isNotIterable());
     }
 
 

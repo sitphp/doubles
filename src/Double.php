@@ -16,9 +16,14 @@ use \Doubles\Lib\EvalLoader;
 use \Doubles\Lib\ClassManager;
 use \Doubles\Exceptions\InvalidArgumentException;
 use \Doubles\Exceptions\RuntimeException;
+use Doubles\Lib\Expectation;
 
 class Double
 {
+
+    const TYPE_ALIAS = 'alias';
+    const TYPE_DUMMY = 'dummy';
+    const TYPE_MOCK = 'mock';
 
     protected static $type_hints = ['self', 'array', 'callable', 'bool', 'float', 'int', 'string'];
     protected static $count = 0;
@@ -28,12 +33,8 @@ class Double
         'allow_protected_methods' => 'allowProtectedMethods',
         'test_unexpected_methods' => 'testUnexpectedMethods',
     ];
-    protected static $reflection_classes = [];
     protected static $doubles = [];
     protected static $instances = [];
-    protected static $services = [
-        'class_manager' => ClassManager::class
-    ];
 
     protected $original;
     protected $interfaces = [];
@@ -70,7 +71,7 @@ class Double
      */
     static function dummy(string $class, array $config = null)
     {
-        return new self('dummy', $class, $config);
+        return new self(self::TYPE_DUMMY, $class, $config);
     }
 
     /**
@@ -82,7 +83,7 @@ class Double
      */
     static function mock(string $class, array $config = null)
     {
-        return new self('mock', $class, $config);
+        return new self(self::TYPE_MOCK, $class, $config);
     }
 
     /**
@@ -94,7 +95,7 @@ class Double
      */
     static function alias(string $class, array $config = null)
     {
-        return new self('alias', $class, $config);
+        return new self(self::TYPE_ALIAS, $class, $config);
     }
 
     /**
@@ -139,7 +140,7 @@ class Double
      * @param $original
      */
     protected function setOriginal(string $original){
-        if($this->getType() !== 'alias' && is_subclass_of($original,DoubleInterface::class)){
+        if($this->getType() !== self::TYPE_ALIAS && is_subclass_of($original,DoubleInterface::class)){
             throw new InvalidArgumentException('Invalid class : cannot make doubles of doubles');
         }
         $this->original = ClassManager::normalizeClass($original);
@@ -161,8 +162,8 @@ class Double
      */
     protected function setType($type)
     {
-        if (!in_array($type, ['alias', 'mock', 'dummy'])) {
-            throw new \RuntimeException('Invalid argument type : expected "mock", "dummy" or "alias", found "' . $this->type . '"');
+        if (!in_array($type, [self::TYPE_ALIAS, self::TYPE_MOCK, self::TYPE_DUMMY])) {
+            throw new \RuntimeException('Invalid argument type : expected "'.self::TYPE_MOCK.'", "'.self::TYPE_DUMMY.'" or "'.self::TYPE_ALIAS.'", found "' . $this->type . '"');
         }
         $this->type = $type;
     }
@@ -333,7 +334,7 @@ class Double
      * @return $this
      */
     function aliasTrait(){
-        if ($this->getType() != 'alias') {
+        if ($this->getType() != self::TYPE_ALIAS) {
             throw new LogicException('Alias class type can only be set for alias doubles');
         }
         $this->class_type = 'trait';
@@ -346,7 +347,7 @@ class Double
      * @return $this
      */
     function aliasAbstract(){
-        if ($this->getType() != 'alias') {
+        if ($this->getType() != self::TYPE_ALIAS) {
             throw new LogicException('Alias class type can only be set for alias doubles');
         }
         $this->class_type = 'abstract class';
@@ -454,7 +455,7 @@ class Double
             return new $double(...$construct_params);
         } else {
             $params = $double::_double_getMethodTypeDefinition('__construct', 1);
-            if ($params[0] == 'dummy') {
+            if ($params[0] == Expectation::TYPE_DUMMY) {
                 $__reference_reflexion = new \ReflectionClass($double);
                 return $__reference_reflexion->newInstanceWithoutConstructor();
             }
@@ -512,7 +513,7 @@ class Double
         ];
 
 
-        if ($double_definition['type'] === 'alias') {
+        if ($double_definition['type'] === self::TYPE_ALIAS) {
             $this->populateAliasDoubleDefinition($double_definition);
         } else if (class_exists($double_definition['original'])) {
             $this->populateClassDoubleDefinition($double_definition);
@@ -641,7 +642,6 @@ class Double
             if ($reflection_class->inNamespace()) {
                 $double_extends .= '\\' . $reflection_class->getNamespaceName() . '\\';
             }
-            $double_extends .= $new_class_name;
         } // Implement trait in a new class
         else {
             $new_class_code = '<?php ';
@@ -649,8 +649,8 @@ class Double
                 $new_class_code .= 'abstract ';
             }
             $new_class_code .= 'class ' . $new_class_name . ' { use ' . $original . '; }';
-            $double_extends .= $new_class_name;
         }
+        $double_extends .= $new_class_name;
         EvalLoader::load($new_class_code);
 
         $class_definition = $this->resolveClassDefinition($original);
@@ -683,7 +683,7 @@ class Double
     /**
      * Resolve class namespace and short-name
      *
-     * @param $class
+     * @param string $class
      * @return array
      */
     protected function resolveClassDefinition(string $class)
@@ -704,7 +704,6 @@ class Double
      * Resolve double class methods to implement from base double definition
      *
      * @param $double_definition
-     * @return mixed
      * @throws \ReflectionException
      */
     protected function populateMethodsToImplement(&$double_definition)
@@ -761,11 +760,11 @@ class Double
             $class_code .= ' extends ' . $double_definition['extends'];
         }
         if (!empty($double_definition['interfaces'])) {
-            $class_code .= ' implements ' . implode(',', $double_definition['interfaces']);
+            $class_code .= ' implements ' . implode(', ', $double_definition['interfaces']);
         }
-        $class_code .= '{';
+        $class_code .= ' {';
         if (!empty($double_definition['traits'])) {
-            $class_code .= PHP_EOL . 'use ' . implode(',', $double_definition['traits']) . ';';
+            $class_code .= PHP_EOL . 'use ' . implode(', ', $double_definition['traits']) . ';';
         }
         $code = preg_replace('#class\s+DoubleStub\s*{#', $class_code, $code);
 
@@ -811,7 +810,7 @@ class Double
                             $first_param = false;
                         }
                         if ($param->hasType()) {
-                            $param_type = $param->getType();
+                            $param_type = $param->getType()->getName();
                             if (!in_array($param_type, self::$type_hints)) {
                                 $param_type = ClassManager::normalizeClass($param->getClass()->getName());
                             } else if (isset($double_definition['extends']) && $param_type == 'self') {
@@ -849,7 +848,7 @@ class Double
                     }
                     $method_code .= ')';
                     if ($method->hasReturnType()) {
-                        $method_return_type = $method->getReturnType();
+                        $method_return_type = $method->getReturnType()->getName();
                         $method_code .= ' : ' . $method_return_type;
                     }
                     $is_static = $method->isStatic();
@@ -881,7 +880,7 @@ class Double
                 $method_code .= 'return $return; }';
                 $methods_code[] = $method_code;
             }
-            $code = substr($code, 0, strrpos($code, "}")) . implode($methods_code, PHP_EOL) . '}';
+            $code = substr($code, 0, strrpos($code, "}")) . implode(PHP_EOL, $methods_code) . '}';
         }
         return $code;
     }

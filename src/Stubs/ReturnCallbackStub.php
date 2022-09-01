@@ -9,7 +9,7 @@
 
 namespace Doubles\Stubs;
 
-
+use Closure;
 use Doubles\Exceptions\InvalidArgumentException;
 
 class ReturnCallbackStub implements StubInterface
@@ -27,7 +27,7 @@ class ReturnCallbackStub implements StubInterface
     function invoke(array $call)
     {
         $callback = $this->callback;
-        if ($callback instanceof \Closure) {
+        if ($callback instanceof Closure) {
             return $callback(...$call['args']);
         }
         return call_user_func_array($callback, $call['args']);

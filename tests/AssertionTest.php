@@ -9,12 +9,12 @@
 
 namespace Tests;
 
-use \Doubles\Stubs;
-use \Doubles\Double;
-use \Doubles\TestCase;
-use \Doubles\Constraints;
-use \Doubles\Lib\ExpectationCollection;
-use \Doubles\Exceptions\InvalidArgumentException;
+use Doubles\Constraints;
+use Doubles\Double;
+use Doubles\Exceptions\InvalidArgumentException;
+use Doubles\Lib\ExpectationCollection;
+use Doubles\Stubs;
+use Doubles\TestCase;
 
 class AssertionTest extends TestCase
 {
@@ -136,6 +136,29 @@ class AssertionTest extends TestCase
         $double->foo();
     }
 
+    public function testAssertCountUsingRangeComparator()
+    {
+        $double = Double::mock(AssertionStandardClass::class)->getInstance();
+        $double::_method('foo')->count('2-5');
+        $double->foo();
+        $double->foo();
+        $double->foo();
+    }
+
+    public function testAssertCountUsingInvalidRangeComparatorShouldFail()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $double = Double::mock(AssertionStandardClass::class)->getInstance();
+        $double::_method('foo')->count('2-5-5');
+    }
+
+    public function testAssertCountUsingInvalidRangeComparator2ShouldFail()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $double = Double::mock(AssertionStandardClass::class)->getInstance();
+        $double::_method('foo')->count('2-d');
+    }
+
     public function testAssertCountUsingPhpUnitConstraints()
     {
         $double = Double::mock(AssertionStandardClass::class)->getInstance();
@@ -196,9 +219,7 @@ class AssertionTest extends TestCase
     public function testAssertStubUsingStubAssertion()
     {
         $double = Double::mock(AssertionStandardClass::class)->getInstance();
-        $stubs_double = Double::mock(Stubs::class)->getClass();
-        $stubs_double::_method('returnValue')->return('bar');
-        $double::_method('foo')->return($stubs_double::returnValue('bar'));
+        $double::_method('foo')->return(new Stubs\ReturnValueStub('bar'));
         $this->assertEquals('bar', $double->foo());
     }
 
@@ -321,6 +342,17 @@ class AssertionTest extends TestCase
         $this->assertEquals('foo', $double->foo());
     }
 
+    public function testAssertDefaultWithMockWithCount(){
+        $double = Double::mock(AssertionStandardClass::class)->getInstance();
+        $double::_method('foo')->dummy();
+        $double::_method('foo')->default(2);
+        $this->assertNull($double->foo());
+        $this->assertEquals('foo', $double->foo());
+        $this->assertNull($double->foo());
+
+
+    }
+
 
     /* -----
     Test arguments
@@ -332,6 +364,35 @@ class AssertionTest extends TestCase
         $double->foo('arg_1', 'arg_2');
     }
 
+    public function testAssertArgsWithBool()
+    {
+        $double = Double::mock(AssertionStandardClass::class)->getInstance();
+        $double::_method('foo')->args([true, false]);
+        $double->foo(true, false);
+    }
+
+    public function testAssertArgsWithNull()
+    {
+        $double = Double::mock(AssertionStandardClass::class)->getInstance();
+        $double::_method('foo')->args(null);
+        $double->foo();
+    }
+
+    public function testAssertArgsWithNullArray()
+    {
+        $double = Double::mock(AssertionStandardClass::class)->getInstance();
+        $double::_method('foo')->args([null]);
+        $double->foo(null);
+    }
+
+    public function testAssertArgsWithNullInArray()
+    {
+        $double = Double::mock(AssertionStandardClass::class)->getInstance();
+        $double::_method('foo')->args(['arg', null]);
+        $double->foo('arg', null);
+        $double->foo('arg');
+    }
+
     public function testPreviousAssertionShouldNotCancelArgAssertion()
     {
         $double = Double::mock(AssertionStandardClass::class)->getInstance();
@@ -339,13 +400,6 @@ class AssertionTest extends TestCase
         $double::_method('bar')->args(['arg_1', 'arg_2']);
 
         $double->bar('arg_1', 'arg_2');
-    }
-
-    public function testAssertArgsWithNullValue()
-    {
-        $double = Double::mock(AssertionStandardClass::class)->getInstance();
-        $double::_method('foo')->args(null);
-        $double->foo();
     }
 
     public function testAssertArgsWithPhpUnitConstraint()
@@ -384,7 +438,6 @@ class AssertionTest extends TestCase
     public function testAssertArgsMethodWithArguments(){
         $double = Double::mock(AssertionStandardClass::class)->getInstance();
         $double::_method('arg')->args([1])->count(1);
-
         $double->arg(1, false);
     }
 
@@ -395,14 +448,10 @@ class AssertionTest extends TestCase
         $double::_method('foo')->args(new \stdClass());
     }
 
-    public function testAssertArgsWithInvalidCallCountShouldFail()
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $double = Double::mock(AssertionStandardClass::class)->getInstance();
-        $double::_method('foo')->args(['arg_1', 'arg_2'], 0);
-        $double->foo();
-        $double->foo('arg_1', 'arg_2');
-    }
+
+    /* -----
+    Test chain
+    ---- */
 
     public function testChain()
     {

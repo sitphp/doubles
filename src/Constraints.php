@@ -46,6 +46,8 @@ use PHPUnit\Framework\Constraint\StringContains;
 use PHPUnit\Framework\Constraint\StringEndsWith;
 use PHPUnit\Framework\Constraint\StringStartsWith;
 use PHPUnit\Framework\Constraint\TraversableContains;
+use PHPUnit\Framework\Constraint\TraversableContainsEqual;
+use PHPUnit\Framework\Constraint\TraversableContainsIdentical;
 use PHPUnit\Framework\Constraint\TraversableContainsOnly;
 
 class Constraints
@@ -55,7 +57,7 @@ class Constraints
      * @param mixed ...$args
      * @return LogicalAnd
      */
-    public static function logicalAnd(...$args)
+    public static function logicalAnd(...$args): LogicalAnd
     {
         return Assert::logicalAnd(...$args);
     }
@@ -65,7 +67,7 @@ class Constraints
      * @param mixed ...$args
      * @return LogicalOr
      */
-    public static function logicalOr(...$args)
+    public static function logicalOr(...$args): LogicalOr
     {
         return Assert::logicalOr(...$args);
     }
@@ -75,7 +77,7 @@ class Constraints
      * @param Constraint $constraint
      * @return LogicalNot
      */
-    public static function logicalNot(Constraint $constraint)
+    public static function logicalNot(Constraint $constraint): LogicalNot
     {
         return Assert::logicalNot($constraint);
     }
@@ -85,7 +87,7 @@ class Constraints
      * @param mixed ...$args
      * @return LogicalXor
      */
-    public static function logicalXor(...$args)
+    public static function logicalXor(...$args): LogicalXor
     {
         return Assert::logicalXor(...$args);
     }
@@ -94,7 +96,7 @@ class Constraints
     /**
      * @return IsAnything
      */
-    public static function anything()
+    public static function anything(): IsAnything
     {
         return Assert::anything();
     }
@@ -103,7 +105,7 @@ class Constraints
     /**
      * @return IsTrue
      */
-    public static function isTrue()
+    public static function isTrue(): IsTrue
     {
         return Assert::isTrue();
     }
@@ -111,9 +113,9 @@ class Constraints
 
     /**
      * @param $callback
-     * @return callable
+     * @return Callback
      */
-    public static function callback($callback)
+    public static function callback($callback): Callback
     {
         return Assert::callback($callback);
     }
@@ -122,7 +124,7 @@ class Constraints
     /**
      * @return IsFalse
      */
-    public static function isFalse()
+    public static function isFalse(): IsFalse
     {
         return Assert::isFalse();
     }
@@ -131,7 +133,7 @@ class Constraints
     /**
      * @return IsJson
      */
-    public static function isJson()
+    public static function isJson(): IsJson
     {
         return Assert::isJson();
     }
@@ -140,7 +142,7 @@ class Constraints
     /**
      * @return IsNull
      */
-    public static function isNull()
+    public static function isNull(): IsNull
     {
         return Assert::isNull();
     }
@@ -149,7 +151,7 @@ class Constraints
     /**
      * @return LogicalNot
      */
-    public static function isNotNull()
+    public static function isNotNull(): LogicalNot
     {
         return Assert::logicalNot(Assert::isNull());
     }
@@ -158,7 +160,7 @@ class Constraints
     /**
      * @return IsFinite
      */
-    public static function isFinite()
+    public static function isFinite(): IsFinite
     {
         return Assert::isFinite();
     }
@@ -167,7 +169,7 @@ class Constraints
     /**
      * @return IsInfinite
      */
-    public static function isInfinite()
+    public static function isInfinite(): IsInfinite
     {
         return Assert::isInfinite();
     }
@@ -176,7 +178,7 @@ class Constraints
     /**
      * @return IsNan
      */
-    public static function isNan()
+    public static function isNan(): IsNan
     {
         return Assert::isNan();
     }
@@ -188,10 +190,29 @@ class Constraints
      * @param bool $checkForObjectIdentity
      * @param bool $checkForNonObjectIdentity
      * @return TraversableContains
+     * @deprecated Use containsEqual() or containsIdentical() instead
      */
-    public static function contains($value, $checkForObjectIdentity = true, $checkForNonObjectIdentity = false)
+    public static function contains($value, bool $checkForObjectIdentity = true, bool $checkForNonObjectIdentity = false): TraversableContains
     {
         return Assert::contains($value, $checkForObjectIdentity, $checkForNonObjectIdentity);
+    }
+
+    /**
+     * @param $value
+     * @return TraversableContainsEqual
+     */
+    public static function containsEqual($value): TraversableContainsEqual
+    {
+        return Assert::containsEqual($value);
+    }
+
+    /**
+     * @param $value
+     * @return TraversableContainsIdentical
+     */
+    public static function containsIdentical($value): TraversableContainsIdentical
+    {
+        return Assert::containsIdentical($value);
     }
 
 
@@ -199,7 +220,7 @@ class Constraints
      * @param $type
      * @return TraversableContainsOnly
      */
-    public static function containsOnly($type)
+    public static function containsOnly($type): TraversableContainsOnly
     {
         return Assert::containsOnly($type);
     }
@@ -209,7 +230,7 @@ class Constraints
      * @param $classname
      * @return TraversableContainsOnly
      */
-    public static function containsOnlyInstancesOf($classname)
+    public static function containsOnlyInstancesOf($classname): TraversableContainsOnly
     {
         return Assert::containsOnlyInstancesOf($classname);
     }
@@ -219,7 +240,7 @@ class Constraints
      * @param $key
      * @return ArrayHasKey
      */
-    public static function arrayHasKey($key)
+    public static function arrayHasKey($key): ArrayHasKey
     {
         return Assert::arrayHasKey($key);
     }
@@ -233,7 +254,7 @@ class Constraints
      * @param bool $ignoreCase
      * @return IsEqual
      */
-    public static function equalTo($value, $delta = 0.0, $maxDepth = 10, $canonicalize = false, $ignoreCase = false)
+    public static function equalTo($value, float $delta = 0.0, int $maxDepth = 10, bool $canonicalize = false, bool $ignoreCase = false): IsEqual
     {
         return Assert::equalTo($value, $delta, $maxDepth, $canonicalize, $ignoreCase);
     }
@@ -242,7 +263,7 @@ class Constraints
     /**
      * @return IsEmpty
      */
-    public static function isEmpty()
+    public static function isEmpty(): IsEmpty
     {
         return Assert::isEmpty();
     }
@@ -251,7 +272,7 @@ class Constraints
     /**
      * @return IsWritable
      */
-    public static function isWritable()
+    public static function isWritable(): IsWritable
     {
         return Assert::isWritable();
     }
@@ -260,7 +281,7 @@ class Constraints
     /**
      * @return IsReadable
      */
-    public static function isReadable()
+    public static function isReadable(): IsReadable
     {
         return Assert::isReadable();
     }
@@ -269,7 +290,7 @@ class Constraints
     /**
      * @return DirectoryExists
      */
-    public static function directoryExists()
+    public static function directoryExists(): DirectoryExists
     {
         return Assert::directoryExists();
     }
@@ -278,7 +299,7 @@ class Constraints
     /**
      * @return FileExists
      */
-    public static function fileExists()
+    public static function fileExists(): FileExists
     {
         return Assert::fileExists();
     }
@@ -288,7 +309,7 @@ class Constraints
      * @param $value
      * @return GreaterThan
      */
-    public static function greaterThan($value)
+    public static function greaterThan($value): GreaterThan
     {
         return Assert::greaterThan($value);
     }
@@ -298,7 +319,7 @@ class Constraints
      * @param $value
      * @return LogicalOr
      */
-    public static function greaterThanOrEqual($value)
+    public static function greaterThanOrEqual($value): LogicalOr
     {
         return Assert::greaterThanOrEqual($value);
     }
@@ -308,7 +329,7 @@ class Constraints
      * @param $attributeName
      * @return ClassHasAttribute
      */
-    public static function classHasAttribute($attributeName)
+    public static function classHasAttribute($attributeName): ClassHasAttribute
     {
         return Assert::classHasAttribute($attributeName);
     }
@@ -318,7 +339,7 @@ class Constraints
      * @param $attributeName
      * @return ClassHasStaticAttribute
      */
-    public static function classHasStaticAttribute($attributeName)
+    public static function classHasStaticAttribute($attributeName): ClassHasStaticAttribute
     {
         return Assert::classHasStaticAttribute($attributeName);
     }
@@ -328,7 +349,7 @@ class Constraints
      * @param $attributeName
      * @return ObjectHasAttribute
      */
-    public static function objectHasAttribute($attributeName)
+    public static function objectHasAttribute($attributeName): ObjectHasAttribute
     {
         return Assert::objectHasAttribute($attributeName);
     }
@@ -338,7 +359,7 @@ class Constraints
      * @param $value
      * @return IsIdentical
      */
-    public static function identicalTo($value)
+    public static function identicalTo($value): IsIdentical
     {
         return Assert::identicalTo($value);
     }
@@ -348,7 +369,7 @@ class Constraints
      * @param $className
      * @return IsInstanceOf
      */
-    public static function isInstanceOf($className)
+    public static function isInstanceOf($className): IsInstanceOf
     {
         return Assert::isInstanceOf($className);
     }
@@ -358,7 +379,7 @@ class Constraints
      * @param $type
      * @return IsType
      */
-    public static function isType($type)
+    public static function isType($type): IsType
     {
         return Assert::isType($type);
     }
@@ -366,7 +387,7 @@ class Constraints
     /**
      * Asserts that a variable is of type array.
      */
-    public static function isArray()
+    public static function isArray(): IsType
     {
         return Assert::isType(IsType::TYPE_ARRAY);
     }
@@ -374,7 +395,7 @@ class Constraints
     /**
      * Asserts that a variable is of type bool.
      */
-    public static function isBool()
+    public static function isBool(): IsType
     {
         return Assert::isType(IsType::TYPE_BOOL);
     }
@@ -382,7 +403,7 @@ class Constraints
     /**
      * Asserts that a variable is of type float.
      */
-    public static function isFloat()
+    public static function isFloat(): IsType
     {
         return Assert::isType(IsType::TYPE_FLOAT);
     }
@@ -390,7 +411,7 @@ class Constraints
     /**
      * Asserts that a variable is of type int.
      */
-    public static function isInt()
+    public static function isInt(): IsType
     {
         return Assert::isType(IsType::TYPE_INT);
     }
@@ -398,7 +419,7 @@ class Constraints
     /**
      * Asserts that a variable is of type numeric.
      */
-    public static function isNumeric()
+    public static function isNumeric(): IsType
     {
         return Assert::isType(IsType::TYPE_NUMERIC);
     }
@@ -406,7 +427,7 @@ class Constraints
     /**
      * Asserts that a variable is of type object.
      */
-    public static function isObject()
+    public static function isObject(): IsType
     {
         return Assert::isType(IsType::TYPE_OBJECT);
     }
@@ -414,7 +435,7 @@ class Constraints
     /**
      * Asserts that a variable is of type resource.
      */
-    public static function isResource()
+    public static function isResource(): IsType
     {
         return Assert::isType(IsType::TYPE_RESOURCE);
     }
@@ -422,7 +443,7 @@ class Constraints
     /**
      * Asserts that a variable is of type string.
      */
-    public static function isString()
+    public static function isString(): IsType
     {
         return Assert::isType(IsType::TYPE_STRING);
     }
@@ -430,7 +451,7 @@ class Constraints
     /**
      * Asserts that a variable is of type scalar.
      */
-    public static function isScalar()
+    public static function isScalar(): IsType
     {
         return Assert::isType(IsType::TYPE_SCALAR);
     }
@@ -438,7 +459,7 @@ class Constraints
     /**
      * Asserts that a variable is of type callable.
      */
-    public static function isCallable()
+    public static function isCallable(): IsType
     {
         return Assert::isType(IsType::TYPE_CALLABLE);
     }
@@ -446,7 +467,7 @@ class Constraints
     /**
      * Asserts that a variable is of type iterable.
      */
-    public static function isIterable()
+    public static function isIterable(): IsType
     {
         return Assert::isType(IsType::TYPE_ITERABLE);
     }
@@ -454,7 +475,7 @@ class Constraints
     /**
      * Asserts that a variable is of type array.
      */
-    public static function isNotArray()
+    public static function isNotArray(): LogicalNot
     {
         return self::logicalNot(Assert::isType(IsType::TYPE_ARRAY));
     }
@@ -462,7 +483,7 @@ class Constraints
     /**
      * Asserts that a variable is of type bool.
      */
-    public static function isNotBool()
+    public static function isNotBool(): LogicalNot
     {
         return self::logicalNot(Assert::isType(IsType::TYPE_BOOL));
     }
@@ -470,7 +491,7 @@ class Constraints
     /**
      * Asserts that a variable is of type float.
      */
-    public static function isNotFloat()
+    public static function isNotFloat(): LogicalNot
     {
         return self::logicalNot(Assert::isType(IsType::TYPE_FLOAT));
     }
@@ -478,7 +499,7 @@ class Constraints
     /**
      * Asserts that a variable is of type int.
      */
-    public static function isNotInt()
+    public static function isNotInt(): LogicalNot
     {
         return self::logicalNot(Assert::isType(IsType::TYPE_INT));
     }
@@ -486,7 +507,7 @@ class Constraints
     /**
      * Asserts that a variable is of type numeric.
      */
-    public static function isNotNumeric()
+    public static function isNotNumeric(): LogicalNot
     {
         return self::logicalNot(Assert::isType(IsType::TYPE_NUMERIC));
     }
@@ -494,7 +515,7 @@ class Constraints
     /**
      * Asserts that a variable is of type object.
      */
-    public static function isNotObject()
+    public static function isNotObject(): LogicalNot
     {
         return self::logicalNot(Assert::isType(IsType::TYPE_OBJECT));
     }
@@ -502,7 +523,7 @@ class Constraints
     /**
      * Asserts that a variable is of type resource.
      */
-    public static function isNotResource()
+    public static function isNotResource(): LogicalNot
     {
         return self::logicalNot(Assert::isType(IsType::TYPE_RESOURCE));
     }
@@ -510,7 +531,7 @@ class Constraints
     /**
      * Asserts that a variable is of type string.
      */
-    public static function isNotString()
+    public static function isNotString(): LogicalNot
     {
         return self::logicalNot(Assert::isType(IsType::TYPE_STRING));
     }
@@ -518,7 +539,7 @@ class Constraints
     /**
      * Asserts that a variable is of type scalar.
      */
-    public static function isNotScalar()
+    public static function isNotScalar(): LogicalNot
     {
         return self::logicalNot(Assert::isType(IsType::TYPE_SCALAR));
     }
@@ -526,7 +547,7 @@ class Constraints
     /**
      * Asserts that a variable is of type callable.
      */
-    public static function isNotCallable()
+    public static function isNotCallable(): LogicalNot
     {
         return self::logicalNot(Assert::isType(IsType::TYPE_CALLABLE));
     }
@@ -534,7 +555,7 @@ class Constraints
     /**
      * Asserts that a variable is of type iterable.
      */
-    public static function isNotIterable()
+    public static function isNotIterable(): LogicalNot
     {
         return self::logicalNot(Assert::isType(IsType::TYPE_ITERABLE));
     }
@@ -544,7 +565,7 @@ class Constraints
      * @param $value
      * @return LessThan
      */
-    public static function lessThan($value)
+    public static function lessThan($value): LessThan
     {
         return Assert::lessThan($value);
     }
@@ -554,7 +575,7 @@ class Constraints
      * @param $value
      * @return LogicalOr
      */
-    public static function lessThanOrEqual($value)
+    public static function lessThanOrEqual($value): LogicalOr
     {
         return Assert::lessThanOrEqual($value);
     }
@@ -564,7 +585,7 @@ class Constraints
      * @param $pattern
      * @return RegularExpression
      */
-    public static function matchesRegularExpression($pattern)
+    public static function matchesRegularExpression($pattern): RegularExpression
     {
         return Assert::matchesRegularExpression($pattern);
     }
@@ -574,7 +595,7 @@ class Constraints
      * @param $expectedJson
      * @return JsonMatches
      */
-    public static function jsonMatches($expectedJson)
+    public static function jsonMatches($expectedJson): JsonMatches
     {
         return new JsonMatches($expectedJson);
     }
@@ -584,7 +605,7 @@ class Constraints
      * @param $prefix
      * @return StringStartsWith
      */
-    public static function stringStartsWith($prefix)
+    public static function stringStartsWith($prefix): StringStartsWith
     {
         return Assert::stringStartsWith($prefix);
     }
@@ -595,7 +616,7 @@ class Constraints
      * @param bool $case
      * @return StringContains
      */
-    public static function stringContains($string, $case = true)
+    public static function stringContains($string, bool $case = true): StringContains
     {
         return Assert::stringContains($string, $case);
     }
@@ -605,7 +626,7 @@ class Constraints
      * @param $suffix
      * @return StringEndsWith
      */
-    public static function stringEndsWith($suffix)
+    public static function stringEndsWith($suffix): StringEndsWith
     {
         return Assert::stringEndsWith($suffix);
     }
@@ -615,7 +636,7 @@ class Constraints
      * @param $count
      * @return Count
      */
-    public static function countOf($count)
+    public static function countOf($count): Count
     {
         return Assert::countOf($count);
     }

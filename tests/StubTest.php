@@ -108,6 +108,35 @@ class StubTest extends TestCase
         $this->assertEquals('numbers', $double->foo('one', 'two'));
     }
 
+    function testReturnValueMapWithoutArrayShouldReturnMappedValue()
+    {
+        $double = Double::mock(StubStandardClass::class)->getInstance();
+        $double::_method('foo')->return(Stubs::returnValueMap([
+            ['pink', 'yellow'], ['one', 'two'], 'one'
+        ], 'test'));
+        $this->assertEquals('test', $double->foo('pink', 'yellow'));
+        $this->assertEquals('test', $double->foo('one', 'two'));
+        $this->assertEquals('test', $double->foo('one'));
+    }
+
+    function testReturnValueMapWithBool()
+    {
+        $double = Double::mock(StubStandardClass::class)->getInstance();
+        $double::_method('foo')->return(Stubs::returnValueMap([
+            [true, false]
+        ], ['test']));
+        $this->assertEquals('test', $double->foo(true, false));
+    }
+
+    function testReturnValueMapWithNull()
+    {
+        $double = Double::mock(StubStandardClass::class)->getInstance();
+        $double::_method('foo')->return(Stubs::returnValueMap([
+            [null, 'arg']
+        ], ['test']));
+        $this->assertEquals('test', $double->foo(null, 'arg'));
+    }
+
     function testReturnValueMapWithConstraints()
     {
         $double = Double::mock(StubStandardClass::class)->getInstance();
@@ -116,13 +145,6 @@ class StubTest extends TestCase
         ], ['colors']));
         $this->assertEquals('colors', $double->foo(true, false));
         $this->assertEquals('foo', $double->foo(true, 'two'));
-    }
-
-    function testReturnValueMapWithWrongReturnCountShouldFail()
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $double = Double::mock(StubStandardClass::class)->getInstance();
-        $double::_method('foo')->return(Stubs::returnValueMap([['pink', 'yellow'], ['one', 'two']], ['colors']));
     }
 
     function testReturnValueMapWithNonMappedValue(){
