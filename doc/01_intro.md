@@ -1,7 +1,7 @@
 # Introduction
 
 ## Requirements
-The "sitphp/doubles" library requires at least PhpUnit 6 and at least PHP 7. It should be installed from composer which will make sure your configuration matches requirements.
+The "sitphp/doubles" library requires at least PhpUnit 6.5 and at least PHP 7.0. It should be installed from composer which will make sure your configuration matches requirements.
  > {.note .info} Note : You can get composer here : [https://getcomposer.org](https://getcomposer.org).
         
 ## Install

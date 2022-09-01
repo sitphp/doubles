@@ -7,6 +7,10 @@ The "sitphp/doubles" library can help you to test your PHP classes by generating
 See full documentation : [here](https://sitphp.com/doubles/doc/intro)
 
 
+## Requirements
+The "sitphp/doubles" library requires at least PhpUnit 6.5 and at least PHP 7.0. It should be installed from composer which will make sure your configuration matches requirements.
+ > {.note .info} Note : You can get composer here : [https://getcomposer.org](https://getcomposer.org).
+
 ## Installation
 
 Add the line `"sitphp/doubles": "2.2.*"` in the `"require-dev"` section of your composer.json file :
@@ -43,7 +47,7 @@ A double is called a "mock" when all the methods of the original class are overw
 $my_double = Double::mock(MyClass::class)->getInstance();
 ```
    
-For more details : [Read the doc on creating doubles](doc/2_creating_doubles.md)
+For more details : [Read the doc on creating doubles](doc/03_creating_doubles.md)
 
 ## Testing a double
 To test how many times a double method is called, use the `count` method :
@@ -67,7 +71,7 @@ To change the return value of a method, use the `stub` method. :
 $my_double::_method('myMethod')->return('hello');
 ```
 
-For more details : [Read the doc on testing doubles](doc/3_testing_doubles.md)
+For more details : [Read the doc on testing doubles](doc/04_testing_doubles.md)
 
 ## Configuration
 
@@ -88,7 +92,7 @@ Here is a list of all available config parameters :
 - `allow_non_existent_classes` : Set this parameter to `false` to disallow alias doubles of non existent classes.
 - `test_unexpected_methods` : Set this parameter to `true` to automatically receive an assertion error whenever an unexpected method is called.
  
-For more details : [Read the doc on configuration](doc/4_configuration.md)
+For more details : [Read the doc on configuration](doc/05_configuration.md)
 
 ## About
 

@@ -22,17 +22,17 @@ class Stubs
      * @param mixed $value
      * @return ReturnValueStub
      */
-    public static function returnValue($value)
+    public static function returnValue($value): ReturnValueStub
     {
         return new ReturnValueStub($value);
     }
 
     /**
      * @param array $args_map
-     * @param array $returns_map
+     * @param $returns_map
      * @return ReturnValueMapStub
      */
-    public static function returnValueMap(array $args_map, array $returns_map)
+    public static function returnValueMap(array $args_map, $returns_map): ReturnValueMapStub
     {
         return new ReturnValueMapStub($args_map, $returns_map);
     }
@@ -41,7 +41,7 @@ class Stubs
      * @param $arg_index
      * @return ReturnArgumentStub
      */
-    public static function returnArgument($arg_index)
+    public static function returnArgument($arg_index): ReturnArgumentStub
     {
         return new ReturnArgumentStub($arg_index);
     }
@@ -51,7 +51,7 @@ class Stubs
      *
      * @return ReturnCallbackStub
      */
-    public static function returnCallback($callback)
+    public static function returnCallback($callback): ReturnCallbackStub
     {
         return new ReturnCallbackStub($callback);
     }
@@ -59,7 +59,7 @@ class Stubs
     /**
      * @return ReturnSelfStub
      */
-    public static function returnSelf()
+    public static function returnSelf(): ReturnSelfStub
     {
         return new ReturnSelfStub();
     }
@@ -69,7 +69,7 @@ class Stubs
      * @param null $message
      * @return ThrowExceptionStub
      */
-    public static function throwException($exception_class, $message = null)
+    public static function throwException($exception_class, $message = null): ThrowExceptionStub
     {
         return new ThrowExceptionStub($exception_class, $message);
     }

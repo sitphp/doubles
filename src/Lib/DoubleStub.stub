@@ -9,14 +9,14 @@
 
 namespace Doubles\Lib;
 
-use \Doubles\Constraints;
-use \Doubles\Lib\Expectation;
-use \Doubles\Stubs\StubInterface;
-use \PHPUnit\Framework\Assert;
-use \Doubles\Lib\ExpectationCollection;
-use \Doubles\Exceptions\RuntimeException;
-use \PHPUnit\Framework\Constraint\Constraint;
-use \Doubles\Exceptions\InvalidArgumentException;
+use Doubles\Lib\Expectation;
+use Doubles\Lib\ExpectationCollection;
+use Doubles\Lib\DoubleCall;
+use Doubles\Exceptions\InvalidArgumentException;
+use Doubles\Exceptions\RuntimeException;
+use Doubles\Stubs\StubInterface;
+use PHPUnit\Framework\Assert;
+use PHPUnit\Framework\Constraint\Constraint;
 
 class DoubleStub
 {
@@ -25,6 +25,7 @@ class DoubleStub
     private static $_double_closed = false;
     private static $type;
     private static $_double_expectations = [];
+    /** @var DoubleCall[] $_double_calls */
     private static $_double_calls = [];
     private static $_double_config = [];
     private static $_double_reference;
@@ -108,7 +109,6 @@ class DoubleStub
      * Set double type (mock, dummy or alias)
      *
      * @param string $type
-     * @return string
      */
     protected static function _double_setType(string $type)
     {
@@ -133,7 +133,7 @@ class DoubleStub
      * Check if method can be asserted and return method expectation
      *
      * @param $method
-     * @return \Doubles\Lib\ExpectationCollection
+     * @return ExpectationCollection
      */
     public static function _method($method)
     {
@@ -149,7 +149,6 @@ class DoubleStub
             $expectation_collection->add($expectation);
         }
         return $expectation_collection;
-
     }
 
     /**
@@ -166,7 +165,7 @@ class DoubleStub
         if (!isset(self::$_double_calls[$method])) {
             self::$_double_calls[$method] = [];
         }
-        self::$_double_calls[$method][] = ['args' => $args];
+        self::$_double_calls[$method][] = new DoubleCall($method, $args);
 
         // Resolve return value
         $call_count = count(self::$_double_calls[$method]);
@@ -177,7 +176,7 @@ class DoubleStub
                 if($method == '__construct' && null !== $_double_reference = self::_double_getReference()){
                     $_double_reference_reflexion = new \ReflectionClass($_double_reference);
                     self::$_double_reference_instance = $_double_reference_reflexion->newInstanceWithoutConstructor();
-                    return;
+                    return null;
                 } else {
                     $return = null;
                 }
@@ -194,15 +193,16 @@ class DoubleStub
                 break;
             case 'mock':
                 $_double_reference = self::_double_getReference();
+                $parent_class = get_parent_class(__CLASS__);
                 if ($method == '__construct' && $_double_reference !== null) {
                     self::$_double_reference_instance = new $_double_reference(...$args);
                 }
                 if ($_double_reference !== null) {
                     $return = self::$_double_reference_instance->$method($args);
-                } else if (!get_parent_class(__CLASS__)) {
+                } else if (!$parent_class) {
                     $return = null;
-                } else if (is_callable([parent::class, $method])) {
-                    $return = parent::$method(...$args);
+                } else if (is_callable([$parent_class, $method])) {
+                    $return = $parent_class::$method(...$args);
                 } else {
                     $return = null;
                 }
@@ -227,7 +227,7 @@ class DoubleStub
         if (!isset(self::$_double_calls[$method])) {
             self::$_double_calls[$method] = [];
         }
-        self::$_double_calls[$method][] = ['args' => $args];
+        self::$_double_calls[$method][] = new DoubleCall($method, $args);
 
         // Resolve return value
         $call_count = count(self::$_double_calls[$method]);
@@ -247,12 +247,13 @@ class DoubleStub
                 ]);
                 break;
             case 'mock':
+                $parent_class = get_parent_class(__CLASS__);
                 if (null !== $_double_reference = self::_double_getReference()) {
                     $return = $_double_reference::$method($args);
-                } else if (!get_parent_class(__CLASS__)) {
+                } else if (!$parent_class) {
                     $return = null;
-                } else if (is_callable([parent::class, $method])) {
-                    $return = parent::$method(...$args);
+                } else if (is_callable([$parent_class, $method])) {
+                    $return = $parent_class::$method(...$args);
                 } else {
                     $return = null;
                 }
@@ -341,7 +342,6 @@ class DoubleStub
      */
     protected static function _double_assertMethodCount()
     {
-
         // Check asserted methods
         foreach (self::_double_getExpectation() as $method => $expectation) {
             $call_count = isset(self::$_double_calls[$method]) ? count(self::$_double_calls[$method]) : 0;
@@ -402,23 +402,24 @@ class DoubleStub
             }
             foreach (self::$_double_calls[$method] as $i => $call) {
                 $call_count = $i + 1;
-                $call_args = $call['args'];
+                $call_args = $call->getArgs();
                 $assert_args = $expectation->getArgs($call_count);
                 if ($assert_args === null) {
                     continue;
                 }
                 if (is_callable($assert_args)) {
-                    $assert_args(...$call['args']);
+                    $assert_args(...$call_args);
                 } else if (is_array($assert_args)) {
-                    foreach($assert_args as $i => $assert_arg){
+                    foreach($assert_args as $j => $assert_arg){
+                        $call_arg = $call_args[$j] ?? null;
                         if ($assert_arg instanceof Constraint) {
-                            Assert::assertThat($call_args[$i], $assert_arg, 'Argument ' . ($i + 1) . ' of method "' . $method . '" didn\'t match expected value on call ' . $call_count);
+                            Assert::assertThat($call_arg, $assert_arg, 'Argument ' . ($j + 1) . ' of method "' . $method . '" didn\'t match expected value on call ' . $call_count);
                         } else {
-                            Assert::assertEquals($assert_arg, $call_args[$i], 'Argument ' . ($i + 1) . ' of method "' . $method . '" didn\'t match expected value on call ' . $call_count);
+                            Assert::assertEquals($assert_arg, $call_arg, 'Argument ' . ($j + 1) . ' of method "' . $method . '" didn\'t match expected value on call ' . $call_count);
                         }
                     }
                 } else if(is_string($assert_args) && $assert_args == 'no-args') {
-                    Assert::assertEquals([], $call_args, 'No arguments expected but '.count($call_args).'found on call ' . $call_count);
+                    Assert::assertEquals([], $call_args, 'No arguments expected but '.count($call_args).' found on call ' . $call_count);
                 } else {
                     throw new RuntimeException('Invalid assertion type');
                 }
@@ -434,9 +435,12 @@ class DoubleStub
         if (self::$_double_closed) {
             return false;
         }
-        self::_double_assertMethodCount();
-        self::_double_assertMethodArgs();
-        self::$_double_closed = true;
+        try {
+            self::_double_assertMethodCount();
+            self::_double_assertMethodArgs();
+        } finally {
+            self::$_double_closed = true;
+        }
         return true;
     }
 }

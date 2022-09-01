@@ -1,7 +1,7 @@
 # Testing doubles
-> {.note .important} Important : For your tests to work, your PhpUnit test case classes must extend the `Doubles\TestCase` class. Read more on the [getting started page](/doc/getting_started#testing-a-double).
+> {.note .important} Important : For your tests to work, your PhpUnit test case classes must extend the `Doubles\TestCase` class. Read more on the [Quick start page](/doc/quick_start#testing-a-double).
 
-## Counting method calls
+## Testing method call count
 To test how many times a double method is being called, use the `count` method. There are two ways :
 
 ### Using comparators
@@ -47,7 +47,7 @@ $double::_method('__call')->count(function($calls){
 });
 ```
 
-## Changing a method's behaviour
+## Changing method's return value
 You can change the behaviour of a double method with the `stub` method.
 
 ### Return a simple value
@@ -83,7 +83,7 @@ $my_double::_method('myMethod')->return(Stubs::returnSelf());
 $my_double::_method('myMethod')->return(Stubs::returnValueMap([['one', 'two'],['blue', 'yellow']], ['numbers', 'colors']);
 ```
 
-### Run a callback
+### Run using a callback
 If you want to have full control on the behaviour of a double method, you may also define your own callback to replace it :
 
 ```php
@@ -97,8 +97,8 @@ $my_double::_method('myMethod')->return(function($arg1){
 });
 ```
   
-### Specify call count overwriting
-For each of the above ways of changing a method's behaviour, you can specify which calls is concerned by the change:
+### Specific call return value
+For each of the above ways of modifying a method's return value, you can specify which calls is concerned by the change:
 
 ```php
 // Make "myMethod" method return "hello" the second time it is called
@@ -202,7 +202,7 @@ Here is a list of all available constraints to test against any argument `$argum
 - `Constraints::classHasStaticAttribute($attributeName)` : Test that class `$argument` has static attribute `$attributeName`.
 - `Constraints::objectHasAttribute($attributeName)` : Test that object `$argument` has attribute `$attributeName`.
 
-### Manualy
+### Manually
 If you need full control to test a method's arguments, you can run your own PhpUnit assertions using a callback function. You will be given all the arguments passed to your method :
 
 ```php
@@ -215,7 +215,7 @@ $double::_method('myMethod')->args(function($arg1, $arg2){
 ```
 
 ### Specify call count test
-If you don't specify on which method call you would like to test your arguments, they will be tested with the rules you have specified everytime the method is being called. You can specify on which method to test your arguments in the 2nd argument of the `args` method  : </p>
+If you don't specify on which method call you would like to test your arguments, they will be tested with the rules you have specified every time the method is being called. You can specify on which method to test your arguments in the 2nd argument of the `args` method  : </p>
 
 ```php 
 // Test that arguments "value1" and "value2" were passed on the 3rd call of method "myMethod"
