@@ -10,7 +10,11 @@
 namespace Doubles;
 
 
-class TestCase extends TestCasePHPUnit8AndHigher
+class TestCase extends \PHPUnit\Framework\TestCase
 {
-
+    function tearDown() : void
+    {
+        parent::tearDown();
+        Double::close();
+    }
 }
