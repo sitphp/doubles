@@ -289,16 +289,10 @@ class DoubleTest extends TestCase
     /* -----
    Test final classes
    ---- */
-    public function testFinalClassDoubleShouldImplementFinalMethodWhenConfigSaySo()
+    public function testFinalClassDoubleShouldNotImplementFinalMethodWhenConfigSaySo()
     {
         $double = Double::dummy(FinalClass::class, ['allow_final_doubles' => true])->getInstance();
         $this->assertNull($double->foo());
-    }
-
-    public function testFinalClassWithFinalMethodDoubleShouldNotImplementFinalMethodWhenConfigSaySo()
-    {
-        $double = Double::dummy(ClassWithFinalMethods::class, ['allow_final_doubles' => false])->getInstance();
-        $this->assertEquals('foo', $double->foo());
     }
 
     public function testMakingFinalClassDoubleShouldFailWhenConfigSaysSo()
@@ -306,6 +300,26 @@ class DoubleTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         Double::dummy(FinalClass::class, ['allow_final_doubles' => false])->getInstance();
     }
+
+    public function testClassWithFinalMethod()
+    {
+        $double = Double::dummy(ClassWithFinalMethods::class)->getInstance();
+        $this->assertNotInstanceOf(ClassWithFinalMethods::class, $double);
+        $this->assertNull($double->foo());
+        $this->assertNull($double::bar());
+    }
+
+    public function testClassWithFinalMethodDoubleShouldExtendItselfWhenConfigSaysSo()
+    {
+        $double = Double::dummy(ClassWithFinalMethods::class, ['allow_final_doubles' => false])->getInstance();
+        $this->assertInstanceOf(ClassWithFinalMethods::class, $double);
+        $this->assertEquals('foo', $double->foo());
+        $this->assertEquals('bar', $double::bar());
+    }
+
+
+
+
 
     /* -----
     Test interfaces
@@ -555,6 +569,10 @@ class ClassWithFinalMethods
     final public function foo()
     {
         return 'foo';
+    }
+
+    final public static function bar(){
+        return 'bar';
     }
 }
 

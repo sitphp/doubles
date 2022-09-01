@@ -10,10 +10,7 @@
 namespace Doubles\Stubs;
 
 use Doubles\Constraints;
-use Doubles\Exceptions\InvalidArgumentException;
-use Doubles\Exceptions\RuntimeException;
 use Doubles\Lib\DoubleStub;
-use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
 
 class ReturnValueMapStub implements StubInterface
@@ -21,17 +18,13 @@ class ReturnValueMapStub implements StubInterface
     protected $args_map;
     protected $returns_map;
 
-    function __construct($args_map, $returns_map)
+    function __construct(array $args_map, $returns_map)
     {
-        if(!is_array($args_map)){
-            $args_map = [$args_map];
-        }
-        if(!is_array($returns_map)){
-            $returns_map = [$returns_map];
-        }
-
-        if (count($args_map) != count($returns_map)) {
-            throw new InvalidArgumentException('Argument count does not match return count');
+        foreach ($args_map as $i => $value){
+            if(is_array($value)){
+               continue;
+            }
+            $args_map[$i] = [$value];
         }
         $this->args_map = $args_map;
         $this->returns_map = $returns_map;
@@ -42,7 +35,7 @@ class ReturnValueMapStub implements StubInterface
         $args = $call['args'];
         foreach ($this->args_map as $i => $arg_map) {
             if ($this->argMapMatchesArgs($arg_map, $args)) {
-                return $this->returns_map[$i];
+                return is_array($this->returns_map) ? $this->returns_map[$i] : $this->returns_map;
             }
         }
 
@@ -60,7 +53,7 @@ class ReturnValueMapStub implements StubInterface
         }
     }
 
-    protected function argMapMatchesArgs(array $arg_map, array $args){
+    protected function argMapMatchesArgs(array $arg_map, $args){
         foreach ($arg_map as $i => $arg){
             if ($arg instanceof Constraint) {
                 $constraint = $arg;

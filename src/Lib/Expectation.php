@@ -17,6 +17,10 @@ use \Doubles\Exceptions\InvalidArgumentException;
 
 class Expectation
 {
+    const TYPE_STUB = 'stub';
+    const TYPE_DUMMY = 'dummy';
+    const TYPE_MOCK = 'mock';
+
     protected $method;
     protected $type = [];
     protected $args = [];
@@ -45,11 +49,11 @@ class Expectation
         $call_counts = $this->validateCallCounts($call_number);
         if ($call_counts !== null) {
             foreach($call_counts as $value) {
-                $this->setTypeCall($value, ['dummy']);
+                $this->setTypeCall($value, [self::TYPE_DUMMY]);
             }
         } else {
             $this->resetType();
-            $this->setTypeDefault(['dummy']);
+            $this->setTypeDefault([self::TYPE_DUMMY]);
         }
         return $this;
     }
@@ -66,11 +70,11 @@ class Expectation
         $call_counts = $this->validateCallCounts($call_number);
         if ($call_counts !== null) {
             foreach($call_counts as $value){
-                $this->setTypeCall($value, ['mock']);
+                $this->setTypeCall($value, [self::TYPE_MOCK]);
             }
         } else {
             $this->resetType();
-            $this->setTypeDefault(['mock']);
+            $this->setTypeDefault([self::TYPE_MOCK]);
         }
         return $this;
     }
@@ -78,7 +82,7 @@ class Expectation
     function default($call_number = null){
         $call_counts = $this->validateCallCounts($call_number);
         if($call_counts !== null){
-            foreach($call_number as $value){
+            foreach($call_counts as $value){
                 $this->resetTypeCall($value);
             }
         } else {
@@ -104,13 +108,14 @@ class Expectation
         } else {
             $stub = Stubs::returnValue($return);
         }
+
         if ($call_counts !== null) {
-            foreach ($call_counts as $value) {
-                $this->setTypeCall($value, ['stub', $stub]);
+            foreach ($call_counts as $call_count) {
+                $this->setTypeCall($call_count, [self::TYPE_STUB, $stub]);
             }
         } else {
             $this->resetType();
-            $this->setTypeDefault(['stub', $stub]);
+            $this->setTypeDefault([self::TYPE_STUB, $stub]);
         }
         return $this;
     }
@@ -126,7 +131,7 @@ class Expectation
     {
         if ($this->isInt($count)) {
             if ($count < 0) {
-                throw new InvalidArgumentException('Invalid "range" argument. Should be "i", ">i", "<i" ">=i", "<=i" (where i is a positive integer), callable or instance of ' . Constraint::class);
+                $this->throwInvalidRangeException();
             }
         } else if (is_string($count)) {
             if ($count[0] == '>') {
@@ -136,7 +141,7 @@ class Expectation
                     $limit = ltrim($count, '>');
                 }
                 if (!$this->isPositiveInt($limit)) {
-                    throw new InvalidArgumentException('Invalid "range" argument. Should be "i", ">i", "<i" ">=i", "<=i" (where i is a positive integer), callable or instance of ' . Constraint::class);
+                    $this->throwInvalidRangeException();
                 }
             } else if ($count[0] == '<') {
                 if ($count[1] == '=') {
@@ -145,22 +150,24 @@ class Expectation
                     $limit = ltrim($count, '<');
                 }
                 if (!$this->isPositiveInt($limit)) {
-                    throw new InvalidArgumentException('Invalid "range" argument. Should be "i", ">i", "<i" ">=i", "<=i" (where i is a positive integer), callable or instance of ' . Constraint::class);
+                    $this->throwInvalidRangeException();
                 }
 
-            } else if (strpos('-', $count)) {
+            } else if (strpos($count,'-') !== false) {
                 $limits = explode('-', $count);
-                if ($count($limits) != 2) {
-                    throw new InvalidArgumentException('Invalid "range" argument. Should be "i", ">i", "<i" ">=i", "<=i" (where i is a positive integer), callable or instance of ' . Constraint::class);
+                if (count($limits) != 2) {
+                    $this->throwInvalidRangeException();
                 }
                 foreach ($limits as $limit) {
                     if (!$this->isPositiveInt($limit)) {
-                        throw new InvalidArgumentException('Invalid "range" argument. Should be "i", ">i", "<i" ">=i", "<=i" (where i is a positive integer), callable or instance of ' . Constraint::class);
+                        $this->throwInvalidRangeException();
                     }
                 }
+            } else {
+                $this->throwInvalidRangeException();
             }
         } else if (!$count instanceof Constraint && !is_callable($count)) {
-            throw new InvalidArgumentException('Invalid "range" argument. Should be "i", ">i", "<i" ">=i", "<=i" (where i is a positive integer), callable or instance of ' . Constraint::class);
+            $this->throwInvalidRangeException();
         }
         $this->count = $count;
         return $this;
@@ -250,13 +257,10 @@ class Expectation
      */
     function getType($call_number)
     {
-        if (isset($this->type[$call_number])) {
+        if (array_key_exists($call_number, $this->type)) {
             return $this->type[$call_number];
-        } else if (isset($this->type['_default'])) {
-            return $this->type['_default'];
-        } else {
-            return null;
         }
+        return $this->type['_default'] ?? null;
     }
 
     /**
@@ -268,7 +272,7 @@ class Expectation
     }
 
     protected function resetTypeCall(int $call_number){
-        unset($this->type[$call_number]);
+        $this->type[$call_number] = null;
     }
 
     /**
@@ -281,6 +285,10 @@ class Expectation
         $this->type['_default'] = $type;
     }
 
+    protected function getTypeDefault(){
+        return $this->type['_default'];
+    }
+
     protected function resetTypeDefault(){
         $this->type['_default'] = null;
     }
@@ -288,12 +296,16 @@ class Expectation
     /**
      * Set method type on specific call
      *
-     * @param $call_number
+     * @param int $call_number
      * @param array $type
      */
-    protected function setTypeCall($call_number, array $type)
+    protected function setTypeCall(int $call_number, array $type)
     {
         $this->type[$call_number] = $type;
+    }
+
+    protected function getTypeCall(int $call_number){
+        return $this->type[$call_number] ?? null;
     }
 
     /**
@@ -366,5 +378,9 @@ class Expectation
     protected function isInt($int)
     {
         return filter_var($int, FILTER_VALIDATE_INT) === 0 || filter_var($int, FILTER_VALIDATE_INT);
+    }
+
+    protected function throwInvalidRangeException(){
+        throw new InvalidArgumentException('Invalid "range" argument. Should be "i", ">i", "<i" ">=i", "<=i", "i-j" (where i/j are positive integers), callable or instance of ' . Constraint::class);
     }
 }

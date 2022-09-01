@@ -22,16 +22,17 @@ $double_instance = Double::dummy(MyClass::class)
 ## Configuration list
 Here is a list of all available config parameters :
 
-- `allow_final_doubles` : Set this parameter to `false` to disable trying to make doubles of final classes/methods. You can also use the `allowFinalDoubles method. Read more [here](#dealing-with-final-classes).
-- `allow_protected_methods` : Set this parameter to `false` to disallow testing protected methods.You can also use the `allowProtectedMethods` method. Read more [here](#dealing-with-protected-methods).
-- `allow_non_existent_classes` : Set this parameter to `false` to disallow alias doubles of non existent classes. You can also use the `allowNonExistentClasses` method. Read more [here](#dealing-with-non-existent-methods).
-- `test_unexpected_methods` : Set this parameter to `true` to automatically receive an assertion error whenever an unexpected method is called. You can also use the `testUnexpectedMethods` method. Read more [here](#testing-unexpected-methods-automatically).
+- `allow_final_doubles` : Set this parameter to `false` to disable trying to make doubles of final classes/methods. You can also use the `allowFinalDoubles method. Read more [here](#2_dealing-with-final-classes).
+- `allow_protected_methods` : Set this parameter to `false` to disallow testing protected methods.You can also use the `allowProtectedMethods` method. Read more [here](#3_dealing-with-protected-methods).
+- `allow_non_existent_classes` : Set this parameter to `false` to disallow alias doubles of non existent classes. You can also use the `allowNonExistentClasses` method. Read more [here](#4_dealing-with-non-existent-methods).
+- `test_unexpected_methods` : Set this parameter to `true` to automatically receive an assertion error whenever an unexpected method is called. You can also use the `testUnexpectedMethods` method. Read more [here](#5_testing-unexpected-methods-automatically).
 
 ## Notes
 
 ### Dealing with final classes
-The "sitphp/commands" library can create doubles of classes marked final or having final methods. However, the double will not extend the original class. Therefore, that double will not be an instance of the original class and that may sometimes be a problem for testing.
-If you really need your double class to be an instance of the original class implementing final methods, you can set the `allow_final_doubles` config parameter to `false`. Your double will then extend your original class but final calls will always behave like in the original class and will not be testable. Also note that this will not work if your call is marked final, but only if it has final methods.
+If a class is marked final or contains final methods, its double will not extend the original class. Therefore, that double will not be an instance of the original class and that may sometimes be a problem for testing.
+
+If you really need your double class extend the original class and implement the final methods, you can set the `allow_final_doubles` config parameter to `false`. Your double will then extend it's original class but final calls  will not be testable and will behave like in the original class. Please note that this will not work if your class is marked final (only if it contains final methods).
 
 ```php
 // This will fail if MyFinalClass class is marked final

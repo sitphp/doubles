@@ -9,6 +9,9 @@
 
 namespace Doubles\Lib;
 
+use ReflectionClass;
+use ReflectionException;
+
 class ClassManager
 {
     protected static $reflection_classes;
@@ -17,25 +20,25 @@ class ClassManager
      * Get class reflection
      *
      * @param string $class
-     * @return \ReflectionClass
-     * @throws \ReflectionException
+     * @return ReflectionClass
+     * @throws ReflectionException
      */
-    public static function getReflection(string $class)
+    public static function getReflection(string $class): ReflectionClass
     {
         if (!isset(self::$reflection_classes[$class])) {
-            self::$reflection_classes[$class] = new \ReflectionClass($class);
+            self::$reflection_classes[$class] = new ReflectionClass($class);
         }
         return self::$reflection_classes[$class];
     }
 
     /**
-     * Check if a given class has finals calls
+     * Check if a given class is finals or has final methods
      *
      * @param $class
      * @return bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    public static function hasFinalCalls($class)
+    public static function hasFinalCalls($class): bool
     {
         $reflection_class = self::getReflection($class);
         if ($reflection_class->isFinal()) {
@@ -51,13 +54,13 @@ class ClassManager
     }
 
     /**
-     * Check if a given class has abstract calls
+     * Check if a given class is abstract or has abstract methods
      *
      * @param $class
      * @return bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    public static function hasAbstractCalls($class)
+    public static function hasAbstractCalls($class): bool
     {
         $reflection_class = self::getReflection($class);
         if ($reflection_class->isAbstract()) {
@@ -72,7 +75,7 @@ class ClassManager
         return false;
     }
 
-    public static function parseClass($class)
+    public static function parseClass($class): array
     {
         $class_parts = explode('\\', trim($class, '\\'));
         $short_name = end($class_parts);
@@ -91,11 +94,10 @@ class ClassManager
      * @param $class
      * @return string
      */
-    public static function normalizeClass($class)
+    public static function normalizeClass($class): string
     {
         $class = trim($class, '\\');
-        $class = '\\' . $class;
-        return $class;
+        return '\\' . $class;
     }
 
     /**
@@ -104,7 +106,7 @@ class ClassManager
      * @param $class
      * @param null $options
      * @return bool|null|string|string[]
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
 
     public static function getCode($class, $options = null)
@@ -120,12 +122,11 @@ class ClassManager
             if($matches[1][$i][0] === $reflection_class->getShortName()){
                 continue;
             }
+            $offset_start = $match[1];
             if(isset($matches[0][$i+1])){
-                $offset_start = $match[1];
                 $offset_end = $matches[0][$i+1][1];
                 $classes_to_remove[] = substr($class_code, $offset_start, $offset_end - $offset_start);
             } else {
-                $offset_start = $match[1];
                 $classes_to_remove[] = substr($class_code, $offset_start);
             }
         }

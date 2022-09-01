@@ -1,5 +1,5 @@
 # Testing doubles
-> {.note .important} Important : For your tests to work, your PhpUnit test case classes must extend the `Doubles\TestCase` class. Read more on the [getting started page](/doc/getting_started#testing-a-double).
+> {.note .important} Important : For your tests to work, your PhpUnit test case classes must extend the `Doubles\TestCase` class. Read more on the [Quick start page](/doc/quick_start#testing-a-double).
 
 ## Testing method call count
 To test how many times a double method is being called, use the `count` method. There are two ways :

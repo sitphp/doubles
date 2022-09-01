@@ -9,7 +9,7 @@
 
 namespace Doubles\Lib;
 
-use Doubles\Stubs;
+use Exception;
 
 class ExpectationCollection
 {
@@ -22,7 +22,7 @@ class ExpectationCollection
      * @param null $call_number
      * @return ExpectationCollection
      */
-    function dummy($call_number = null)
+    function dummy($call_number = null): ExpectationCollection
     {
         /** @var Expectation $expectation */
         foreach ($this->expectations as $expectation) {
@@ -38,7 +38,7 @@ class ExpectationCollection
      * @param null $call_number
      * @return ExpectationCollection
      */
-    function mock($call_number = null)
+    function mock($call_number = null): ExpectationCollection
     {
         /** @var Expectation $expectation */
         foreach ($this->expectations as $expectation) {
@@ -47,7 +47,8 @@ class ExpectationCollection
         return $this;
     }
 
-    function default($call_number = null){
+    function default($call_number = null): ExpectationCollection
+    {
         /** @var Expectation $expectation */
         foreach ($this->expectations as $expectation) {
             $expectation->default($call_number);
@@ -63,7 +64,7 @@ class ExpectationCollection
      * @param null $call_number
      * @return ExpectationCollection
      */
-    function return($return, $call_number = null)
+    function return($return, $call_number = null): ExpectationCollection
     {
         /** @var Expectation $expectation */
         foreach ($this->expectations as $expectation) {
@@ -72,21 +73,15 @@ class ExpectationCollection
         return $this;
     }
 
-    function whenArgsReturn(array $args, $return, $call_number){
-        foreach ($this->expectations as $expectation) {
-            $expectation->return(Stubs::returnValueMap($args, $return), $call_number);
-        }
-    }
-
     /**
      * Set and validate expectation methods count
      *
      * @param $range
      * @return $this
-     * @throws \Exception
+     * @throws Exception
      * @return ExpectationCollection
      */
-    function count($range)
+    function count($range): ExpectationCollection
     {
         foreach ($this->expectations as $expectation) {
             $expectation->count($range);
@@ -101,7 +96,7 @@ class ExpectationCollection
      * @param null $call_number
      * @return ExpectationCollection
      */
-    function args($arguments_assertions, $call_number = null)
+    function args($arguments_assertions, $call_number = null): ExpectationCollection
     {
         /** @var Expectation $expectation */
         foreach ($this->expectations as $expectation) {
