@@ -16,12 +16,12 @@ which will make sure your configuration matches requirements.
 
 ## Installation
 
-Add the line `"sitphp/doubles": "2.2.*"` in the `"require-dev"` section of your composer.json file :
+Add the line `"sitphp/doubles": "2.4.*"` in the `"require-dev"` section of your composer.json file :
 
 ```json
 {
     "require-dev": {
-        "sitphp/doubles": "2.2.*"
+        "sitphp/doubles": "2.4.*"
     }
 }
 ```
