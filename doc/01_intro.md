@@ -8,13 +8,13 @@ which will make sure your configuration matches requirements.
 
 ## Install
 
-Once you have composer installed, add the line `"sitphp/doubles": "~2.4.1"` in the `"require-dev"` section of your
+Once you have composer installed, add the line `"sitphp/doubles": "~2.4.*"` in the `"require-dev"` section of your
 composer.json file :
 
 ```json 
 {
     "require-dev": {
-        "sitphp/doubles": "~2.4.1"
+        "sitphp/doubles": "~2.4.*"
     }
 }
 ```
