@@ -2,18 +2,18 @@
 /**
  * This file is part of the "sitphp/doubles" package.
  *
- *  @license MIT License
- *  @link https://github.com/sitphp/doubles
- *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
+ * @license MIT License
+ * @link https://github.com/sitphp/doubles
+ * @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
-namespace Tests;
+namespace SitPHP\Doubles\Tests;
 
-use \Doubles\Exceptions\LogicException;
-use \Doubles\TestCase;
-use \Doubles\Lib\DoubleInterface;
-use \Doubles\Double;
-use \Doubles\Exceptions\InvalidArgumentException;
+use SitPHP\Doubles\Double;
+use SitPHP\Doubles\Exceptions\InvalidArgumentException;
+use SitPHP\Doubles\Exceptions\LogicException;
+use SitPHP\Doubles\Lib\DoubleInterface;
+use SitPHP\Doubles\TestCase;
 
 class DoubleTest extends TestCase
 {
@@ -74,7 +74,9 @@ class DoubleTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         Double::dummy(\Closure::class)->getInstance();
     }
-    public function testMakingDoubleOfDoubleShouldFail(){
+
+    public function testMakingDoubleOfDoubleShouldFail()
+    {
         $this->expectException(InvalidArgumentException::class);
         $double = Double::dummy(DoubleStandardClass::class)->getClass();
         Double::dummy($double)->getClass();
@@ -232,6 +234,7 @@ class DoubleTest extends TestCase
             ->getClass();
         $this->assertTrue(trait_exists($double));
     }
+
     public function testAbstractAlias()
     {
         $double = Double::alias('NonExistentAbstract')
@@ -239,11 +242,15 @@ class DoubleTest extends TestCase
             ->getClass();
         $this->assertTrue(class_exists($double));
     }
-    public function testAliasTraitShouldFailWithoutAlias(){
+
+    public function testAliasTraitShouldFailWithoutAlias()
+    {
         $this->expectException(LogicException::class);
         $double = Double::dummy('NonExistentTrait')->aliasTrait();
     }
-    public function testAliasAbstractShouldFailWithoutAlias(){
+
+    public function testAliasAbstractShouldFailWithoutAlias()
+    {
         $this->expectException(LogicException::class);
         $double = Double::dummy('NonExistentTrait')->aliasAbstract();
     }
@@ -316,9 +323,6 @@ class DoubleTest extends TestCase
         $this->assertEquals('foo', $double->foo());
         $this->assertEquals('bar', $double::bar());
     }
-
-
-
 
 
     /* -----
@@ -416,19 +420,24 @@ class DoubleTest extends TestCase
             ->getInstance();
         $this->assertInstanceOf(StandardInterface::class, $double);
     }
-    public function testAddInterfaceShouldAcceptArrayOfInterfaces(){
+
+    public function testAddInterfaceShouldAcceptArrayOfInterfaces()
+    {
         $double = Double::dummy(DoubleStandardClass::class)
             ->addInterface([StandardInterface::class, StandardOtherInterface::class])
             ->getInstance();
         $this->assertInstanceOf(StandardInterface::class, $double);
         $this->assertInstanceOf(StandardOtherInterface::class, $double);
     }
+
     public function testClassDoubleShouldImplementTrait()
     {
         $double = Double::dummy(DoubleStandardClass::class)->addTrait(StandardTrait::class)->getInstance();
         $this->assertEquals(StandardTrait::class, class_uses($double)[StandardTrait::class]);
     }
-    public function testAddInterfaceShouldAcceptArrayOfTraits(){
+
+    public function testAddInterfaceShouldAcceptArrayOfTraits()
+    {
         $double = Double::dummy(DoubleStandardClass::class)
             ->addTrait([StandardTrait::class, StandardOtherTrait::class])
             ->getInstance();
@@ -436,15 +445,21 @@ class DoubleTest extends TestCase
         $this->assertEquals(StandardTrait::class, class_uses($double)[StandardTrait::class]);
         $this->assertEquals(StandardOtherTrait::class, class_uses($double)[StandardOtherTrait::class]);
     }
-    public function testAddInterfaceWithInvalidClassShouldFail(){
+
+    public function testAddInterfaceWithInvalidClassShouldFail()
+    {
         $this->expectException(InvalidArgumentException::class);
         Double::dummy(DoubleStandardClass::class)->addInterface(new \stdClass());
     }
-    public function testAddTraitWithInvalidClassShouldFail(){
+
+    public function testAddTraitWithInvalidClassShouldFail()
+    {
         $this->expectException(InvalidArgumentException::class);
         Double::dummy(DoubleStandardClass::class)->addTrait(new \stdClass());
     }
-    public function testAddInterfaceWithInvalidMethodShouldFail(){
+
+    public function testAddInterfaceWithInvalidMethodShouldFail()
+    {
         $this->expectException(InvalidArgumentException::class);
         Double::dummy(DoubleStandardClass::class)->addInterface(IncompatibleInterface::class)->getClass();
     }
@@ -484,7 +499,8 @@ class DoubleStandardClass
         $a++;
     }
 
-    public function &referenceMethod(){
+    public function &referenceMethod()
+    {
         return 1;
     }
 
@@ -571,7 +587,8 @@ class ClassWithFinalMethods
         return 'foo';
     }
 
-    final public static function bar(){
+    final public static function bar()
+    {
         return 'bar';
     }
 }
@@ -598,10 +615,12 @@ interface StandardInterface
 {
     function foo();
 }
+
 interface StandardOtherInterface
 {
     public static function bar();
 }
+
 interface IncompatibleInterface
 {
     static function foo();
@@ -614,6 +633,7 @@ trait StandardTrait
         return 'foo';
     }
 }
+
 trait StandardOtherTrait
 {
     function bar()

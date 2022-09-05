@@ -2,16 +2,16 @@
 /**
  * This file is part of the "sitphp/doubles" package.
  *
- *  @license MIT License
- *  @link https://github.com/sitphp/doubles
- *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
+ * @license MIT License
+ * @link https://github.com/sitphp/doubles
+ * @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
-namespace Tests;
+namespace SitPHP\Doubles\Tests;
 
 
-use Doubles\TestCase;
-use Doubles\Constraints;
+use SitPHP\Doubles\Constraints;
+use SitPHP\Doubles\TestCase;
 use PHPUnit\Framework\Constraint\ArrayHasKey;
 use PHPUnit\Framework\Constraint\Callback;
 use PHPUnit\Framework\Constraint\ClassHasAttribute;
@@ -63,7 +63,7 @@ class ConstraintTest extends TestCase
 
     public function testLogicalOr()
     {
-        $constraint = Constraints::logicalOr(2,3);
+        $constraint = Constraints::logicalOr(2, 3);
         $this->assertInstanceOf(LogicalOr::class, $constraint);
     }
 
@@ -261,7 +261,8 @@ class ConstraintTest extends TestCase
         $this->assertInstanceOf(IsType::class, $constraint);
     }
 
-    public function testTypeShorthands(){
+    public function testTypeShorthands()
+    {
         $this->assertInstanceOf(IsType::class, Constraints::isArray());
         $this->assertInstanceOf(LogicalNot::class, Constraints::isNotArray());
         $this->assertInstanceOf(IsType::class, Constraints::isBool());

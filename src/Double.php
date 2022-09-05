@@ -2,21 +2,21 @@
 /**
  * This file is part of the "sitphp/doubles" package.
  *
- *  @license MIT License
- *  @link https://github.com/sitphp/doubles
- *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
+ * @license MIT License
+ * @link https://github.com/sitphp/doubles
+ * @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
-namespace Doubles;
+namespace SitPHP\Doubles;
 
-use \Doubles\Exceptions\LogicException;
-use \Doubles\Lib\DoubleInterface;
-use \Doubles\Lib\DoubleStub;
-use \Doubles\Lib\EvalLoader;
-use \Doubles\Lib\ClassManager;
-use \Doubles\Exceptions\InvalidArgumentException;
-use \Doubles\Exceptions\RuntimeException;
-use Doubles\Lib\Expectation;
+use SitPHP\Doubles\Exceptions\InvalidArgumentException;
+use SitPHP\Doubles\Exceptions\LogicException;
+use SitPHP\Doubles\Exceptions\RuntimeException;
+use SitPHP\Doubles\Lib\ClassManager;
+use SitPHP\Doubles\Lib\DoubleInterface;
+use SitPHP\Doubles\Lib\DoubleStub;
+use SitPHP\Doubles\Lib\EvalLoader;
+use SitPHP\Doubles\Lib\Expectation;
 
 class Double
 {
@@ -125,7 +125,7 @@ class Double
     function setConfig(array $config)
     {
         foreach ($config as $key => $value) {
-            $config_method = self::$config_mapping[$key] ??  null;
+            $config_method = self::$config_mapping[$key] ?? null;
             if ($config_method === null) {
                 throw new InvalidArgumentException('Invalid config "' . $key . '"');
             }
@@ -139,8 +139,9 @@ class Double
      *
      * @param $original
      */
-    protected function setOriginal(string $original){
-        if($this->getType() !== self::TYPE_ALIAS && is_subclass_of($original,DoubleInterface::class)){
+    protected function setOriginal(string $original)
+    {
+        if ($this->getType() !== self::TYPE_ALIAS && is_subclass_of($original, DoubleInterface::class)) {
             throw new InvalidArgumentException('Invalid class : cannot make doubles of doubles');
         }
         $this->original = ClassManager::normalizeClass($original);
@@ -151,7 +152,8 @@ class Double
      *
      * @return mixed
      */
-    protected function getOriginal(){
+    protected function getOriginal()
+    {
         return $this->original;
     }
 
@@ -163,7 +165,7 @@ class Double
     protected function setType($type)
     {
         if (!in_array($type, [self::TYPE_ALIAS, self::TYPE_MOCK, self::TYPE_DUMMY])) {
-            throw new \RuntimeException('Invalid argument type : expected "'.self::TYPE_MOCK.'", "'.self::TYPE_DUMMY.'" or "'.self::TYPE_ALIAS.'", found "' . $this->type . '"');
+            throw new \RuntimeException('Invalid argument type : expected "' . self::TYPE_MOCK . '", "' . self::TYPE_DUMMY . '" or "' . self::TYPE_ALIAS . '", found "' . $this->type . '"');
         }
         $this->type = $type;
     }
@@ -191,7 +193,7 @@ class Double
             $this->interfaces[] = $this->normalizeInterface($interface);
         } else if (is_array($interface)) {
             foreach ($interface as $item) {
-                if(!is_string($item)){
+                if (!is_string($item)) {
                     $this->throwInterfaceException();
                 }
                 $this->addInterface($item);
@@ -201,10 +203,12 @@ class Double
         }
         return $this;
     }
+
     /**
      * Throw an invalid interface exception
      */
-    protected function throwInterfaceException(){
+    protected function throwInterfaceException()
+    {
         throw new InvalidArgumentException('Invalid $interface argument type : expected string or array of strings');
     }
 
@@ -244,7 +248,7 @@ class Double
             $this->traits[] = $this->normalizeTrait($trait);
         } else if (is_array($trait)) {
             foreach ($trait as $item) {
-                if(!is_string($item)){
+                if (!is_string($item)) {
                     $this->throwTraitException();
                 }
                 $this->addTrait($item);
@@ -258,7 +262,8 @@ class Double
     /**
      * Throw an invalid trait exception
      */
-    protected function throwTraitException(){
+    protected function throwTraitException()
+    {
         throw new InvalidArgumentException('Invalid $trait argument type : expected string or array of strings');
     }
 
@@ -333,7 +338,8 @@ class Double
      *
      * @return $this
      */
-    function aliasTrait(){
+    function aliasTrait()
+    {
         if ($this->getType() != self::TYPE_ALIAS) {
             throw new LogicException('Alias class type can only be set for alias doubles');
         }
@@ -346,7 +352,8 @@ class Double
      *
      * @return $this
      */
-    function aliasAbstract(){
+    function aliasAbstract()
+    {
         if ($this->getType() != self::TYPE_ALIAS) {
             throw new LogicException('Alias class type can only be set for alias doubles');
         }
@@ -376,7 +383,8 @@ class Double
      *
      * @return mixed
      */
-    function getName(){
+    function getName()
+    {
         return $this->class_name;
     }
 
@@ -447,7 +455,7 @@ class Double
      * @return DoubleStub
      * @throws \ReflectionException
      */
-    function getInstance(... $construct_params)
+    function getInstance(...$construct_params)
     {
         $double_definition = $this->resolveDoubleDefinition();
         $double = $this->makeDouble($double_definition);
@@ -522,7 +530,7 @@ class Double
         } else if (interface_exists($double_definition['original'])) {
             $this->populateInterfaceDoubleDefinition($double_definition);
         } else {
-            throw new InvalidArgumentException('Undefined class "'.$double_definition['original'].'" : Use the "alias" method to  create doubles of non existent classes');
+            throw new InvalidArgumentException('Undefined class "' . $double_definition['original'] . '" : Use the "alias" method to  create doubles of non existent classes');
         }
         $this->populateMethodsToImplement($double_definition);
 
@@ -563,7 +571,7 @@ class Double
         $double_definition['namespace'] = $class_definition['namespace'];
 
         // Remove interfaces if trait alias
-        if($class_type == 'trait'){
+        if ($class_type == 'trait') {
             $double_definition['interfaces'] = [];
         }
 
@@ -725,13 +733,13 @@ class Double
                 // Skip if double will already implement interface method by heritage
                 if ($double_definition['extends'] !== null && method_exists($double_definition['extends'], $interface_method->name)) {
                     $extend_method = new \ReflectionMethod($double_definition['extends'], $interface_method->name);
-                    if(
+                    if (
                         !$extend_method->isPublic()
                         || ($interface_method->isStatic() && !$extend_method->isStatic())
                         || (!$interface_method->isStatic() && $extend_method->isStatic())
                         || ($interface_method->getReturnType() !== $extend_method->getReturnType())
-                    ){
-                        throw new InvalidArgumentException('Interface method '.$interface.'::'.$interface_method->name.' is not compatible with class method '.$double_definition['extends'].'::'.$interface_method->name);
+                    ) {
+                        throw new InvalidArgumentException('Interface method ' . $interface . '::' . $interface_method->name . ' is not compatible with class method ' . $double_definition['extends'] . '::' . $interface_method->name);
                     }
                     continue;
                 }
@@ -751,9 +759,9 @@ class Double
         }
         $code = file_get_contents(__DIR__ . '/Lib/DoubleStub.stub');
         if (isset($double_definition['namespace'])) {
-            $code = str_replace('namespace Doubles\Lib;', 'namespace ' . $double_definition['namespace'] . ';', $code);
+            $code = str_replace('namespace SitPHP\Doubles\Lib;', 'namespace ' . $double_definition['namespace'] . ';', $code);
         } else {
-            $code = str_replace('namespace Doubles\Lib;', '', $code);
+            $code = str_replace('namespace SitPHP\Doubles\Lib;', '', $code);
         }
         $class_code = $double_definition['class_type'] . ' ' . trim($double_definition['short_name'], '\\');
         if (isset($double_definition['extends'])) {
@@ -797,8 +805,8 @@ class Double
                         $method_code .= ' static';
                     }
                     $method_code .= ' function ';
-                    if($method->returnsReference()){
-                        $method_code.='&';
+                    if ($method->returnsReference()) {
+                        $method_code .= '&';
                     }
                     $method_code .= $method->getShortName() . '(';
                     $first_param = true;
@@ -867,7 +875,7 @@ class Double
                 }
                 $method_code .= '{ $args = func_get_args(); ';
                 foreach ($reference_params as $key => $reference_param) {
-                    $method_code .= 'if(isset($args['.$key.'])){
+                    $method_code .= 'if(isset($args[' . $key . '])){
                         $args[' . $key . '] = &$' . $reference_param . ';
                     }';
                 }

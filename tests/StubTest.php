@@ -2,18 +2,18 @@
 /**
  * This file is part of the "sitphp/doubles" package.
  *
- *  @license MIT License
- *  @link https://github.com/sitphp/doubles
- *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
+ * @license MIT License
+ * @link https://github.com/sitphp/doubles
+ * @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
-namespace Tests;
+namespace SitPHP\Doubles\Tests;
 
-use Doubles\Constraints;
-use \Doubles\Double;
-use \Doubles\Exceptions\InvalidArgumentException;
-use \Doubles\Stubs;
-use \Doubles\TestCase;
+use SitPHP\Doubles\Constraints;
+use SitPHP\Doubles\Double;
+use SitPHP\Doubles\Exceptions\InvalidArgumentException;
+use SitPHP\Doubles\Stubs;
+use SitPHP\Doubles\TestCase;
 
 class StubTest extends TestCase
 {
@@ -147,20 +147,22 @@ class StubTest extends TestCase
         $this->assertEquals('foo', $double->foo(true, 'two'));
     }
 
-    function testReturnValueMapWithNonMappedValue(){
+    function testReturnValueMapWithNonMappedValue()
+    {
         $double = Double::mock(StubStandardClass::class)->getInstance();
         $double::_method('foo')->return(Stubs::returnValueMap([
             ['pink', 'yellow'], ['one', 'two']
         ], ['colors', 'numbers']));
-        $this->assertEquals('foo',$double->foo('pink', 'red'));
+        $this->assertEquals('foo', $double->foo('pink', 'red'));
     }
 
-    function testReturnValueMapWithNonMappedValueStatic(){
+    function testReturnValueMapWithNonMappedValueStatic()
+    {
         $double = Double::mock(StubStandardClass::class)->getClass();
         $double::_method('bar')->return(Stubs::returnValueMap([
             ['pink', 'yellow'], ['one', 'two']
         ], ['colors', 'numbers']));
-        $this->assertEquals('foo',$double::bar('pink', 'red'));
+        $this->assertEquals('foo', $double::bar('pink', 'red'));
     }
 
     /* -----

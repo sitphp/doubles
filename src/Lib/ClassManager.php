@@ -2,12 +2,12 @@
 /**
  * This file is part of the "sitphp/doubles" package.
  *
- *  @license MIT License
- *  @link https://github.com/sitphp/doubles
- *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
+ * @license MIT License
+ * @link https://github.com/sitphp/doubles
+ * @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
-namespace Doubles\Lib;
+namespace SitPHP\Doubles\Lib;
 
 use ReflectionClass;
 use ReflectionException;
@@ -119,12 +119,12 @@ class ClassManager
 
         $classes_to_remove = [];
         foreach ($matches[0] as $i => $match) {
-            if($matches[1][$i][0] === $reflection_class->getShortName()){
+            if ($matches[1][$i][0] === $reflection_class->getShortName()) {
                 continue;
             }
             $offset_start = $match[1];
-            if(isset($matches[0][$i+1])){
-                $offset_end = $matches[0][$i+1][1];
+            if (isset($matches[0][$i + 1])) {
+                $offset_end = $matches[0][$i + 1][1];
                 $classes_to_remove[] = substr($class_code, $offset_start, $offset_end - $offset_start);
             } else {
                 $classes_to_remove[] = substr($class_code, $offset_start);

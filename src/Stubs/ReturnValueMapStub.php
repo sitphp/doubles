@@ -2,16 +2,16 @@
 /**
  * This file is part of the "sitphp/doubles" package.
  *
- *  @license MIT License
- *  @link https://github.com/sitphp/doubles
- *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
+ * @license MIT License
+ * @link https://github.com/sitphp/doubles
+ * @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
-namespace Doubles\Stubs;
+namespace SitPHP\Doubles\Stubs;
 
-use Doubles\Constraints;
-use Doubles\Lib\DoubleStub;
 use PHPUnit\Framework\Constraint\Constraint;
+use SitPHP\Doubles\Constraints;
+use SitPHP\Doubles\Lib\DoubleStub;
 
 class ReturnValueMapStub implements StubInterface
 {
@@ -20,9 +20,9 @@ class ReturnValueMapStub implements StubInterface
 
     function __construct(array $args_map, $returns_map)
     {
-        foreach ($args_map as $i => $value){
-            if(is_array($value)){
-               continue;
+        foreach ($args_map as $i => $value) {
+            if (is_array($value)) {
+                continue;
             }
             $args_map[$i] = [$value];
         }
@@ -53,8 +53,9 @@ class ReturnValueMapStub implements StubInterface
         }
     }
 
-    protected function argMapMatchesArgs(array $arg_map, $args){
-        foreach ($arg_map as $i => $arg){
+    protected function argMapMatchesArgs(array $arg_map, $args)
+    {
+        foreach ($arg_map as $i => $arg) {
             if ($arg instanceof Constraint) {
                 $constraint = $arg;
             } else if (is_bool($arg)) {
@@ -64,9 +65,9 @@ class ReturnValueMapStub implements StubInterface
             } else {
                 $constraint = Constraints::equalTo($arg);
             }
-            try{
+            try {
                 $constraint->evaluate($args[$i]);
-            } catch (\Exception $e){
+            } catch (\Exception $e) {
                 return false;
             }
         }

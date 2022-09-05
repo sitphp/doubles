@@ -2,14 +2,14 @@
 /**
  * This file is part of the "sitphp/doubles" package.
  *
- *  @license MIT License
- *  @link https://github.com/sitphp/doubles
- *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
+ * @license MIT License
+ * @link https://github.com/sitphp/doubles
+ * @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
-namespace Doubles\Lib;
+namespace SitPHP\Doubles\Lib;
 
-use Exception;
+use \Exception;
 
 class ExpectationCollection
 {
@@ -78,8 +78,8 @@ class ExpectationCollection
      *
      * @param $range
      * @return $this
-     * @throws Exception
      * @return ExpectationCollection
+     * @throws Exception
      */
     function count($range): ExpectationCollection
     {

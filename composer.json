@@ -1,27 +1,39 @@
 {
-    "name": "sitphp/doubles",
-    "description": "A simple yet powerful library to make class doubles for testing",
-    "keywords": ["php", "test", "testing", "doubles", "mock", "phpunit", "unit-testing"],
-    "homepage": "https://github.com/sitphp/doubles",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Alexandre GEISWILLER",
-            "email": "alexandre.geiswiller@gmail.com"
-        }
-    ],
-    "require": {
-        "php": ">=7.2",
-        "phpunit/phpunit": "~8.5"
-    },
-    "autoload": {
-        "psr-4": {
-            "Doubles\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests"
-        }
+  "name": "sitphp/doubles",
+  "description": "A simple yet powerful library to make class doubles for testing",
+  "keywords": [
+    "php",
+    "test",
+    "testing",
+    "doubles",
+    "mock",
+    "phpunit",
+    "unit-testing"
+  ],
+  "homepage": "https://github.com/sitphp/doubles",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Alexandre GEISWILLER",
+      "email": "alexandre.geiswiller@gmail.com"
     }
+  ],
+  "require": {
+    "php": ">=7.2",
+    "phpunit/phpunit": "~8.5",
+    "ext-dom": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "SitPHP\\Doubles\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "SitPHP\\Doubles\\Tests\\": "tests"
+    }
+  },
+  "require-dev": {
+    "ext-mbstring": "*"
+  }
 }

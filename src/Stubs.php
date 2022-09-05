@@ -2,19 +2,19 @@
 /**
  * This file is part of the "sitphp/doubles" package.
  *
- *  @license MIT License
- *  @link https://github.com/sitphp/doubles
- *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
+ * @license MIT License
+ * @link https://github.com/sitphp/doubles
+ * @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
-namespace Doubles;
+namespace SitPHP\Doubles;
 
-use Doubles\Stubs\ReturnArgumentStub;
-use Doubles\Stubs\ReturnCallbackStub;
-use Doubles\Stubs\ReturnSelfStub;
-use Doubles\Stubs\ReturnValueMapStub;
-use Doubles\Stubs\ReturnValueStub;
-use Doubles\Stubs\ThrowExceptionStub;
+use SitPHP\Doubles\Stubs\ReturnArgumentStub;
+use SitPHP\Doubles\Stubs\ReturnCallbackStub;
+use SitPHP\Doubles\Stubs\ReturnSelfStub;
+use SitPHP\Doubles\Stubs\ReturnValueMapStub;
+use SitPHP\Doubles\Stubs\ReturnValueStub;
+use SitPHP\Doubles\Stubs\ThrowExceptionStub;
 
 class Stubs
 {

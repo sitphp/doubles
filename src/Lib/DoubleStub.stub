@@ -2,21 +2,21 @@
 /**
  * This file is part of the "sitphp/doubles" package.
  *
- *  @license MIT License
- *  @link https://github.com/sitphp/doubles
- *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
+ * @license MIT License
+ * @link https://github.com/sitphp/doubles
+ * @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
-namespace Doubles\Lib;
+namespace SitPHP\Doubles\Lib;
 
-use Doubles\Lib\Expectation;
-use Doubles\Lib\ExpectationCollection;
-use Doubles\Lib\DoubleCall;
-use Doubles\Exceptions\InvalidArgumentException;
-use Doubles\Exceptions\RuntimeException;
-use Doubles\Stubs\StubInterface;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Constraint\Constraint;
+use SitPHP\Doubles\Exceptions\InvalidArgumentException;
+use SitPHP\Doubles\Exceptions\RuntimeException;
+use SitPHP\Doubles\Stubs\StubInterface;
+use SitPHP\Doubles\Lib\ExpectationCollection;
+use SitPHP\Doubles\Lib\DoubleCall;
+use SitPHP\Doubles\Lib\Expectation;
 
 class DoubleStub
 {
@@ -137,7 +137,7 @@ class DoubleStub
      */
     public static function _method($method)
     {
-        if(!is_array($method)){
+        if (!is_array($method)) {
             $method = [$method];
         }
         $expectation_collection = new ExpectationCollection();
@@ -173,7 +173,7 @@ class DoubleStub
         $type = $method_definition[0];
         switch ($type) {
             case 'dummy':
-                if($method == '__construct' && null !== $_double_reference = self::_double_getReference()){
+                if ($method == '__construct' && null !== $_double_reference = self::_double_getReference()) {
                     $_double_reference_reflexion = new \ReflectionClass($_double_reference);
                     self::$_double_reference_instance = $_double_reference_reflexion->newInstanceWithoutConstructor();
                     return null;
@@ -410,7 +410,7 @@ class DoubleStub
                 if (is_callable($assert_args)) {
                     $assert_args(...$call_args);
                 } else if (is_array($assert_args)) {
-                    foreach($assert_args as $j => $assert_arg){
+                    foreach ($assert_args as $j => $assert_arg) {
                         $call_arg = $call_args[$j] ?? null;
                         if ($assert_arg instanceof Constraint) {
                             Assert::assertThat($call_arg, $assert_arg, 'Argument ' . ($j + 1) . ' of method "' . $method . '" didn\'t match expected value on call ' . $call_count);
@@ -418,8 +418,8 @@ class DoubleStub
                             Assert::assertEquals($assert_arg, $call_arg, 'Argument ' . ($j + 1) . ' of method "' . $method . '" didn\'t match expected value on call ' . $call_count);
                         }
                     }
-                } else if(is_string($assert_args) && $assert_args == 'no-args') {
-                    Assert::assertEquals([], $call_args, 'No arguments expected but '.count($call_args).' found on call ' . $call_count);
+                } else if (is_string($assert_args) && $assert_args == 'no-args') {
+                    Assert::assertEquals([], $call_args, 'No arguments expected but ' . count($call_args) . ' found on call ' . $call_count);
                 } else {
                     throw new RuntimeException('Invalid assertion type');
                 }

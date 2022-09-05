@@ -2,19 +2,19 @@
 /**
  * This file is part of the "sitphp/doubles" package.
  *
- *  @license MIT License
- *  @link https://github.com/sitphp/doubles
- *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
+ * @license MIT License
+ * @link https://github.com/sitphp/doubles
+ * @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
-namespace Tests;
+namespace SitPHP\Doubles\Tests;
 
-use Doubles\Constraints;
-use Doubles\Double;
-use Doubles\Exceptions\InvalidArgumentException;
-use Doubles\Lib\ExpectationCollection;
-use Doubles\Stubs;
-use Doubles\TestCase;
+use SitPHP\Doubles\Constraints;
+use SitPHP\Doubles\Double;
+use SitPHP\Doubles\Exceptions\InvalidArgumentException;
+use SitPHP\Doubles\Lib\ExpectationCollection;
+use SitPHP\Doubles\Stubs;
+use SitPHP\Doubles\TestCase;
 
 class AssertionTest extends TestCase
 {
@@ -60,6 +60,7 @@ class AssertionTest extends TestCase
         $expectations = $double::_method(['foo', 'bar']);
         $this->assertInstanceOf(ExpectationCollection::class, $expectations);
     }
+
     public function testAssertingInternalMethodsShouldNotBeAllowed()
     {
         $this->expectException(InvalidArgumentException::class);
@@ -328,21 +329,24 @@ class AssertionTest extends TestCase
     /* -----
     Test default
     ---- */
-    public function testAssertDefaultWithDummy(){
+    public function testAssertDefaultWithDummy()
+    {
         $double = Double::dummy(AssertionStandardClass::class)->getInstance();
         $double::_method('foo')->mock();
         $double::_method('foo')->default();
         $this->assertNull($double->foo());
     }
 
-    public function testAssertDefaultWithMock(){
+    public function testAssertDefaultWithMock()
+    {
         $double = Double::mock(AssertionStandardClass::class)->getInstance();
         $double::_method('foo')->dummy();
         $double::_method('foo')->default();
         $this->assertEquals('foo', $double->foo());
     }
 
-    public function testAssertDefaultWithMockWithCount(){
+    public function testAssertDefaultWithMockWithCount()
+    {
         $double = Double::mock(AssertionStandardClass::class)->getInstance();
         $double::_method('foo')->dummy();
         $double::_method('foo')->default(2);
@@ -435,7 +439,9 @@ class AssertionTest extends TestCase
         $double->foo('arg_1', 'arg_2');
         $double->foo('arg_1', 'arg_2');
     }
-    public function testAssertArgsMethodWithArguments(){
+
+    public function testAssertArgsMethodWithArguments()
+    {
         $double = Double::mock(AssertionStandardClass::class)->getInstance();
         $double::_method('arg')->args([1])->count(1);
         $double->arg(1, false);

@@ -1,6 +1,6 @@
 <?php
 
-namespace Doubles\Lib;
+namespace SitPHP\Doubles\Lib;
 
 class DoubleCall
 {

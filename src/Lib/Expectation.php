@@ -2,18 +2,18 @@
 /**
  * This file is part of the "sitphp/doubles" package.
  *
- *  @license MIT License
- *  @link https://github.com/sitphp/doubles
- *  @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
+ * @license MIT License
+ * @link https://github.com/sitphp/doubles
+ * @copyright Alexandre Geiswiller <alexandre.geiswiller@gmail.com>
  */
 
-namespace Doubles\Lib;
+namespace SitPHP\Doubles\Lib;
 
-use \Doubles\Stubs;
-use \Doubles\Constraints;
-use \Doubles\Stubs\StubInterface;
+use SitPHP\Doubles\Exceptions\InvalidArgumentException;
 use PHPUnit\Framework\Constraint\Constraint;
-use \Doubles\Exceptions\InvalidArgumentException;
+use SitPHP\Doubles\Constraints;
+use SitPHP\Doubles\Stubs;
+use SitPHP\Doubles\Stubs\StubInterface;
 
 class Expectation
 {
@@ -48,7 +48,7 @@ class Expectation
     {
         $call_counts = $this->validateCallCounts($call_number);
         if ($call_counts !== null) {
-            foreach($call_counts as $value) {
+            foreach ($call_counts as $value) {
                 $this->setTypeCall($value, [self::TYPE_DUMMY]);
             }
         } else {
@@ -69,7 +69,7 @@ class Expectation
     {
         $call_counts = $this->validateCallCounts($call_number);
         if ($call_counts !== null) {
-            foreach($call_counts as $value){
+            foreach ($call_counts as $value) {
                 $this->setTypeCall($value, [self::TYPE_MOCK]);
             }
         } else {
@@ -79,10 +79,11 @@ class Expectation
         return $this;
     }
 
-    function default($call_number = null){
+    function default($call_number = null)
+    {
         $call_counts = $this->validateCallCounts($call_number);
-        if($call_counts !== null){
-            foreach($call_counts as $value){
+        if ($call_counts !== null) {
+            foreach ($call_counts as $value) {
                 $this->resetTypeCall($value);
             }
         } else {
@@ -153,7 +154,7 @@ class Expectation
                     $this->throwInvalidRangeException();
                 }
 
-            } else if (strpos($count,'-') !== false) {
+            } else if (strpos($count, '-') !== false) {
                 $limits = explode('-', $count);
                 if (count($limits) != 2) {
                     $this->throwInvalidRangeException();
@@ -234,10 +235,10 @@ class Expectation
      */
     protected function validateCallCounts($call_counts)
     {
-        if($call_counts === null){
+        if ($call_counts === null) {
             return null;
         }
-        if(!is_array($call_counts)){
+        if (!is_array($call_counts)) {
             $call_counts = [$call_counts];
         }
         foreach ($call_counts as $value) {
@@ -271,7 +272,8 @@ class Expectation
         $this->type = [];
     }
 
-    protected function resetTypeCall(int $call_number){
+    protected function resetTypeCall(int $call_number)
+    {
         $this->type[$call_number] = null;
     }
 
@@ -285,11 +287,13 @@ class Expectation
         $this->type['_default'] = $type;
     }
 
-    protected function getTypeDefault(){
+    protected function getTypeDefault()
+    {
         return $this->type['_default'];
     }
 
-    protected function resetTypeDefault(){
+    protected function resetTypeDefault()
+    {
         $this->type['_default'] = null;
     }
 
@@ -304,7 +308,8 @@ class Expectation
         $this->type[$call_number] = $type;
     }
 
-    protected function getTypeCall(int $call_number){
+    protected function getTypeCall(int $call_number)
+    {
         return $this->type[$call_number] ?? null;
     }
 
@@ -380,7 +385,8 @@ class Expectation
         return filter_var($int, FILTER_VALIDATE_INT) === 0 || filter_var($int, FILTER_VALIDATE_INT);
     }
 
-    protected function throwInvalidRangeException(){
+    protected function throwInvalidRangeException()
+    {
         throw new InvalidArgumentException('Invalid "range" argument. Should be "i", ">i", "<i" ">=i", "<=i", "i-j" (where i/j are positive integers), callable or instance of ' . Constraint::class);
     }
 }
