@@ -2,12 +2,12 @@
 
 ## Creating a compatible test case
 
-In order to run PhpUnit test cases with this library, your test class should extend the `Doubles\TestCase` class. This
+In order to run PhpUnit test cases with this library, your test class should extend the `SitPHP\Doubles\TestCase` class. This
 class extends the  `PHPUnit\Framework\TestCase` class so you can still use the PhpUnit methods normally. Here is what a
 test class should look like :
 
 ```php
-use \Doubles\TestCase;
+use SitPHP\Doubles\TestCase;
 
 class MyTestClass extends TestCase {
 
@@ -19,7 +19,7 @@ class MyTestClass extends TestCase {
 }
 ```
 
-This will make sure the `Doubles\Double::close()` method is executed after each test. The next step is to create class
+This will make sure the `SitPHP\Doubles\Double::close()` method is executed after each test. The next step is to create class
 double of the class we want to test.
 
 ## Creating a double
@@ -32,8 +32,8 @@ double, use the `dummy` method class :
 
 ```php 
    
-use \Doubles\Double;
-use \Doubles\TestCase;
+use SitPHP\Doubles\Double;
+use SitPHP\Doubles\TestCase;
 
 class MyTestClass extends TestCase {
     
@@ -52,8 +52,8 @@ original class. If you are not sure what doubles of type "mock" are, you can get
 the [introduction page](/doc/intro). To get a "mock" double instance, use the `mock` method :
 
 ```php
-use \Doubles\Double;
-use \Doubles\TestCase;
+use SitPHP\Doubles\Double;
+use SitPHP\Doubles\TestCase;
 
 class MyTestClass extends TestCase {
     
@@ -77,8 +77,8 @@ methods depending on what you want to do :
 Here is a full working example :
 
 ```php
-use \Doubles\Double;
-use \Doubles\TestCase;
+use SitPHP\Doubles\Double;
+use SitPHP\Doubles\TestCase;
 
 class MyTestClass extends TestCase {
 
