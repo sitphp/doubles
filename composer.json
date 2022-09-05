@@ -21,7 +21,8 @@
   "require": {
     "php": ">=7.2",
     "phpunit/phpunit": "~8.5",
-    "ext-dom": "*"
+    "ext-dom": "*",
+    "ext-mbstring": "*"
   },
   "autoload": {
     "psr-4": {
@@ -34,6 +35,5 @@
     }
   },
   "require-dev": {
-    "ext-mbstring": "*"
   }
 }
