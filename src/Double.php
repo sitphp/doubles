@@ -859,8 +859,12 @@ class Double
                     }
                     $method_code .= ')';
                     if ($method->hasReturnType()) {
+                        $method_code .= ' : ';
                         $method_return_type = $method->getReturnType()->getName();
-                        $method_code .= ' : ' . $method_return_type;
+                        if($method->getReturnType()->allowsNull()){
+                            $method_code .= '?';
+                        }
+                        $method_code .= $method_return_type;
                     }
                     $is_static = $method->isStatic();
                 } else if (is_string($method)) {
