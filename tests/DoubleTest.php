@@ -572,6 +572,11 @@ class DoubleStandardClass
     {
         return 'string';
     }
+
+    public function returnNullType(): ?string
+    {
+        return 'string';
+    }
 }
 
 class ClassWithConstructor
