@@ -499,9 +499,9 @@ class DoubleStandardClass
         $a++;
     }
 
-    public function &referenceMethod()
+    public function &referenceMethod(int $a)
     {
-        return 1;
+        return $a;
     }
 
     public function variadic(...$a)
@@ -511,6 +511,10 @@ class DoubleStandardClass
 
     public function defaultWithOptional($default = null, $a = 1, $optional = null)
     {
+        return $a;
+    }
+
+    public function defaultWithNullType(?string $a){
         return $a;
     }
 

@@ -824,6 +824,9 @@ class Double
                             } else if (isset($double_definition['extends']) && $param_type == 'self') {
                                 $param_type = $double_definition['extends'];
                             }
+                            if($param->getType()->allowsNull()){
+                                $method_code.= '?';
+                            }
                             $method_code .= $param_type . ' ';
                         }
                         if ($param->isPassedByReference()) {
