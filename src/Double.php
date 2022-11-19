@@ -781,6 +781,7 @@ class Double
             $methods_code = [];
             foreach ($double_definition['methods'] as $method) {
                 $reference_params = [];
+                $method_return_type = null;
 
                 // Check method was not already implemented
                 $method_name = $method instanceof \ReflectionMethod ? $method->getShortName() : $method;
@@ -887,12 +888,19 @@ class Double
                     }';
                 }
 
-                if ($is_static) {
-                    $method_code .= '$return = self::_double_handleStaticCall(__FUNCTION__, $args); ';
-                } else {
-                    $method_code .= '$return = $this->_double_handleInstanceCall(__FUNCTION__, $args); ';
+                if($method_return_type != 'void'){
+                    $method_code .= '$return = ';
                 }
-                $method_code .= 'return $return; }';
+                if ($is_static) {
+                    $method_code .= 'self::_double_handleStaticCall(__FUNCTION__, $args); ';
+                } else {
+                    $method_code .= '$this->_double_handleInstanceCall(__FUNCTION__, $args); ';
+                }
+                if($method_return_type != 'void'){
+                    $method_code .= 'return $return;';
+                }
+                $method_code .= ' }';
+
                 $methods_code[] = $method_code;
             }
             $code = substr($code, 0, strrpos($code, "}")) . implode(PHP_EOL, $methods_code) . '}';

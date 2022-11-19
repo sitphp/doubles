@@ -568,6 +568,11 @@ class DoubleStandardClass
         return $a;
     }
 
+    public function returnTypeVoid(): void
+    {
+
+    }
+
     public function returnType(): string
     {
         return 'string';
